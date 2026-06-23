@@ -3,10 +3,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CaseOfficerModule } from './case_officer/case_officer.module';
 import { AdminModule } from './admin/admin.module';
-
+import { MprModule } from './missing_person_reporter/mpr.module';
 
 @Module({
-  imports: [CaseOfficerModule, AdminModule],
+  imports: [CaseOfficerModule, AdminModule, MprModule],
   controllers: [AppController],
   providers: [AppService],
 })
