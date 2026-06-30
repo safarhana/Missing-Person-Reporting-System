@@ -14,7 +14,7 @@ export class VolunteerController {
     return this.volunteerService.getAllCases();
   }
 
-   @Get('cases/filter')
+   @Get('cases/filter') 
   getCasesByDistrict(@Query('district') district: string) {
     return this.volunteerService.getCasesByDistrict(district);
   }
@@ -24,19 +24,16 @@ export class VolunteerController {
     return this.volunteerService.getCaseById(Number(id));
   }
 
-
   @Get('assigned')
   getAssignedCases() {
     return this.volunteerService.getAssignedCases();
   }
 
- 
   @Post('join')
   joinSearch(@Body() dto: VolunteerDto) {
     return this.volunteerService.joinSearch(dto);
   }
 
- 
   @Put('profile/:id')
   updateProfile(
     @Param('id') id: string,
@@ -44,7 +41,6 @@ export class VolunteerController {
   ) {
     return this.volunteerService.updateProfile(Number(id), dto);
   }
-
 
   @Patch('case/:id')
   updateCaseStatus(@Param('id') id: string) {
