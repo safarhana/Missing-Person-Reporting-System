@@ -18,6 +18,21 @@ export class Case {
 export class CaseOfficerService {
   private cases: Case[] = [];
   private idCounter = 1;
+  private registeredOfficers: any[] = [];
+
+  registerOfficer(dto: any, filename?: string) {
+    const newOfficer = {
+      ...dto,
+      file: filename || null,
+      registeredAt: new Date().toISOString(),
+    };
+    this.registeredOfficers.push(newOfficer);
+    return newOfficer;
+  }
+
+  getRegisteredOfficers() {
+    return this.registeredOfficers;
+  }
 
   create(createCaseDto: CreateCaseDto): Case {
     const newCase: Case = {

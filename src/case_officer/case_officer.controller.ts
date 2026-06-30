@@ -41,6 +41,11 @@ export class CaseOfficerController {
     return this.caseOfficerService.search(q);
   }
 
+  @Get('register')
+  getRegistered() {
+    return this.caseOfficerService.getRegisteredOfficers();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string): Case {
     return this.caseOfficerService.findOne(Number(id));
@@ -93,9 +98,10 @@ export class CaseOfficerController {
     @Body() body: CreateCaseOfficerDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
+    const savedOfficer = this.caseOfficerService.registerOfficer(body, file ? file.filename : null);
     return {
       message: 'Case Officer registered successfully',
-      file: file ? file.filename : null,
+      file: savedOfficer.file,
       data: body,
     };
   }
