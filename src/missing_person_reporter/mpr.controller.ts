@@ -1,9 +1,11 @@
 import { Controller, Get, Post, Put, Patch, Param, Query, Body } from '@nestjs/common';
 import { MprService } from './mpr.service';
-import { CreateMissingReportDto } from './dto/create_mpr.dto';
-import { UpdateMissingReportDto } from './dto/update_mpr.dto';
+import { CreateMprDto } from './dto/create_mpr.dto';
+import { UpdateMprDto } from './dto/update_mpr.dto';
 import { StatusDto } from './dto/status.dto';
 import { NoteDto } from './dto/note.dto';
+import { UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('missing')
 export class MprController {
@@ -30,12 +32,22 @@ export class MprController {
   }
 
   @Post()
-  create(@Body() createDto: CreateMissingReportDto) {
+  @UseInterceptors(FileInterceptor('nidImage'))
+  create(
+    @Body() createDto: CreateMprDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 2097152, message: 'NID Image size must not exceed 2MB!' }),
+        ],
+      }),
+    ) file: Express.Multer.File,
+  ) {
     return this.mprService.createReport(createDto);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateDto: UpdateMissingReportDto) {
+  update(@Param('id') id: string, @Body() updateDto: UpdateMprDto) {
     return this.mprService.updateReport(Number(id), updateDto);
   }
 

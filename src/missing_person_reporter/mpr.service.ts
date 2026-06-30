@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateMissingReportDto } from './dto/create_mpr.dto';
-import { UpdateMissingReportDto } from './dto/update_mpr.dto';
+import { CreateMprDto } from './dto/create_mpr.dto';
+import { UpdateMprDto } from './dto/update_mpr.dto';
 
 @Injectable()
 export class MprService {
   private reports = [
-    { id: 1, name: 'Rahim Uddin', age: 25, city: 'dhaka', status: 'Missing', reporterComment: 'Last seen near station.' },
-    { id: 2, name: 'Karim Ali', age: 14, city: 'chittagong', status: 'Found', reporterComment: 'Returned home safely.' },
+    { id: 1, name: 'Rahim Uddin', email: 'rahim@mpr.xyz', nid: '1234567890', city: 'dhaka', status: 'Missing', reporterComment: 'Last seen near station.' },
+    { id: 2, name: 'Karim Ali', email: 'karim@mpr.xyz', nid: '0987654321', city: 'chittagong', status: 'Found', reporterComment: 'Returned home safely.' },
   ];
 
   getAllReports() {
@@ -29,19 +29,20 @@ export class MprService {
     return this.reports.filter((r) => r.city.toLowerCase() === city.toLowerCase());
   }
 
-  createReport(dto: CreateMissingReportDto) {
+  
+  createReport(dto: CreateMprDto) {
     const newReport = {
       id: this.reports.length + 1,
       ...dto,
-      city: dto.lastSeenLocation.toLowerCase(),
+      city: 'dhaka',
       status: 'Missing',
       reporterComment: '',
     };
     this.reports.push(newReport);
-    return { message: 'Report created successfully', data: newReport };
+    return { message: 'Report created successfully with validation', data: newReport };
   }
 
-  updateReport(id: number, dto: UpdateMissingReportDto) {
+  updateReport(id: number, dto: UpdateMprDto) {
     const index = this.reports.findIndex((r) => r.id === id);
     if (index === -1) throw new NotFoundException(`Report with ID ${id} not found`);
     
