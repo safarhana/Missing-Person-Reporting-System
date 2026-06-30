@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+<<<<<<< HEAD
+=======
+    
+>>>>>>> f57789c98ab5f520b999c4fb860797c7f1c74164
     "module": "commonjs",
     "declaration": true,
     "removeComments": true,
