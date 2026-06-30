@@ -23,7 +23,7 @@ export class VolunteerService {
     ];
   }
 
-  // GET /volunteer/cases?district=dhaka
+   
   getCasesByDistrict(district: string) {
     return {
       message: `Showing active cases in ${district}`,
@@ -40,7 +40,7 @@ export class VolunteerService {
   }
 
 
-  // GET /volunteer/assigned
+ 
   getAssignedCases() {
     return {
       volunteer: 'Volunteer User',
@@ -48,7 +48,7 @@ export class VolunteerService {
     };
   }
 
-  // POST /volunteer/join
+ 
   joinSearch(dto: VolunteerDto) {
     this.volunteers.push(dto);
 
@@ -58,7 +58,7 @@ export class VolunteerService {
     };
   }
 
-  // PUT /volunteer/profile/:id
+ 
   updateProfile(id: number, dto: VolunteerDto) {
     return {
       message: `Volunteer profile ${id} updated successfully`,
@@ -66,14 +66,14 @@ export class VolunteerService {
     };
   }
 
-  // PATCH /volunteer/case/:id
+   
   updateCaseStatus(id: number) {
     return {
       message: `Case ${id} status updated by volunteer`,
     };
   }
 
-  // DELETE /volunteer/leave/:id
+ 
   leaveCase(id: number) {
     return {
       message: `Volunteer left case ${id}`,
