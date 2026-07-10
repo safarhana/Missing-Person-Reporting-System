@@ -1,37 +1,24 @@
-import {
+import{
   IsNotEmpty,
+  IsString,
+  MaxLength,
   Matches,
-  IsDateString,
-  IsUrl,
 } from 'class-validator';
 
 export class CreateAdminDto {
   @IsNotEmpty()
-  @Matches(/^[^0-9]*$/, {
-    message: 'Name should not contain numbers',
+  @IsString()
+  @MaxLength(100)
+  @Matches(/^[a-zA-Z0-9_]+$/, {
+    message: 'Username can only contain letters, numbers, and underscores.',
   })
-  name: string;
+  username: string;
 
   @IsNotEmpty()
-  email: string;
-
-  @IsNotEmpty()
-  role: string;
-
-  @IsNotEmpty()
-  @Matches(/[@#$&]/, {
-    message:
-      'Password must contain one special character (@, #, $ or &)',
-  })
-  password: string;
-
-  @IsDateString({}, {
-    message: 'Please enter a valid date',
-  })
-  date: string;
-
-  @IsUrl({}, {
-    message: 'Please enter a valid social media URL',
-  })
-  socialMedia: string;
+  @IsString()
+  @MaxLength(150)
+  @Matches(/^[a-zA-Z\s]+$/, {
+    message: 'Full name can only contain letters and spaces.',  
+})
+  fullName: string;
 }
