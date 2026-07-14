@@ -1,4 +1,4 @@
-import { IsNotEmpty, Matches, MinLength, IsEmail } from 'class-validator';
+import { IsNotEmpty, Matches, MinLength, IsEmail, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class CreateCaseOfficerDto {
   @IsNotEmpty()
@@ -25,4 +25,9 @@ export class CreateCaseOfficerDto {
     message: 'Phone number must start with 01',
   })
   phone: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(30)
+  country?: string;
 }
