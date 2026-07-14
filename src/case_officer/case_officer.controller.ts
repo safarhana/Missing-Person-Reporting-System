@@ -21,6 +21,7 @@ import { UpdateCaseDto } from './dto/update-case.dto';
 import { UpdateStatusDto } from './dto/status.dto';
 import { CreateNoteDto } from './dto/note.dto';
 import { CreateCaseOfficerDto } from './dto/create-case-officer.dto';
+import { UpdateCountryDto } from './dto/update-country.dto';
 
 @Controller('case-officer')
 export class CaseOfficerController {
@@ -39,6 +40,16 @@ export class CaseOfficerController {
   @Get('search')
   search(@Query('q') q: string): Case[] {
     return this.caseOfficerService.search(q);
+  }
+
+  @Get('search/by-date')
+  findByJoiningDate(@Query('date') date: string) {
+    return this.caseOfficerService.findByJoiningDate(date);
+  }
+
+  @Get('search/default-country')
+  findWithDefaultCountry() {
+    return this.caseOfficerService.findWithDefaultCountry();
   }
 
   @Get('register')
@@ -65,6 +76,15 @@ export class CaseOfficerController {
     @Body() updateStatusDto: UpdateStatusDto,
   ): Case {
     return this.caseOfficerService.updateStatus(Number(id), updateStatusDto.status);
+  }
+
+  @Patch(':id/country')
+  @UsePipes(new ValidationPipe())
+  updateCountry(
+    @Param('id') id: string,
+    @Body() updateCountryDto: UpdateCountryDto,
+  ) {
+    return this.caseOfficerService.updateCountry(Number(id), updateCountryDto.country);
   }
 
   @Post(':id/notes')
@@ -94,11 +114,11 @@ export class CaseOfficerController {
       }),
     }),
   )
-  register(
+  async register(
     @Body() body: CreateCaseOfficerDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    const savedOfficer = this.caseOfficerService.registerOfficer(body, file ? file.filename : null);
+    const savedOfficer = await this.caseOfficerService.registerOfficer(body, file ? file.filename : null);
     return {
       message: 'Case Officer registered successfully',
       file: savedOfficer.file,
