@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Patch, Param, Query, Body } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Param, Query, Body, ParseIntPipe } from '@nestjs/common';
 import { MprService } from './mpr.service';
 import { CreateMprDto } from './dto/create_mpr.dto';
 import { UpdateMprDto } from './dto/update_mpr.dto';
@@ -7,9 +7,19 @@ import { NoteDto } from './dto/note.dto';
 import { UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
-@Controller('missing')
+@Controller('mpr')
 export class MprController {
   constructor(private readonly mprService: MprService) {}
+
+  @Get('inactive')
+  findInactive() {
+    return this.mprService.getInactiveUsers();
+  }
+
+  @Get('older-than-40')
+  findOlder() {
+    return this.mprService.getUsersOlderThan40();
+  }
 
   @Get()
   getAll() {
@@ -21,14 +31,9 @@ export class MprController {
     return this.mprService.searchByName(name);
   }
 
-  @Get('location')
-  filterByLocation(@Query('city') city: string) {
-    return this.mprService.filterByCity(city);
-  }
-
   @Get(':id')
-  getOne(@Param('id') id: string) {
-    return this.mprService.getReportById(Number(id));
+  getOne(@Param('id', ParseIntPipe) id: number) {
+    return this.mprService.getReportById(id);
   }
 
   @Post()
@@ -46,18 +51,11 @@ export class MprController {
     return this.mprService.createReport(createDto);
   }
 
-  @Put(':id')
-  update(@Param('id') id: string, @Body() updateDto: UpdateMprDto) {
-    return this.mprService.updateReport(Number(id), updateDto);
-  }
-
   @Patch(':id/status')
-  updateStatus(@Param('id') id: string, @Body() statusDto: StatusDto) {
-    return this.mprService.updateStatus(Number(id), statusDto.status);
-  }
-
-  @Patch(':id/note')
-  addNote(@Param('id') id: string, @Body() noteDto: NoteDto) {
-    return this.mprService.addNoteToReport(Number(id), noteDto.reporterComment);
+  updateStatus(
+    @Param('id', ParseIntPipe) id: number, 
+    @Body('status') status: 'active' | 'inactive'
+  ) {
+    return this.mprService.updateStatus(id, status);
   }
 }
