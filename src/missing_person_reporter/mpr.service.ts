@@ -1,63 +1,61 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateMissingReportDto } from './dto/create_mpr.dto';
-import { UpdateMissingReportDto } from './dto/update_mpr.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, MoreThan } from 'typeorm';
+import { Mpr } from './mpr.entity';
+import { CreateMprDto } from './dto/create_mpr.dto';
+import { UpdateMprDto } from './dto/update_mpr.dto';
 
 @Injectable()
 export class MprService {
-  private reports = [
-    { id: 1, name: 'Rahim Uddin', age: 25, city: 'dhaka', status: 'Missing', reporterComment: 'Last seen near station.' },
-    { id: 2, name: 'Karim Ali', age: 14, city: 'chittagong', status: 'Found', reporterComment: 'Returned home safely.' },
-  ];
+  constructor(
+    @InjectRepository(Mpr)
+    private readonly mprRepository: Repository<Mpr>,
+  ) {}
 
-  getAllReports() {
-    return this.reports;
+  async createReport(dto: CreateMprDto): Promise<Mpr> {
+    const derivedAge = dto.nid ? parseInt(dto.nid.substring(dto.nid.length - 2)) || 25 : 25;
+
+    const newReport = this.mprRepository.create({
+      fullName: dto.name,
+      age: derivedAge,
+      status: 'active',
+    });
+
+    return await this.mprRepository.save(newReport);
   }
 
-  getReportById(id: number) {
-    const report = this.reports.find((r) => r.id === id);
-    if (!report) throw new NotFoundException(`Report with ID ${id} not found`);
+  async updateStatus(id: number, status: 'active' | 'inactive'): Promise<Mpr> {
+    const report = await this.mprRepository.findOne({ where: { id } });
+    if (!report) {
+      throw new NotFoundException(`Report with ID ${id} not found`);
+    }
+    report.status = status;
+    return await this.mprRepository.save(report);
+  }
+
+  async getInactiveUsers(): Promise<Mpr[]> {
+    return await this.mprRepository.find({ where: { status: 'inactive' } });
+  }
+
+  async getUsersOlderThan40(): Promise<Mpr[]> {
+    return await this.mprRepository.find({ where: { age: MoreThan(40) } });
+  }
+
+  async getAllReports(): Promise<Mpr[]> {
+    return await this.mprRepository.find();
+  }
+
+  async getReportById(id: number): Promise<Mpr> {
+    const report = await this.mprRepository.findOne({ where: { id } });
+    if (!report) {
+      throw new NotFoundException(`Report with ID ${id} not found`);
+    }
     return report;
   }
 
-  searchByName(name: string) {
-    return this.reports.filter((r) =>
-      r.name.toLowerCase().includes(name.toLowerCase()),
-    );
-  }
-
-  filterByCity(city: string) {
-    return this.reports.filter((r) => r.city.toLowerCase() === city.toLowerCase());
-  }
-
-  createReport(dto: CreateMissingReportDto) {
-    const newReport = {
-      id: this.reports.length + 1,
-      ...dto,
-      city: dto.lastSeenLocation.toLowerCase(),
-      status: 'Missing',
-      reporterComment: '',
-    };
-    this.reports.push(newReport);
-    return { message: 'Report created successfully', data: newReport };
-  }
-
-  updateReport(id: number, dto: UpdateMissingReportDto) {
-    const index = this.reports.findIndex((r) => r.id === id);
-    if (index === -1) throw new NotFoundException(`Report with ID ${id} not found`);
-    
-    this.reports[index] = { ...this.reports[index], ...dto };
-    return { message: 'Report fully updated', data: this.reports[index] };
-  }
-
-  updateStatus(id: number, status: string) {
-    const report = this.getReportById(id);
-    report.status = status;
-    return { message: 'Report status updated successfully', data: report };
-  }
-
-  addNoteToReport(id: number, comment: string) {
-    const report = this.getReportById(id);
-    report.reporterComment = comment;
-    return { message: 'Note added successfully', data: report };
+  async searchByName(name: string): Promise<Mpr[]> {
+    return await this.mprRepository.find({
+      where: { fullName: name },
+    });
   }
 }

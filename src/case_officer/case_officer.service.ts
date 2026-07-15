@@ -1,7 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { CaseOfficerEntity } from './case_officer.entity';
+import { CreateCaseOfficerDto } from './dto/create-case-officer.dto';
 import { CreateCaseDto } from './dto/create-case.dto';
-import { UpdateCaseDto } from './dto/update-case.dto';
 import { CreateNoteDto } from './dto/note.dto';
+import { UpdateCaseDto } from './dto/update-case.dto';
 
 export class Case {
   id: number;
@@ -16,8 +20,48 @@ export class Case {
 
 @Injectable()
 export class CaseOfficerService {
+  constructor(
+    @InjectRepository(CaseOfficerEntity)
+    private readonly caseOfficerRepo: Repository<CaseOfficerEntity>,
+  ) { }
+
   private cases: Case[] = [];
   private idCounter = 1;
+  private registeredOfficers: any[] = [];
+
+  async registerOfficer(dto: CreateCaseOfficerDto, filename?: string): Promise<CaseOfficerEntity> {
+    const newOfficer = this.caseOfficerRepo.create({
+      ...dto,
+      file: filename || null,
+    });
+    return this.caseOfficerRepo.save(newOfficer);
+  }
+
+  async getRegisteredOfficers(): Promise<CaseOfficerEntity[]> {
+    return this.caseOfficerRepo.find();
+  }
+
+
+  async updateCountry(id: number, country: string): Promise<CaseOfficerEntity> {
+    const officer = await this.caseOfficerRepo.findOneBy({ id });
+    if (!officer) {
+      throw new NotFoundException(`Case Officer with ID ${id} not found`);
+    }
+    officer.country = country;
+    return this.caseOfficerRepo.save(officer);
+  }
+
+  async findByJoiningDate(date: string): Promise<CaseOfficerEntity[]> {
+
+    return this.caseOfficerRepo.createQueryBuilder('officer')
+      .where('DATE(officer.joiningDate) = :date', { date })
+      .getMany();
+  }
+
+  async findWithDefaultCountry(): Promise<CaseOfficerEntity[]> {
+    return this.caseOfficerRepo.find({ where: { country: 'Unknown' } });
+  }
+
 
   create(createCaseDto: CreateCaseDto): Case {
     const newCase: Case = {

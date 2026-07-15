@@ -8,12 +8,20 @@ import {
   Body,
   Param,
   Query,
+  UseInterceptors,
+  UploadedFile,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { MulterError, diskStorage } from 'multer';
 import { CaseOfficerService, Case } from './case_officer.service';
 import { CreateCaseDto } from './dto/create-case.dto';
 import { UpdateCaseDto } from './dto/update-case.dto';
 import { UpdateStatusDto } from './dto/status.dto';
 import { CreateNoteDto } from './dto/note.dto';
+import { CreateCaseOfficerDto } from './dto/create-case-officer.dto';
+import { UpdateCountryDto } from './dto/update-country.dto';
 
 @Controller('case-officer')
 export class CaseOfficerController {
@@ -32,6 +40,21 @@ export class CaseOfficerController {
   @Get('search')
   search(@Query('q') q: string): Case[] {
     return this.caseOfficerService.search(q);
+  }
+
+  @Get('search/by-date')
+  findByJoiningDate(@Query('date') date: string) {
+    return this.caseOfficerService.findByJoiningDate(date);
+  }
+
+  @Get('search/default-country')
+  findWithDefaultCountry() {
+    return this.caseOfficerService.findWithDefaultCountry();
+  }
+
+  @Get('register')
+  getRegistered() {
+    return this.caseOfficerService.getRegisteredOfficers();
   }
 
   @Get(':id')
@@ -55,12 +78,52 @@ export class CaseOfficerController {
     return this.caseOfficerService.updateStatus(Number(id), updateStatusDto.status);
   }
 
+  @Patch(':id/country')
+  @UsePipes(new ValidationPipe())
+  updateCountry(
+    @Param('id') id: string,
+    @Body() updateCountryDto: UpdateCountryDto,
+  ) {
+    return this.caseOfficerService.updateCountry(Number(id), updateCountryDto.country);
+  }
+
   @Post(':id/notes')
   addNote(
     @Param('id') id: string,
     @Body() createNoteDto: CreateNoteDto,
   ): Case {
     return this.caseOfficerService.addNote(Number(id), createNoteDto);
+  }
+
+  @Post('register')
+  @UsePipes(new ValidationPipe())
+  @UseInterceptors(
+    FileInterceptor('file', {
+      fileFilter: (req, file, cb) => {
+        if (file.originalname.match(/^.*\.(pdf)$/i)) {
+          cb(null, true);
+        } else {
+          cb(new MulterError('LIMIT_UNEXPECTED_FILE', 'pdf'), false);
+        }
+      },
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          cb(null, Date.now() + file.originalname);
+        },
+      }),
+    }),
+  )
+  async register(
+    @Body() body: CreateCaseOfficerDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    const savedOfficer = await this.caseOfficerService.registerOfficer(body, file ? file.filename : null);
+    return {
+      message: 'Case Officer registered successfully',
+      file: savedOfficer.file,
+      data: body,
+    };
   }
 
   @Delete(':id')

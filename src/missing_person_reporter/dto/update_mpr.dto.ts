@@ -1,4 +1,4 @@
-export class UpdateMissingReportDto {
+export class UpdateMprDto {
   name?: string;
   age?: number;
   lastSeenLocation?: string;

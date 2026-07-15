@@ -1,60 +1,43 @@
-import { Injectable } from '@nestjs/common';
+import {Injectable} from '@nestjs/common';
+import {InjectRepository} from '@nestjs/typeorm';
+import {Repository, Like} from 'typeorm';
+
+import {Admin} from './admin.entity';
+import {CreateAdminDto} from './dto/create-admin.dto';
 
 @Injectable()
 export class AdminService {
 
-  getUsers() {
-    return {
-      message: 'All users',
-    };
+  constructor(
+    @InjectRepository(Admin)
+    private readonly adminRepository: Repository<Admin>,
+  ) {}
+
+  create(createAdminDto: CreateAdminDto) {
+    const admin = this.adminRepository.create(createAdminDto);
+    return this.adminRepository.save(admin);
   }
 
-  getUser(id: string) {
-    return {
-      message: 'Single user',
-      id,
-    };
+
+  findByFullName(fullName: string) {
+    return this.adminRepository.find({
+      where: { fullName: Like(`%${fullName}%`) },
+    });
+  } 
+
+  findByUsername(username: string) {
+    return this.adminRepository.findOne({
+      where: { username},
+    });
   }
 
-  getReports() {
-    return {
-      message: 'All reports',
-    };
+  remove(username: string) {
+    return this.adminRepository.delete({
+      username,
+
+    })
+
   }
 
-  filterReports(status: string) {
-    return {
-      message: 'Filtered reports',
-      status,
-    };
-  }
-
-  createUser(body: any) {
-    return {
-      message: 'User created',
-      data: body,
-    };
-  }
-
-  updateUser(id: string, body: any) {
-    return {
-      message: 'User updated',
-      id,
-      data: body,
-    };
-  }
-
-  patchUser(id: string) {
-    return {
-      message: 'User partially updated',
-      id,
-    };
-  }
-
-  deleteUser(id: string) {
-    return {
-      message: 'User deleted',
-      id,
-    };
-  }
 }
+  
