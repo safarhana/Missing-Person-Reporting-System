@@ -9,6 +9,47 @@ import { VolunteerDto } from './volunteer.dto';
 export class VolunteerController {
   constructor(private readonly volunteerService: VolunteerService) {}
 
+  @Post()
+  createUser(@Body() dto: VolunteerDto) {
+    return this.volunteerService.createUser(dto);
+  }
+  
+  @Patch(':id')
+  updatePhone(
+    @Param('id') id: string,
+    @Body('phone') phone: string,
+  ) {
+    return this.volunteerService.updatePhone(
+      Number(id),
+      phone,
+    );
+  }
+
+  @Put(':id')
+  updatePhnName(
+    @Param('id') id: string,
+    @Body('phone') phone: string,
+    @Body('fullName') fullName: string,
+  ) {
+    return this.volunteerService.updatePhnName(
+      Number(id),
+      phone,
+      fullName,
+    );
+  }
+
+  @Get('null-name')
+  getUsersWithNullName() {
+    return this.volunteerService.getUsersWithNullName();
+  }
+
+  @Delete(':id')
+  deleteUser(@Param('id') id: string) {
+    return this.volunteerService.deleteUser(
+      Number(id),
+    );
+  }
+
   @Get('cases')
   getAllCases() {
     return this.volunteerService.getAllCases();
@@ -52,4 +93,5 @@ export class VolunteerController {
   leaveCase(@Param('id') id: string) {
     return this.volunteerService.leaveCase(Number(id));
   }
+    
 }

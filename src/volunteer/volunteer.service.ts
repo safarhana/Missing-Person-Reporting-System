@@ -1,11 +1,51 @@
 import { Injectable } from '@nestjs/common';
 import { VolunteerDto } from './volunteer.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { VolunteerEntity } from './volunteer.entity';
+import { Repository,IsNull, Like } from 'typeorm';
 
 @Injectable()
 export class VolunteerService {
 
+  constructor(
+    @InjectRepository(VolunteerEntity)
+    private volunteerRepo: Repository<VolunteerEntity>,
+  ) {}
+
   private volunteers: VolunteerDto[] = [];
 
+  async createUser(dto: VolunteerDto): Promise<VolunteerEntity> {
+  const volunteer = this.volunteerRepo.create(dto);
+  return await this.volunteerRepo.save(volunteer);
+}
+
+async updatePhone(id: number, phone: string): Promise<VolunteerEntity | null> {
+  await this.volunteerRepo.update(id, { phone });
+
+  return await this.volunteerRepo.findOne({
+    where: { id },
+  });
+}
+
+async updatePhnName(id: number, phone: string, fullName: string): Promise<VolunteerEntity | null> {
+  await this.volunteerRepo.update(id, { phone, fullName });
+
+  return await this.volunteerRepo.findOne({
+    where: { id },
+  });
+}
+
+async getUsersWithNullName(): Promise<VolunteerEntity[]> {
+  return await this.volunteerRepo.find({
+    where: {
+      fullName: IsNull(),
+    },
+  });
+}
+
+async deleteUser(id: number): Promise<void> {
+  await this.volunteerRepo.delete(id);
+}
   getAllCases() {
     return [
       {
@@ -23,7 +63,6 @@ export class VolunteerService {
     ];
   }
 
-   
   getCasesByDistrict(district: string) {
     return {
       message: `Showing active cases in ${district}`,
@@ -39,8 +78,6 @@ export class VolunteerService {
     };
   }
 
-
- 
   getAssignedCases() {
     return {
       volunteer: 'Volunteer User',
@@ -48,7 +85,6 @@ export class VolunteerService {
     };
   }
 
- 
   joinSearch(dto: VolunteerDto) {
     this.volunteers.push(dto);
 
