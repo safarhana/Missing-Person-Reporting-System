@@ -26,11 +26,15 @@ export class AdminController {
     return this.adminService.findByFullName(name);
   }
 
+  
+
+
   @Get(':username')
   findByUsername(@Param('username') username: string) {
     return this.adminService.findByUsername(username);
   }
 
+  
   @Delete(':username')
   remove(@Param('username') username: string) {
     return this.adminService.remove(username);

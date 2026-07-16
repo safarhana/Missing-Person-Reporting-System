@@ -18,9 +18,8 @@ import { MprModule } from './missing_person_reporter/mpr.module';
       host: 'localhost',
       port: 5432,
       username: 'postgres',
-      password: '1234', 
-      database: 'volunteer_db', 
-
+      password: 'mysql', 
+      database: 'missing_person_reporting_system', 
       autoLoadEntities: true,
       synchronize: true,
     }),
