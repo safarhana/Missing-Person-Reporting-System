@@ -6,6 +6,7 @@ import { CreateCaseOfficerDto } from './dto/create-case-officer.dto';
 import { CreateCaseDto } from './dto/create-case.dto';
 import { CreateNoteDto } from './dto/note.dto';
 import { UpdateCaseDto } from './dto/update-case.dto';
+import { UpdateValueDto } from './dto/update-value.dto';
 
 export class Case {
   id: number;
@@ -16,6 +17,8 @@ export class Case {
   contactNumber: string;
   status: string;
   notes: { noteText: string; addedBy: string; date: string }[];
+  email?: string;
+  country?: string;
 }
 
 @Injectable()
@@ -113,9 +116,19 @@ export class CaseOfficerService {
     return existingCase;
   }
 
+
+
   updateStatus(id: number, status: string): Case {
     const existingCase = this.findOne(id);
     existingCase.status = status;
+    return existingCase;
+  }
+
+  updatevalue(id: number, updateValueDto: UpdateValueDto): Case {
+    const existingCase = this.findOne(id);
+    if (updateValueDto.name !== undefined) existingCase.name = updateValueDto.name;
+    if (updateValueDto.email !== undefined) existingCase.email = updateValueDto.email;
+    if (updateValueDto.country !== undefined) existingCase.country = updateValueDto.country;
     return existingCase;
   }
 

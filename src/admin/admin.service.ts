@@ -19,6 +19,7 @@ export class AdminService {
   }
 
 
+
   findByFullName(fullName: string) {
     return this.adminRepository.find({
       where: { fullName: Like(`%${fullName}%`) },
@@ -27,9 +28,14 @@ export class AdminService {
 
   findByUsername(username: string) {
     return this.adminRepository.findOne({
-      where: { username},
+      where: { username },
+      
+      
     });
+
   }
+
+  
 
   remove(username: string) {
     return this.adminRepository.delete({

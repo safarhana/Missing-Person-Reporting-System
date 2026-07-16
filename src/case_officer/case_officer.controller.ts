@@ -22,6 +22,7 @@ import { UpdateStatusDto } from './dto/status.dto';
 import { CreateNoteDto } from './dto/note.dto';
 import { CreateCaseOfficerDto } from './dto/create-case-officer.dto';
 import { UpdateCountryDto } from './dto/update-country.dto';
+import { UpdateValueDto } from './dto/update-value.dto';
 
 @Controller('case-officer')
 export class CaseOfficerController {
@@ -63,11 +64,11 @@ export class CaseOfficerController {
   }
 
   @Put(':id')
-  update(
+  updatevalue(
     @Param('id') id: string,
-    @Body() updateCaseDto: UpdateCaseDto,
+    @Body() updatevalueDto: UpdateValueDto,
   ): Case {
-    return this.caseOfficerService.update(Number(id), updateCaseDto);
+    return this.caseOfficerService.update(Number(id), updatevalueDto);
   }
 
   @Patch(':id/status')
@@ -85,6 +86,15 @@ export class CaseOfficerController {
     @Body() updateCountryDto: UpdateCountryDto,
   ) {
     return this.caseOfficerService.updateCountry(Number(id), updateCountryDto.country);
+  }
+
+  @Put(':id')
+  @UsePipes(new ValidationPipe())
+  update(
+    @Param('id') id: string,
+    @Body() updateCaseDto: UpdateCaseDto,
+  ): Case {
+    return this.caseOfficerService.update(Number(id), updateCaseDto);
   }
 
   @Post(':id/notes')
