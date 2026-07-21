@@ -2,13 +2,13 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 import { Admin } from '../admin/admin.entity';
 import { LoginDto } from './login.dto';
 
 @Injectable()
 export class AuthService {
-
   constructor(
     @InjectRepository(Admin)
     private adminRepository: Repository<Admin>,
@@ -17,7 +17,6 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto) {
-
     const admin = await this.adminRepository.findOne({
       where: {
         username: loginDto.username,
@@ -28,9 +27,12 @@ export class AuthService {
       throw new UnauthorizedException('Invalid username');
     }
 
+    const passwordMatch = await bcrypt.compare(
+      loginDto.password,
+      admin.password,
+    );
 
-
-    if (admin.password !== loginDto.password) {
+    if (!passwordMatch) {
       throw new UnauthorizedException('Invalid password');
     }
 
