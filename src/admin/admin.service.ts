@@ -10,7 +10,9 @@ import { Admin } from './admin.entity';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { VolunteerEntity } from '../volunteer/volunteer.entity';
 import { CaseOfficerEntity } from '../case_officer/case_officer.entity';
+
 import * as bcrypt from 'bcrypt';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class AdminService {
@@ -23,21 +25,31 @@ export class AdminService {
 
     @InjectRepository(CaseOfficerEntity)
     private readonly caseOfficerRepository: Repository<CaseOfficerEntity>,
+
+    private readonly mailerService: MailerService,
   ) {}
 
   async create(createAdminDto: CreateAdminDto) {
-  const hashedPassword = await bcrypt.hash(
-    createAdminDto.password,
-    10,
-  );
+    const hashedPassword = await bcrypt.hash(
+      createAdminDto.password,
+      10,
+    );
 
-  createAdminDto.password = hashedPassword;
+    createAdminDto.password = hashedPassword;
 
-  const admin =
-    this.adminRepository.create(createAdminDto);
+    const admin = this.adminRepository.create(createAdminDto);
 
-  return this.adminRepository.save(admin);
-}
+    const savedAdmin = await this.adminRepository.save(admin);
+
+    await this.mailerService.sendMail({
+      to: 'farhana.mim080@gmail.com',
+      subject: 'Admin Registration',
+      text: `Welcome ${savedAdmin.fullName}! Your account has been created successfully.`,
+    });
+
+    return savedAdmin;
+  }
+
   findAll() {
     return this.adminRepository.find();
   }
@@ -101,39 +113,40 @@ export class AdminService {
     });
   }
 
- async assignVolunteer(adminId: number, volunteerId: number) {
-  const admin = await this.adminRepository.findOne({
-    where: { id: adminId },
-  });
+  async assignVolunteer(
+    adminId: number,
+    volunteerId: number,
+  ) {
+    const admin = await this.adminRepository.findOne({
+      where: { id: adminId },
+    });
 
-  if (!admin) {
-    throw new NotFoundException('Admin not found');
+    if (!admin) {
+      throw new NotFoundException('Admin not found');
+    }
+
+    const volunteer = await this.volunteerRepository.findOne({
+      where: { id: volunteerId },
+    });
+
+    if (!volunteer) {
+      throw new NotFoundException('Volunteer not found');
+    }
+
+    await this.volunteerRepository.update(
+      volunteerId,
+      {
+        admin,
+      },
+    );
+
+    return this.volunteerRepository.findOne({
+      where: { id: volunteerId },
+      relations: {
+        admin: true,
+      },
+    });
   }
-
-  const volunteer = await this.volunteerRepository.findOne({
-    where: { id: volunteerId },
-  });
-
-  if (!volunteer) {
-    throw new NotFoundException('Volunteer not found');
-  }
-
-  await this.volunteerRepository.update(
-    volunteerId,
-    {
-      admin,
-    },
-  );
-
-  return this.volunteerRepository.findOne({
-    where: { id: volunteerId },
-    relations: {
-      admin: true,
-    },
-  });
-}
-
-  
 
   async getVolunteers(adminId: number) {
     const admin = await this.adminRepository.findOne({
@@ -150,8 +163,10 @@ export class AdminService {
     return admin.volunteers;
   }
 
-
-  async removeVolunteer(adminId: number, volunteerId: number) {
+  async removeVolunteer(
+    adminId: number,
+    volunteerId: number,
+  ) {
     const volunteer = await this.volunteerRepository.findOne({
       where: { id: volunteerId },
       relations: {
@@ -175,80 +190,81 @@ export class AdminService {
   }
 
   async assignCaseOfficer(
-  adminId: number,
-  caseOfficerId: number,
-) {
-  const admin = await this.adminRepository.findOne({
-    where: { id: adminId },
-    relations: {
-      caseOfficers: true,
-    },
-  });
-
-  if (!admin) {
-    throw new NotFoundException('Admin not found');
-  }
-
-  const caseOfficer =
-    await this.caseOfficerRepository.findOne({
-      where: { id: caseOfficerId },
+    adminId: number,
+    caseOfficerId: number,
+  ) {
+    const admin = await this.adminRepository.findOne({
+      where: { id: adminId },
+      relations: {
+        caseOfficers: true,
+      },
     });
 
-  if (!caseOfficer) {
-    throw new NotFoundException(
-      'Case Officer not found',
-    );
+    if (!admin) {
+      throw new NotFoundException('Admin not found');
+    }
+
+    const caseOfficer =
+      await this.caseOfficerRepository.findOne({
+        where: { id: caseOfficerId },
+      });
+
+    if (!caseOfficer) {
+      throw new NotFoundException(
+        'Case Officer not found',
+      );
+    }
+
+    admin.caseOfficers.push(caseOfficer);
+
+    await this.adminRepository.save(admin);
+
+    return this.adminRepository.findOne({
+      where: { id: adminId },
+      relations: {
+        caseOfficers: true,
+      },
+    });
   }
 
-  admin.caseOfficers.push(caseOfficer);
+  async getCaseOfficers(adminId: number) {
+    const admin = await this.adminRepository.findOne({
+      where: { id: adminId },
+      relations: {
+        caseOfficers: true,
+      },
+    });
 
-  await this.adminRepository.save(admin);
+    if (!admin) {
+      throw new NotFoundException('Admin not found');
+    }
 
-  return this.adminRepository.findOne({
-    where: { id: adminId },
-    relations: {
-      caseOfficers: true,
-    },
-  });
-}
- async getCaseOfficers(adminId: number) {
-  const admin = await this.adminRepository.findOne({
-    where: { id: adminId },
-    relations: {
-      caseOfficers: true,
-    },
-  });
-
-  if (!admin) {
-    throw new NotFoundException('Admin not found');
+    return admin.caseOfficers;
   }
 
-  return admin.caseOfficers;
-}
+  async removeCaseOfficer(
+    adminId: number,
+    caseOfficerId: number,
+  ) {
+    const admin = await this.adminRepository.findOne({
+      where: { id: adminId },
+      relations: {
+        caseOfficers: true,
+      },
+    });
 
-async removeCaseOfficer(
-  adminId: number,
-  caseOfficerId: number,
-) {
-  const admin = await this.adminRepository.findOne({
-    where: { id: adminId },
-    relations: {
-      caseOfficers: true,
-    },
-  });
+    if (!admin) {
+      throw new NotFoundException('Admin not found');
+    }
 
-  if (!admin) {
-    throw new NotFoundException('Admin not found');
+    admin.caseOfficers =
+      admin.caseOfficers.filter(
+        (officer) =>
+          officer.id !== caseOfficerId,
+      );
+
+    await this.adminRepository.save(admin);
+
+    return admin;
   }
-
-  admin.caseOfficers =
-    admin.caseOfficers.filter(
-      (officer) =>
-        officer.id !== caseOfficerId,
-    );
-
-  await this.adminRepository.save(admin);
-
-  return admin;
-}
 }
