@@ -15,6 +15,8 @@ import {
 
 import { AdminService } from './admin.service';
 import { CreateAdminDto } from './dto/create-admin.dto';
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/jwt-auth/jwt-auth.guard';
 
 @Controller('admin')
 export class AdminController {
@@ -29,6 +31,7 @@ export class AdminController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   findAll() {
     return this.adminService.findAll();
   }
