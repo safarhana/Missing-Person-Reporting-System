@@ -10,6 +10,7 @@ import { Admin } from './admin.entity';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { VolunteerEntity } from '../volunteer/volunteer.entity';
 import { CaseOfficerEntity } from '../case_officer/case_officer.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AdminService {
@@ -24,11 +25,19 @@ export class AdminService {
     private readonly caseOfficerRepository: Repository<CaseOfficerEntity>,
   ) {}
 
-  create(createAdminDto: CreateAdminDto) {
-    const admin = this.adminRepository.create(createAdminDto);
-    return this.adminRepository.save(admin);
-  }
+  async create(createAdminDto: CreateAdminDto) {
+  const hashedPassword = await bcrypt.hash(
+    createAdminDto.password,
+    10,
+  );
 
+  createAdminDto.password = hashedPassword;
+
+  const admin =
+    this.adminRepository.create(createAdminDto);
+
+  return this.adminRepository.save(admin);
+}
   findAll() {
     return this.adminRepository.find();
   }
