@@ -1,6 +1,15 @@
-import {BeforeInsert, Column, Entity, PrimaryColumn,
-    
+import {
+  BeforeInsert,
+  Column,
+  Entity,
+  PrimaryColumn,
+
+ 
+  ManyToOne,
 } from 'typeorm';
+
+
+import { Admin } from '../admin/admin.entity';
 
 @Entity('volunteer')
 export class VolunteerEntity {
@@ -29,4 +38,16 @@ export class VolunteerEntity {
     unsigned: true,
   })
   phone: string;
+
+
+
+  @ManyToOne(
+    () => Admin,
+    (admin) => admin.volunteers,
+    {
+      nullable: true,
+      onDelete: 'SET NULL',
+    },
+  )
+  admin: Admin;
 }

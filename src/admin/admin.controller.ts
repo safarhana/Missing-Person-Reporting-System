@@ -89,4 +89,80 @@ export class AdminController {
   ) {
     return this.adminService.remove(username);
   }
+
+  @Post(':adminId/volunteer/:volunteerId')
+  assignVolunteer(
+    @Param('adminId', ParseIntPipe)
+    adminId: number,
+
+    @Param('volunteerId', ParseIntPipe)
+    volunteerId: number,
+  ) {
+    return this.adminService.assignVolunteer(
+      adminId,
+      volunteerId,
+    );
+  }
+
+
+  @Get(':adminId/volunteers')
+  getVolunteers(
+    @Param('adminId', ParseIntPipe)
+    adminId: number,
+  ) {
+    return this.adminService.getVolunteers(adminId);
+  }
+
+  
+  @Delete(':adminId/volunteer/:volunteerId')
+  removeVolunteer(
+    @Param('adminId', ParseIntPipe)
+    adminId: number,
+
+    @Param('volunteerId', ParseIntPipe)
+    volunteerId: number,
+  ) {
+    return this.adminService.removeVolunteer(
+      adminId,
+      volunteerId,
+    );
+  }
+
+  @Post(':adminId/case-officer/:caseOfficerId')
+assignCaseOfficer(
+  @Param('adminId', ParseIntPipe)
+  adminId: number,
+
+  @Param('caseOfficerId', ParseIntPipe)
+  caseOfficerId: number,
+) {
+  return this.adminService.assignCaseOfficer(
+    adminId,
+    caseOfficerId,
+  );
+}
+
+@Get(':adminId/case-officers')
+getCaseOfficers(
+  @Param('adminId', ParseIntPipe)
+  adminId: number,
+) {
+  return this.adminService.getCaseOfficers(
+    adminId,
+  );
+}
+
+@Delete(':adminId/case-officer/:caseOfficerId')
+removeCaseOfficer(
+  @Param('adminId', ParseIntPipe)
+  adminId: number,
+
+  @Param('caseOfficerId', ParseIntPipe)
+  caseOfficerId: number,
+) {
+  return this.adminService.removeCaseOfficer(
+    adminId,
+    caseOfficerId,
+  );
+}
 }
