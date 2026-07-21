@@ -14,6 +14,17 @@ export class CreateAdminDto {
   })
   username: string;
 
+  @IsNotEmpty({
+  message: 'Password is required.',
+  })
+  @Matches(/^(?=.*[!@#$%^&*(),.?":{}|<>]).+$/, {
+  message: 'Password must contain at least one special character.',
+ })
+ password: string;
+
+@IsNotEmpty()
+isActive: boolean;
+
   @IsNotEmpty()
   @IsString()
   @MaxLength(150)

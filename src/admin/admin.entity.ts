@@ -27,6 +27,13 @@ username: string;
 fullName: string;
 
 @Column({
+  type: 'varchar',
+  length: 255,
+})
+password: string;
+
+
+@Column({
   type: 'boolean',
   default: false,
 })
