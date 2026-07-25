@@ -7,6 +7,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy/jwt.strategy';
 import { Admin } from '../admin/admin.entity';
+import { VolunteerEntity } from '../volunteer/volunteer.entity';
 
 @Module({
   imports: [
@@ -14,7 +15,6 @@ import { Admin } from '../admin/admin.entity';
     PassportModule.register({
   defaultStrategy: 'jwt',
 }),
-
     JwtModule.register({
       secret: 'mySecretKey',
       signOptions: {
@@ -22,7 +22,7 @@ import { Admin } from '../admin/admin.entity';
       },
     }),
 
-    TypeOrmModule.forFeature([Admin]),
+    TypeOrmModule.forFeature([Admin, VolunteerEntity]),
   ],
 
   controllers: [AuthController],

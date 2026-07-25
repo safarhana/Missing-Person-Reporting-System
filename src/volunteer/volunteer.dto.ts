@@ -7,6 +7,10 @@ export class VolunteerDto {
   fullName: string;
 
   @IsOptional()
+  @IsString()
+  username: string;
+
+  @IsOptional()
   @IsInt()
   id: number;
 
@@ -16,9 +20,9 @@ export class VolunteerDto {
 
   @IsOptional()
   @IsEmail()
-  @Matches(/^[A-Za-z0-9._%+-]+@aiub\.edu$/, {
-    message: 'Email must be an AIUB email.',
-  })
+  //@Matches(/^[A-Za-z0-9._%+-]+@aiub\.edu$/, {
+  //   message: 'Email must be an AIUB email.',
+  // })
   email: string;
   
   @IsOptional()
@@ -37,13 +41,17 @@ export class VolunteerDto {
   })
   gender: string;
 
- @IsOptional()
- @IsNumberString({}, {
+  @IsOptional()
+  @IsNumberString({}, {
     message: 'Phone must contain only numbers.',
   })
   phone: string;
 
-@IsOptional()
-  @IsInt()
+ @IsOptional()
+ @IsInt()
   caseId: number;
+
+ @IsOptional()
+ @IsInt()
+ adminId: number;
 }
