@@ -3,13 +3,13 @@ import {
   Column,
   Entity,
   PrimaryColumn,
-
- 
+  ManyToMany,
+  JoinTable,
   ManyToOne,
 } from 'typeorm';
 
-
 import { Admin } from '../admin/admin.entity';
+import { Mpr } from '../missing_person_reporter/mpr.entity';
 
 @Entity('volunteer')
 export class VolunteerEntity {
@@ -21,6 +21,20 @@ export class VolunteerEntity {
   generateId() {
     this.id = Math.floor(Math.random() * 900000);
   }
+
+  @Column({
+      type: 'varchar',
+      length: 100,
+      unique: true,
+      nullable: true,
+    })
+    username: string;
+
+  @Column({
+    type: 'varchar',
+    nullable: true,
+  })
+  password: string;
 
   @Column({
     default: true,
@@ -39,7 +53,11 @@ export class VolunteerEntity {
   })
   phone: string;
 
-
+   @Column({
+    type: 'varchar',
+    nullable: true,
+   })
+   email: string;
 
   @ManyToOne(
     () => Admin,
@@ -50,4 +68,8 @@ export class VolunteerEntity {
     },
   )
   admin: Admin;
+
+  @ManyToMany(() => Mpr, (mpr) => mpr.volunteers)
+  @JoinTable()
+  mprs: Mpr[];
 }
