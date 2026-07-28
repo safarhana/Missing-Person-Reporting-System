@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { VolunteerEntity } from '../volunteer/volunteer.entity';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
 
 @Entity('mpr_users')
 export class Mpr {
@@ -13,4 +14,10 @@ export class Mpr {
 
   @Column({ type: 'varchar', default: 'active' }) 
   status: 'active' | 'inactive';
+
+   @ManyToMany(
+    () => VolunteerEntity,
+    (volunteer) => volunteer.mprs,
+  )
+  volunteers: VolunteerEntity[];
 }
