@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppController } from './app.controller';
@@ -30,15 +30,15 @@ import { MailerModule } from '@nestjs-modules/mailer';
       synchronize: true,
     }),
 
-    // 📧 Mailer Configuration for Bonus Marks
+   
     MailerModule.forRoot({
       transport: {
         host: 'smtp.gmail.com',
         port: 465,
-        secure: true, // true for 465, false for other ports
+        secure: true, 
         auth: {
-          user: 'remondwasi24@gmail.com', // Replace with your test email
-          pass: 'mimg qaij gpnh pxph',   // Replace with your email app password
+          user: 'remondwasi24@gmail.com', 
+          pass: 'mimg qaij gpnh pxph',   
         },
       },
       defaults: {
