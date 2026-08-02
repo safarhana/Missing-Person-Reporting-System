@@ -52,14 +52,12 @@ export class CaseOfficerEntity {
     this.uniqueId = randomUUID();
   }
 
-  // Relationship 1: Many-to-Many with Admin
   @ManyToMany(
     () => Admin,
     (admin) => admin.caseOfficers,
   )
   admins: Admin[];
 
-  // Relationship 2: One-to-Many with CaseReportEntity
   @OneToMany(
     () => CaseReportEntity,
     (caseReport) => caseReport.officer,
