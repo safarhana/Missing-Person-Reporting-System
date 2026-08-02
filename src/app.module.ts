@@ -10,6 +10,7 @@ import { VolunteerModule } from './volunteer/volunteer.module';
 import { CaseOfficerModule } from './case_officer/case_officer.module';
 import { MprModule } from './missing_person_reporter/mpr.module';
 import { AuthModule } from './auth/auth.module';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -23,10 +24,26 @@ import { AuthModule } from './auth/auth.module';
       host: 'localhost',
       port: 5432,
       username: 'postgres',
-      password: '1234',
-      database: 'volunteer_db',
+      password: 'mysql',
+      database: 'missing_person_reporting_system',
       autoLoadEntities: true,
       synchronize: true,
+    }),
+
+    // 📧 Mailer Configuration for Bonus Marks
+    MailerModule.forRoot({
+      transport: {
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true, // true for 465, false for other ports
+        auth: {
+          user: 'remondwasi24@gmail.com', // Replace with your test email
+          pass: 'mimg qaij gpnh pxph',   // Replace with your email app password
+        },
+      },
+      defaults: {
+        from: '"Missing Person System" <no-reply@mprsystem.com>',
+      },
     }),
 
     VolunteerModule,

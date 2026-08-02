@@ -30,13 +30,13 @@ export class AuthService {
     }
 
     const passwordMatch = await bcrypt.compare(
-      loginDto.password,
-      admin.password,
-    );
+     loginDto.password,
+     admin.password,
+     );
 
-    if (!passwordMatch) {
-      throw new UnauthorizedException('Invalid password');
-    }
+     if (!passwordMatch) {
+       throw new UnauthorizedException('Invalid password');
+   }
 
     const payload = {
       sub: admin.id,
@@ -49,38 +49,33 @@ export class AuthService {
   }
 
   async volunteerLogin(loginDto: VolunteerLoginDto) {
+    const volunteer = await this.volunteerRepository.findOne({
+      where: {
+        username: loginDto.username,
+      },
+    });
 
-  const volunteer = await this.volunteerRepository.findOne({
-    where: {
-      username: loginDto.username,
-    },
-  });
+    if (!volunteer) {
+      throw new UnauthorizedException('Invalid username');
+    }
 
-  if (!volunteer) {
-    throw new UnauthorizedException('Invalid username');
+    const match = await bcrypt.compare(
+      loginDto.password,
+      volunteer.password,
+    );
+
+    if (!match) {
+      throw new UnauthorizedException('Invalid password');
+    }
+
+    const payload = {
+      sub: volunteer.id,
+      username: volunteer.username,
+      role: 'volunteer',
+    };
+
+    return {
+      access_token: await this.jwtService.signAsync(payload),
+    };
   }
-
-  const match = await bcrypt.compare(
-    loginDto.password,
-    volunteer.password,
-  );
-
-  if (!match) {
-    throw new UnauthorizedException('Invalid password');
-  }
-
-  const payload = {
-    sub: volunteer.id,
-    username: volunteer.username,
-    role: 'volunteer',
-  };
-
-  return {
-    access_token: await this.jwtService.signAsync(payload),
-  };
-}
-
-
-
-
 }

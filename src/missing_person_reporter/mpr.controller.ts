@@ -1,13 +1,18 @@
-import { Controller, Get, Post, Put, Patch, Param, Query, Body, ParseIntPipe } from '@nestjs/common';
+import { 
+  Controller, Get, Post, Put, Patch, Delete, 
+  Param, Query, Body, ParseIntPipe, UseGuards, 
+  UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, UsePipes, ValidationPipe 
+} from '@nestjs/common';
 import { MprService } from './mpr.service';
 import { CreateMprDto } from './dto/create_mpr.dto';
 import { UpdateMprDto } from './dto/update_mpr.dto';
-import { StatusDto } from './dto/status.dto';
 import { NoteDto } from './dto/note.dto';
-import { UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { JwtAuthGuard } from '../auth/jwt-auth/jwt-auth.guard';
+
 
 @Controller('mpr')
+@UseGuards(JwtAuthGuard)
 export class MprController {
   constructor(private readonly mprService: MprService) {}
 
@@ -37,6 +42,7 @@ export class MprController {
   }
 
   @Post()
+  @UsePipes(new ValidationPipe({ transform: true }))
   @UseInterceptors(FileInterceptor('nidImage'))
   create(
     @Body() createDto: CreateMprDto,
@@ -51,11 +57,46 @@ export class MprController {
     return this.mprService.createReport(createDto);
   }
 
+  @Put(':id')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  updateReport(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateDto: UpdateMprDto,
+  ) {
+    return this.mprService.updateReport(id, updateDto);
+  }
+
   @Patch(':id/status')
   updateStatus(
     @Param('id', ParseIntPipe) id: number, 
     @Body('status') status: 'active' | 'inactive'
   ) {
     return this.mprService.updateStatus(id, status);
+  }
+
+  @Delete(':id')
+  deleteReport(@Param('id', ParseIntPipe) id: number) {
+    return this.mprService.deleteReport(id);
+  }
+
+  @Post(':id/notes')
+  addNote(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() noteDto: NoteDto,
+  ) {
+    return this.mprService.addNote(id, noteDto);
+  }
+
+  @Post('send-email')
+  async sendEmail(
+    @Body('email') email: string,
+    @Body('subject') subject?: string,
+    @Body('message') message?: string,
+  ) {
+    return await this.mprService.sendNotificationEmail(
+      email,
+      subject || 'Missing Person System Alert',
+      message || 'A missing person report update has been processed.',
+    );
   }
 }
