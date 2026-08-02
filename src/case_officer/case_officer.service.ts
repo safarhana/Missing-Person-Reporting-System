@@ -2,7 +2,6 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
-  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
@@ -34,7 +33,6 @@ export class CaseOfficerService {
     private readonly mailerService: MailerService,
   ) {}
 
-  // 1. Officer Registration with BCrypt & Mailer
   async registerOfficer(
     dto: CreateCaseOfficerDto,
     filename?: string,
@@ -56,7 +54,6 @@ export class CaseOfficerService {
 
     const savedOfficer = await this.officerRepo.save(newOfficer);
 
-    // Send welcome email via MailerService
     try {
       await this.mailerService.sendMail({
         to: savedOfficer.email,
@@ -70,7 +67,6 @@ export class CaseOfficerService {
     return savedOfficer;
   }
 
-  // 2. Find All Officers
   async getRegisteredOfficers(country?: string): Promise<CaseOfficerEntity[]> {
     if (country) {
       return this.officerRepo.find({
@@ -83,7 +79,6 @@ export class CaseOfficerService {
     });
   }
 
-  // 3. Find Single Officer by ID
   async findOneOfficer(id: number): Promise<CaseOfficerEntity> {
     const officer = await this.officerRepo.findOne({
       where: { id },
@@ -95,14 +90,12 @@ export class CaseOfficerService {
     return officer;
   }
 
-  // 4. Update Officer Country
   async updateCountry(id: number, country: string): Promise<CaseOfficerEntity> {
     const officer = await this.findOneOfficer(id);
     officer.country = country;
     return this.officerRepo.save(officer);
   }
 
-  // 5. Query Officers by Joining Date
   async findByJoiningDate(date: string): Promise<CaseOfficerEntity[]> {
     return this.officerRepo
       .createQueryBuilder('officer')
@@ -112,7 +105,6 @@ export class CaseOfficerService {
       .getMany();
   }
 
-  // 6. Query Officers with Default Country
   async findWithDefaultCountry(): Promise<CaseOfficerEntity[]> {
     return this.officerRepo.find({
       where: { country: 'Unknown' },
@@ -120,7 +112,6 @@ export class CaseOfficerService {
     });
   }
 
-  // 7. Search Officers
   async searchOfficers(q: string): Promise<CaseOfficerEntity[]> {
     if (!q) return this.getRegisteredOfficers();
     const query = `%${q}%`;
@@ -134,7 +125,6 @@ export class CaseOfficerService {
     });
   }
 
-  // 8. Update Officer Details
   async updateOfficer(
     id: number,
     updateDto: UpdateCaseDto | UpdateValueDto,
@@ -148,16 +138,12 @@ export class CaseOfficerService {
     return this.officerRepo.save(officer);
   }
 
-  // 9. Remove Officer
   async deleteOfficer(id: number): Promise<{ success: boolean }> {
     const officer = await this.findOneOfficer(id);
     await this.officerRepo.remove(officer);
     return { success: true };
   }
 
-  // --- RELATIONSHIP 1: ONE-TO-MANY (Case Officer -> Case Report) ---
-
-  // 10. Create Case assigned to Case Officer
   async createCaseForOfficer(
     officerId: number,
     dto: CreateCaseDto,
@@ -173,7 +159,6 @@ export class CaseOfficerService {
 
     const savedCase = await this.caseRepo.save(newCase);
 
-    // Send notification email to Case Officer
     try {
       await this.mailerService.sendMail({
         to: officer.email,
@@ -187,7 +172,6 @@ export class CaseOfficerService {
     return savedCase;
   }
 
-  // 11. Get Cases for a Case Officer
   async getCasesForOfficer(officerId: number): Promise<CaseReportEntity[]> {
     const officer = await this.findOneOfficer(officerId);
     return this.caseRepo.find({
@@ -196,7 +180,6 @@ export class CaseOfficerService {
     });
   }
 
-  // 12. Delete a Case Report
   async deleteCase(caseId: number): Promise<{ success: boolean }> {
     const caseReport = await this.caseRepo.findOneBy({ id: caseId });
     if (!caseReport) {
@@ -206,7 +189,6 @@ export class CaseOfficerService {
     return { success: true };
   }
 
-  // 13. Update Case Status
   async updateCaseStatus(
     caseId: number,
     status: string,
@@ -219,7 +201,6 @@ export class CaseOfficerService {
     return this.caseRepo.save(caseReport);
   }
 
-  // 14. Add Note to Case
   async addNoteToCase(
     caseId: number,
     createNoteDto: CreateNoteDto,
@@ -240,9 +221,6 @@ export class CaseOfficerService {
     return this.caseRepo.save(caseReport);
   }
 
-  // --- RELATIONSHIP 2: MANY-TO-MANY (Case Officer <-> Admin) ---
-
-  // 15. Assign Admin to Case Officer
   async assignAdmin(
     officerId: number,
     adminId: number,
@@ -269,13 +247,11 @@ export class CaseOfficerService {
     return this.findOneOfficer(officerId);
   }
 
-  // 16. Get Admins assigned to Case Officer
   async getAdminsForOfficer(officerId: number): Promise<Admin[]> {
     const officer = await this.findOneOfficer(officerId);
     return officer.admins;
   }
 
-  // 17. Remove Admin from Case Officer
   async removeAdminFromOfficer(
     officerId: number,
     adminId: number,
