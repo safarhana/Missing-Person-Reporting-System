@@ -12,101 +12,29 @@ import {
   UploadedFile,
   UsePipes,
   ValidationPipe,
+  UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MulterError, diskStorage } from 'multer';
-import { CaseOfficerService, Case } from './case_officer.service';
+
+import { CaseOfficerService } from './case_officer.service';
+import { CreateCaseOfficerDto } from './dto/create-case-officer.dto';
 import { CreateCaseDto } from './dto/create-case.dto';
 import { UpdateCaseDto } from './dto/update-case.dto';
 import { UpdateStatusDto } from './dto/status.dto';
 import { CreateNoteDto } from './dto/note.dto';
-import { CreateCaseOfficerDto } from './dto/create-case-officer.dto';
 import { UpdateCountryDto } from './dto/update-country.dto';
 import { UpdateValueDto } from './dto/update-value.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth/jwt-auth.guard';
 
 @Controller('case-officer')
 export class CaseOfficerController {
   constructor(private readonly caseOfficerService: CaseOfficerService) {}
 
-  @Post()
-  create(@Body() createCaseDto: CreateCaseDto): Case {
-    return this.caseOfficerService.create(createCaseDto);
-  }
-
-  @Get()
-  findAll(@Query('status') status?: string): Case[] {
-    return this.caseOfficerService.findAll(status);
-  }
-
-  @Get('search')
-  search(@Query('q') q: string): Case[] {
-    return this.caseOfficerService.search(q);
-  }
-
-  @Get('search/by-date')
-  findByJoiningDate(@Query('date') date: string) {
-    return this.caseOfficerService.findByJoiningDate(date);
-  }
-
-  @Get('search/default-country')
-  findWithDefaultCountry() {
-    return this.caseOfficerService.findWithDefaultCountry();
-  }
-
-  @Get('register')
-  getRegistered() {
-    return this.caseOfficerService.getRegisteredOfficers();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string): Case {
-    return this.caseOfficerService.findOne(Number(id));
-  }
-
-  @Put(':id')
-  updatevalue(
-    @Param('id') id: string,
-    @Body() updatevalueDto: UpdateValueDto,
-  ): Case {
-    return this.caseOfficerService.update(Number(id), updatevalueDto);
-  }
-
-  @Patch(':id/status')
-  updateStatus(
-    @Param('id') id: string,
-    @Body() updateStatusDto: UpdateStatusDto,
-  ): Case {
-    return this.caseOfficerService.updateStatus(Number(id), updateStatusDto.status);
-  }
-
-  @Patch(':id/country')
-  @UsePipes(new ValidationPipe())
-  updateCountry(
-    @Param('id') id: string,
-    @Body() updateCountryDto: UpdateCountryDto,
-  ) {
-    return this.caseOfficerService.updateCountry(Number(id), updateCountryDto.country);
-  }
-
-  @Put(':id')
-  @UsePipes(new ValidationPipe())
-  update(
-    @Param('id') id: string,
-    @Body() updateCaseDto: UpdateCaseDto,
-  ): Case {
-    return this.caseOfficerService.update(Number(id), updateCaseDto);
-  }
-
-  @Post(':id/notes')
-  addNote(
-    @Param('id') id: string,
-    @Body() createNoteDto: CreateNoteDto,
-  ): Case {
-    return this.caseOfficerService.addNote(Number(id), createNoteDto);
-  }
-
+  // 1. Officer Registration (Public, with PDF upload, BCrypt, Mailer)
   @Post('register')
-  @UsePipes(new ValidationPipe())
+  @UsePipes(new ValidationPipe({ whitelist: true }))
   @UseInterceptors(
     FileInterceptor('file', {
       fileFilter: (req, file, cb) => {
@@ -119,7 +47,7 @@ export class CaseOfficerController {
       storage: diskStorage({
         destination: './uploads',
         filename: (req, file, cb) => {
-          cb(null, Date.now() + file.originalname);
+          cb(null, Date.now() + '-' + file.originalname);
         },
       }),
     }),
@@ -128,17 +56,151 @@ export class CaseOfficerController {
     @Body() body: CreateCaseOfficerDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    const savedOfficer = await this.caseOfficerService.registerOfficer(body, file ? file.filename : null);
+    const savedOfficer = await this.caseOfficerService.registerOfficer(
+      body,
+      file ? file.filename : null,
+    );
     return {
       message: 'Case Officer registered successfully',
+      officerId: savedOfficer.id,
+      uniqueId: savedOfficer.uniqueId,
       file: savedOfficer.file,
-      data: body,
+      data: {
+        name: savedOfficer.name,
+        email: savedOfficer.email,
+        phone: savedOfficer.phone,
+        country: savedOfficer.country,
+      },
     };
   }
 
+  // 2. Get All Officers (TypeORM DB, with optional country filter)
+  @Get()
+  findAll(@Query('country') country?: string) {
+    return this.caseOfficerService.getRegisteredOfficers(country);
+  }
+
+  // 3. Search Officers by query string
+  @Get('search')
+  search(@Query('q') q: string) {
+    return this.caseOfficerService.searchOfficers(q);
+  }
+
+  // 4. Search Officers by Joining Date
+  @Get('search/by-date')
+  findByJoiningDate(@Query('date') date: string) {
+    return this.caseOfficerService.findByJoiningDate(date);
+  }
+
+  // 5. Find Officers with Default Country
+  @Get('search/default-country')
+  findWithDefaultCountry() {
+    return this.caseOfficerService.findWithDefaultCountry();
+  }
+
+  // 6. Get Officer by ID with relations
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.caseOfficerService.findOneOfficer(id);
+  }
+
+  // 7. Update Officer Details
+  @Put(':id')
+  @UsePipes(new ValidationPipe({ whitelist: true, skipMissingProperties: true }))
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateDto: UpdateCaseDto,
+  ) {
+    return this.caseOfficerService.updateOfficer(id, updateDto);
+  }
+
+  // 8. Update Officer Country (with Pipe transformation & validation)
+  @Patch(':id/country')
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  updateCountry(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateCountryDto: UpdateCountryDto,
+  ) {
+    return this.caseOfficerService.updateCountry(id, updateCountryDto.country);
+  }
+
+  // 9. Delete Officer
   @Delete(':id')
-  remove(@Param('id') id: string): { success: boolean } {
-    const result = this.caseOfficerService.remove(Number(id));
-    return { success: result };
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.caseOfficerService.deleteOfficer(id);
+  }
+
+  // =========================================================================
+  // RELATIONSHIP 1: ONE-TO-MANY (Case Officer -> Case Reports)
+  // =========================================================================
+
+  // 10. Create Case Report assigned to Case Officer (One-to-Many CREATE)
+  @Post(':id/cases')
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  createCase(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() createCaseDto: CreateCaseDto,
+  ) {
+    return this.caseOfficerService.createCaseForOfficer(id, createCaseDto);
+  }
+
+  // 11. Get Case Reports assigned to Case Officer (One-to-Many READ)
+  @Get(':id/cases')
+  getCases(@Param('id', ParseIntPipe) id: number) {
+    return this.caseOfficerService.getCasesForOfficer(id);
+  }
+
+  // 12. Delete Case Report (One-to-Many DELETE)
+  @Delete('cases/:caseId')
+  deleteCase(@Param('caseId', ParseIntPipe) caseId: number) {
+    return this.caseOfficerService.deleteCase(caseId);
+  }
+
+  // 13. Update Case Status
+  @Patch('cases/:caseId/status')
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  updateCaseStatus(
+    @Param('caseId', ParseIntPipe) caseId: number,
+    @Body() updateStatusDto: UpdateStatusDto,
+  ) {
+    return this.caseOfficerService.updateCaseStatus(caseId, updateStatusDto.status);
+  }
+
+  // 14. Add Note to Case Report
+  @Post('cases/:caseId/notes')
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  addNote(
+    @Param('caseId', ParseIntPipe) caseId: number,
+    @Body() createNoteDto: CreateNoteDto,
+  ) {
+    return this.caseOfficerService.addNoteToCase(caseId, createNoteDto);
+  }
+
+  // =========================================================================
+  // RELATIONSHIP 2: MANY-TO-MANY (Case Officer <-> Admin)
+  // =========================================================================
+
+  // 15. Assign Admin to Case Officer (Many-to-Many CREATE)
+  @Post(':id/assign-admin/:adminId')
+  assignAdmin(
+    @Param('id', ParseIntPipe) officerId: number,
+    @Param('adminId', ParseIntPipe) adminId: number,
+  ) {
+    return this.caseOfficerService.assignAdmin(officerId, adminId);
+  }
+
+  // 16. Get Admins assigned to Case Officer (Many-to-Many READ)
+  @Get(':id/admins')
+  getAdmins(@Param('id', ParseIntPipe) officerId: number) {
+    return this.caseOfficerService.getAdminsForOfficer(officerId);
+  }
+
+  // 17. Remove Admin assignment from Case Officer (Many-to-Many DELETE)
+  @Delete(':id/admins/:adminId')
+  removeAdmin(
+    @Param('id', ParseIntPipe) officerId: number,
+    @Param('adminId', ParseIntPipe) adminId: number,
+  ) {
+    return this.caseOfficerService.removeAdminFromOfficer(officerId, adminId);
   }
 }
