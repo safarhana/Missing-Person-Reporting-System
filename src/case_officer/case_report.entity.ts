@@ -1,10 +1,10 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
+  Entity,
   ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn
 } from 'typeorm';
 import { CaseOfficerEntity } from './case_officer.entity';
 
@@ -46,4 +46,6 @@ export class CaseReportEntity {
     { onDelete: 'CASCADE', nullable: true },
   )
   officer: CaseOfficerEntity;
+
+
 }

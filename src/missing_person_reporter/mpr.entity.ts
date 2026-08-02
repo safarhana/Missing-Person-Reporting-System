@@ -1,5 +1,6 @@
 import { VolunteerEntity } from '../volunteer/volunteer.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
+import { CaseOfficerEntity } from '../case_officer/case_officer.entity';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, ManyToOne } from 'typeorm';
 
 @Entity('mpr_users')
 export class Mpr {
@@ -15,7 +16,10 @@ export class Mpr {
   @Column({ type: 'varchar', default: 'active' }) 
   status: 'active' | 'inactive';
 
-   @ManyToMany(
+  @ManyToOne(() => CaseOfficerEntity, (officer) => officer.mprs, { onDelete: 'CASCADE', nullable: true })
+  caseOfficer: CaseOfficerEntity;
+
+  @ManyToMany(
     () => VolunteerEntity,
     (volunteer) => volunteer.mprs,
   )

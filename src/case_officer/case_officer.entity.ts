@@ -4,12 +4,14 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  PrimaryGeneratedColumn,
+  JoinTable,
   ManyToMany,
   OneToMany,
+  PrimaryGeneratedColumn
 } from 'typeorm';
 
 import { Admin } from '../admin/admin.entity';
+import { Mpr } from '../missing_person_reporter/mpr.entity';
 import { CaseReportEntity } from './case_report.entity';
 
 @Entity('case_officer')
@@ -56,6 +58,7 @@ export class CaseOfficerEntity {
     () => Admin,
     (admin) => admin.caseOfficers,
   )
+  @JoinTable({ name: 'case_officer_admins' })
   admins: Admin[];
 
   @OneToMany(
@@ -63,4 +66,13 @@ export class CaseOfficerEntity {
     (caseReport) => caseReport.officer,
   )
   cases: CaseReportEntity[];
+
+  @OneToMany(
+    () => Mpr,
+    (mpr) => mpr.caseOfficer,
+    { cascade: true },
+  )
+  mprs: Mpr[];
+
+
 }
