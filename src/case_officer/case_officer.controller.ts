@@ -13,17 +13,20 @@ import {
   UsePipes,
   ValidationPipe,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MulterError, diskStorage } from 'multer';
 
 import { CaseOfficerService } from './case_officer.service';
 import { CreateCaseOfficerDto } from './dto/create-case-officer.dto';
+import { LoginCaseOfficerDto } from './dto/login-case-officer.dto';
 import { CreateCaseDto } from './dto/create-case.dto';
 import { UpdateCaseDto } from './dto/update-case.dto';
 import { UpdateStatusDto } from './dto/status.dto';
 import { CreateNoteDto } from './dto/note.dto';
 import { UpdateCountryDto } from './dto/update-country.dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('case-officer')
 export class CaseOfficerController {
@@ -70,6 +73,12 @@ export class CaseOfficerController {
     };
   }
 
+  @Post('login')
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  async login(@Body() loginDto: LoginCaseOfficerDto) {
+    return this.caseOfficerService.login(loginDto);
+  }
+
   @Get()
   findAll(@Query('country') country?: string) {
     return this.caseOfficerService.getRegisteredOfficers(country);
@@ -96,6 +105,7 @@ export class CaseOfficerController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe({ whitelist: true, skipMissingProperties: true }))
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -105,6 +115,7 @@ export class CaseOfficerController {
   }
 
   @Patch(':id/country')
+  @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe({ whitelist: true }))
   updateCountry(
     @Param('id', ParseIntPipe) id: number,
@@ -114,11 +125,13 @@ export class CaseOfficerController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.caseOfficerService.deleteOfficer(id);
   }
 
   @Post(':id/cases')
+  @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe({ whitelist: true }))
   createCase(
     @Param('id', ParseIntPipe) id: number,
@@ -128,16 +141,19 @@ export class CaseOfficerController {
   }
 
   @Get(':id/cases')
+  @UseGuards(JwtAuthGuard)
   getCases(@Param('id', ParseIntPipe) id: number) {
     return this.caseOfficerService.getCasesForOfficer(id);
   }
 
   @Delete('cases/:caseId')
+  @UseGuards(JwtAuthGuard)
   deleteCase(@Param('caseId', ParseIntPipe) caseId: number) {
     return this.caseOfficerService.deleteCase(caseId);
   }
 
   @Patch('cases/:caseId/status')
+  @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe({ whitelist: true }))
   updateCaseStatus(
     @Param('caseId', ParseIntPipe) caseId: number,
@@ -147,6 +163,7 @@ export class CaseOfficerController {
   }
 
   @Post('cases/:caseId/notes')
+  @UseGuards(JwtAuthGuard)
   @UsePipes(new ValidationPipe({ whitelist: true }))
   addNote(
     @Param('caseId', ParseIntPipe) caseId: number,
@@ -156,6 +173,7 @@ export class CaseOfficerController {
   }
 
   @Post(':id/assign-admin/:adminId')
+  @UseGuards(JwtAuthGuard)
   assignAdmin(
     @Param('id', ParseIntPipe) officerId: number,
     @Param('adminId', ParseIntPipe) adminId: number,
@@ -164,11 +182,13 @@ export class CaseOfficerController {
   }
 
   @Get(':id/admins')
+  @UseGuards(JwtAuthGuard)
   getAdmins(@Param('id', ParseIntPipe) officerId: number) {
     return this.caseOfficerService.getAdminsForOfficer(officerId);
   }
 
   @Delete(':id/admins/:adminId')
+  @UseGuards(JwtAuthGuard)
   removeAdmin(
     @Param('id', ParseIntPipe) officerId: number,
     @Param('adminId', ParseIntPipe) adminId: number,

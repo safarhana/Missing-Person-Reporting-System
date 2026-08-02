@@ -2,10 +2,12 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 import { MailerService } from '@nestjs-modules/mailer';
 
 import { CaseOfficerEntity } from './case_officer.entity';
@@ -13,6 +15,7 @@ import { CaseReportEntity } from './case_report.entity';
 import { Admin } from '../admin/admin.entity';
 
 import { CreateCaseOfficerDto } from './dto/create-case-officer.dto';
+import { LoginCaseOfficerDto } from './dto/login-case-officer.dto';
 import { CreateCaseDto } from './dto/create-case.dto';
 import { UpdateCaseDto } from './dto/update-case.dto';
 import { CreateNoteDto } from './dto/note.dto';
@@ -30,6 +33,7 @@ export class CaseOfficerService {
     @InjectRepository(Admin)
     private readonly adminRepo: Repository<Admin>,
 
+    private readonly jwtService: JwtService,
     private readonly mailerService: MailerService,
   ) {}
 
@@ -65,6 +69,29 @@ export class CaseOfficerService {
     }
 
     return savedOfficer;
+  }
+
+  async login(dto: LoginCaseOfficerDto): Promise<{ access_token: string; officer: any }> {
+    const officer = await this.officerRepo.findOne({
+      where: { email: dto.email },
+    });
+    if (!officer) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    const isMatch = await bcrypt.compare(dto.password, officer.password);
+    if (!isMatch) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    const payload = { sub: officer.id, email: officer.email, name: officer.name };
+    const token = await this.jwtService.signAsync(payload);
+
+    const { password, ...officerData } = officer;
+    return {
+      access_token: token,
+      officer: officerData,
+    };
   }
 
   async getRegisteredOfficers(country?: string): Promise<CaseOfficerEntity[]> {
