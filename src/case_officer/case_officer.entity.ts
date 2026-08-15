@@ -12,6 +12,12 @@ import {
 
 import { Admin } from '../admin/admin.entity';
 import { Mpr } from '../missing_person_reporter/mpr.entity';
+  PrimaryGeneratedColumn,
+  ManyToMany,
+  OneToMany,
+} from 'typeorm';
+
+import { Admin } from '../admin/admin.entity';
 import { CaseReportEntity } from './case_report.entity';
 
 @Entity('case_officer')

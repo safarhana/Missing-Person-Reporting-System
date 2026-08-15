@@ -1,10 +1,10 @@
 import {
+  Entity,
+  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  Entity,
+  UpdateDateColumn,
   ManyToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn
 } from 'typeorm';
 import { CaseOfficerEntity } from './case_officer.entity';
 

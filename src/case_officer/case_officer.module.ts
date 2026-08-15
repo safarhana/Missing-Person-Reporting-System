@@ -48,5 +48,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
   controllers: [CaseOfficerController],
   providers: [CaseOfficerService, JwtAuthGuard],
   exports: [CaseOfficerService, JwtAuthGuard, JwtModule],
+  providers: [CaseOfficerService],
+  exports: [CaseOfficerService],
 })
 export class CaseOfficerModule {}
