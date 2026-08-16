@@ -5,17 +5,15 @@ import {
   CreateDateColumn,
   Entity,
   PrimaryGeneratedColumn,
-
-  
   ManyToMany,
+  OneToMany,
 } from 'typeorm';
 
-
 import { Admin } from '../admin/admin.entity';
+import { CaseReportEntity } from './case_report.entity';
 
 @Entity('case_officer')
 export class CaseOfficerEntity {
-
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -54,10 +52,15 @@ export class CaseOfficerEntity {
     this.uniqueId = randomUUID();
   }
 
-
   @ManyToMany(
     () => Admin,
     (admin) => admin.caseOfficers,
   )
   admins: Admin[];
+
+  @OneToMany(
+    () => CaseReportEntity,
+    (caseReport) => caseReport.officer,
+  )
+  cases: CaseReportEntity[];
 }
