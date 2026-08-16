@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppController } from './app.controller';
@@ -19,31 +19,38 @@ import { MailerModule } from '@nestjs-modules/mailer';
       envFilePath: '.env',
     }),
 
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'mysql',
-      database: 'missing_person_reporting_system',
-      autoLoadEntities: true,
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get<string>('DB_HOST', 'localhost'),
+        port: configService.get<number>('DB_PORT', 5432),
+        username: configService.get<string>('DB_USERNAME', 'postgres'),
+        password: configService.get<string>('DB_PASSWORD', 'mysql'),
+        database: configService.get<string>('DB_DATABASE', 'missing_person_reporting_system'),
+        autoLoadEntities: true,
+        synchronize: true,
+      }),
     }),
 
-    // 📧 Mailer Configuration for Bonus Marks
-    MailerModule.forRoot({
-      transport: {
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true, // true for 465, false for other ports
-        auth: {
-          user: 'remondwasi24@gmail.com', // Replace with your test email
-          pass: 'mimg qaij gpnh pxph',   // Replace with your email app password
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        transport: {
+          host: configService.get<string>('MAIL_HOST', 'smtp.gmail.com'),
+          port: configService.get<number>('MAIL_PORT', 465),
+          secure: configService.get<boolean>('MAIL_SECURE', true),
+          auth: {
+            user: configService.get<string>('MAIL_USER', 'remondwasi24@gmail.com'),
+            pass: configService.get<string>('MAIL_PASS', 'mimg qaij gpnh pxph'),
+          },
         },
-      },
-      defaults: {
-        from: '"Missing Person System" <no-reply@mprsystem.com>',
-      },
+        defaults: {
+          from: configService.get<string>('MAIL_FROM', '"Missing Person System" <no-reply@mprsystem.com>'),
+        },
+      }),
     }),
 
     VolunteerModule,
