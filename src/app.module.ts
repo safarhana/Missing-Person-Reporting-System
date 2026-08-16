@@ -46,6 +46,25 @@ import { MailerModule } from '@nestjs-modules/mailer';
       },
     }),
 
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        transport: {
+          host: configService.get<string>('MAIL_HOST', 'smtp.gmail.com'),
+          port: configService.get<number>('MAIL_PORT', 465),
+          secure: configService.get<boolean>('MAIL_SECURE', true),
+          auth: {
+            user: configService.get<string>('MAIL_USER', 'remondwasi24@gmail.com'),
+            pass: configService.get<string>('MAIL_PASS', 'mimg qaij gpnh pxph'),
+          },
+        },
+        defaults: {
+          from: configService.get<string>('MAIL_FROM', '"Missing Person System" <no-reply@mprsystem.com>'),
+        },
+      }),
+    }),
+
     VolunteerModule,
     CaseOfficerModule,
     AdminModule,
@@ -56,4 +75,4 @@ import { MailerModule } from '@nestjs-modules/mailer';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
