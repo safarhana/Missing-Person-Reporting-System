@@ -132,4 +132,13 @@ export class MprService {
     });
     return await this.noteRepository.save(note);
   }
+
+  async addNote(id: number, noteDto: NoteDto): Promise<NoteEntity> {
+    const report = await this.getReportById(id);
+    const note = this.noteRepository.create({
+      text: (noteDto as any).comment || (noteDto as any).text || (noteDto as any).note,
+      mpr: report,
+    });
+    return await this.noteRepository.save(note);
+  }
 }
