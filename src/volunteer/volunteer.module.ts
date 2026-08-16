@@ -12,22 +12,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 
   imports: [
     TypeOrmModule.forFeature([VolunteerEntity, Admin, Mpr]),
-    MailerModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        transport: {
-          host: configService.get<string>('MAIL_HOST', 'smtp.gmail.com'),
-          port: configService.get<number>('MAIL_PORT', 465),
-          ignoreTLS: true,
-          secure: true,
-          auth: {
-            user: configService.get<string>('MAIL_USER'),
-            pass: configService.get<string>('MAIL_PASS'),
-          },
-        },
-      }),
-    }),
+     
   ],
   controllers: [VolunteerController],
   providers: [VolunteerService],

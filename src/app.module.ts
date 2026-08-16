@@ -55,8 +55,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
           port: configService.get<number>('MAIL_PORT', 465),
           secure: configService.get<boolean>('MAIL_SECURE', true),
           auth: {
-            user: configService.get<string>('MAIL_USER', 'remondwasi24@gmail.com'),
-            pass: configService.get<string>('MAIL_PASS', 'mimg qaij gpnh pxph'),
+            user: configService.get<string>('MAIL_USER'),
+            pass: configService.get<string>('MAIL_PASS'),
           },
         },
         defaults: {
