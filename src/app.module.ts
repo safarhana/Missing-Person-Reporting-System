@@ -19,15 +19,22 @@ import { MailerModule } from '@nestjs-modules/mailer';
       envFilePath: '.env',
     }),
 
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'mysql',
-      database: 'missing_person_reporting_system',
-      autoLoadEntities: true,
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+
+      inject: [ConfigService],
+
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+
+        host: configService.get<string>('DB_HOST'),
+        port: configService.get<number>('DB_PORT'),
+        username: configService.get<string>('DB_USERNAME'),
+        password: configService.get<string>('DB_PASSWORD'),
+        database: configService.get<string>('DB_DATABASE'),
+
+        autoLoadEntities: true,
+        synchronize: true,
+      }),
     }),
 
    
@@ -55,8 +62,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
           port: configService.get<number>('MAIL_PORT', 465),
           secure: configService.get<boolean>('MAIL_SECURE', true),
           auth: {
-            user: configService.get<string>('MAIL_USER', 'remondwasi24@gmail.com'),
-            pass: configService.get<string>('MAIL_PASS', 'mimg qaij gpnh pxph'),
+            user: configService.get<string>('MAIL_USER'),
+            pass: configService.get<string>('MAIL_PASS'),
           },
         },
         defaults: {

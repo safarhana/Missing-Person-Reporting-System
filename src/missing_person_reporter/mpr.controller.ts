@@ -86,29 +86,6 @@ export class MprController {
   }
 
   @Post(':id/notes')
-  @UsePipes(new ValidationPipe({ transform: true }))
-  addNote(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() noteDto: NoteDto,
-  ) {
-    return this.mprService.addNote(id, noteDto);
-  }
-
-  @Post('send-email')
-  async sendEmail(
-    @Body('email') email: string,
-    @Body('subject') subject?: string,
-    @Body('message') message?: string,
-  ) {
-    return await this.mprService.sendNotificationEmail(email, subject, message);
-  }
-
-  @Delete(':id')
-  deleteReport(@Param('id', ParseIntPipe) id: number) {
-    return this.mprService.deleteReport(id);
-  }
-
-  @Post(':id/notes')
   addNote(
     @Param('id', ParseIntPipe) id: number,
     @Body() noteDto: NoteDto,
