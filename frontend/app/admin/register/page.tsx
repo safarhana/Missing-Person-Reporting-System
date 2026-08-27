@@ -2,22 +2,28 @@
 
 import { useState, FormEvent } from "react";
 import { z } from "zod";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
+// Zod schema matching NestJS backend CreateAdminDto validation rules
 const registerSchema = z.object({
-  name: z
+  username: z
     .string()
-    .min(1, "Name is required")
-    .min(3, "Name must be at least 3 characters"),
+    .min(1, "Username is required")
+    .max(100, "Username must be at most 100 characters")
+    .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
 
-  email: z
+  fullName: z
     .string()
-    .min(1, "Email is required")
-    .email("Invalid email address"),
+    .min(1, "Full name is required")
+    .max(150, "Full name must be at most 150 characters")
+    .regex(/^[a-zA-Z\s]+$/, "Full name can only contain letters and spaces"),
 
   password: z
     .string()
     .min(1, "Password is required")
-    .min(6, "Password must be at least 6 characters"),
+    .min(6, "Password must be at least 6 characters")
+    .regex(/^(?=.*[!@#$%^&*(),.?":{}|<>]).+$/, "Password must contain at least one special character"),
 
   confirmPassword: z
     .string()
@@ -25,23 +31,24 @@ const registerSchema = z.object({
 });
 
 export default function RegisterPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const router = useRouter();
+  const [username, setUsername] = useState("");
+  const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     setError("");
     setSuccess("");
 
     const result = registerSchema.safeParse({
-      name,
-      email,
+      username,
+      fullName,
       password,
       confirmPassword,
     });
@@ -56,9 +63,32 @@ export default function RegisterPage() {
       return;
     }
 
-    setSuccess("Registration successful!");
+    try {
+      const apiEndpoint = process.env.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:3000";
+      await axios.post(
+        `${apiEndpoint}/admin`,
+        {
+          username,
+          fullName,
+          password,
+          isActive: true,
+        },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
 
-    console.log(result.data);
+      setSuccess("Registration successful! Redirecting to login...");
+      
+      // Delay redirection slightly so user can read the success message
+      setTimeout(() => {
+        router.push("/admin/login");
+      }, 1500);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.response?.data?.message || "Registration failed. Please try again.");
+    }
   };
 
   return (
@@ -67,24 +97,24 @@ export default function RegisterPage() {
 
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Name</label>
+          <label>Username</label>
           <br />
           <input
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
         </div>
 
         <br />
 
         <div>
-          <label>Email</label>
+          <label>Full Name</label>
           <br />
           <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="text"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
           />
         </div>
 
@@ -114,9 +144,9 @@ export default function RegisterPage() {
 
         <br />
 
-        {error && <p>{error}</p>}
+        {error && <p style={{ color: "red" }}>{error}</p>}
 
-        {success && <p>{success}</p>}
+        {success && <p style={{ color: "green" }}>{success}</p>}
 
         <button type="submit">Register</button>
       </form>
