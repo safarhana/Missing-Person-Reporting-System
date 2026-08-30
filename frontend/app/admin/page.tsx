@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import AdminCard from "./components/AdminCard";
 
 export default function AdminPage() {
@@ -14,13 +15,14 @@ export default function AdminPage() {
     const savedUsername = sessionStorage.getItem("username");
 
     if (!token) {
-      // Redirect to login if not authenticated
       router.push("/admin/login");
     } else {
-      setIsAuthenticated(true);
-      if (savedUsername) {
-        setUsername(savedUsername);
-      }
+      setTimeout(() => {
+        setIsAuthenticated(true);
+        if (savedUsername) {
+          setUsername(savedUsername);
+        }
+      }, 0);
     }
   }, [router]);
 
@@ -30,43 +32,101 @@ export default function AdminPage() {
   };
 
   if (!isAuthenticated) {
-    return <p>Loading dashboard...</p>;
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh", fontFamily: "sans-serif", backgroundColor: "#f8fafc", color: "#0f172a" }}>
+        <p style={{ fontSize: "0.875rem", fontWeight: 500 }}>Verifying access...</p>
+      </div>
+    );
   }
 
   return (
-    <main>
-      <h1>Admin Dashboard</h1>
+    <div className="admin-root">
+      <header className="admin-header">
+        <div className="header-container">
+          <div className="header-brand">
+            <Link href="/" className="brand-icon">
+              🔍
+            </Link>
+            <div className="brand-title-wrap">
+              <span className="brand-name">MPRS Admin</span>
+              <p className="brand-sub">Dashboard</p>
+            </div>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="admin-btn admin-btn-danger btn-small"
+          >
+            Logout
+          </button>
+        </div>
+      </header>
 
-      <p>Welcome to the Missing Person Reporting System, {username || "Admin"}.</p>
+      <main className="admin-main">
+        <div className="dashboard-title-section">
+          <h1 className="dashboard-title">Admin Dashboard</h1>
+          <p className="dashboard-subtitle">Welcome, {username || "Admin"}. Use the tools below to manage the system.</p>
+        </div>
 
-      <AdminCard
-        name={username || "Admin"}
-        role="Administrator"
-      />
+        <section className="dashboard-section">
+          <h2 className="section-label">Profile Information</h2>
+          <AdminCard name={username} role="Administrator" />
+        </section>
 
-      <h2>Admin Tasks</h2>
+        <section className="dashboard-section">
+          <h2 className="section-label">System Tasks</h2>
+          
+          <div className="task-grid">
+            <Link href="/admin/users" className="admin-card">
+              <div className="admin-card-header">
+                <div className="card-icon-wrap">
+                  👥
+                </div>
+                <span className="card-arrow">
+                  →
+                </span>
+              </div>
+              <div className="card-body">
+                <h3 className="card-title">Manage system users</h3>
+                <p className="card-desc">Review accounts and view individual profiles.</p>
+              </div>
+            </Link>
 
-      <ul>
-        <li>Manage volunteers</li>
-        <li>Manage missing person reports</li>
-        <li>Monitor case officers</li>
-        <li>Manage system users</li>
-      </ul>
+            <div className="admin-card-disabled">
+              <div className="card-icon-wrap">
+                🤝
+              </div>
+              <div className="card-body">
+                <h3 className="card-title">Manage volunteers</h3>
+                <p className="card-desc">Verify credentials & coordinate tasks (Coming soon).</p>
+              </div>
+            </div>
 
-      <br />
-      <button 
-        onClick={handleLogout}
-        style={{
-          padding: "8px 16px",
-          backgroundColor: "#ff4d4f",
-          color: "white",
-          border: "none",
-          borderRadius: "4px",
-          cursor: "pointer"
-        }}
-      >
-        Logout
-      </button>
-    </main>
+            <div className="admin-card-disabled">
+              <div className="card-icon-wrap">
+                📋
+              </div>
+              <div className="card-body">
+                <h3 className="card-title">Manage missing reports</h3>
+                <p className="card-desc">Review new case submittals & logs (Coming soon).</p>
+              </div>
+            </div>
+
+            <div className="admin-card-disabled">
+              <div className="card-icon-wrap">
+                📹
+              </div>
+              <div className="card-body">
+                <h3 className="card-title">Monitor case officers</h3>
+                <p className="card-desc">Audit logs, assign cases, and chat (Coming soon).</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="admin-footer">
+        &copy; {new Date().getFullYear()} Missing Person Reporting System. Admin Dashboard.
+      </footer>
+    </div>
   );
 }
