@@ -94,13 +94,13 @@ export class MprService {
   }
 
   async getAllReports(): Promise<Mpr[]> {
-    return await this.mprRepository.find({ relations: ['notes', 'volunteers'] });
+    return await this.mprRepository.find({ relations: { notes: true, volunteers: true } });
   }
 
   async getReportById(id: number): Promise<Mpr> {
     const report = await this.mprRepository.findOne({
       where: { id },
-      relations: ['notes', 'volunteers'],
+      relations: { notes: true, volunteers: true },
     });
     if (!report) {
       throw new NotFoundException(`Report with ID ${id} not found`);

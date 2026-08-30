@@ -71,18 +71,18 @@ export class CaseOfficerService {
     if (country) {
       return this.officerRepo.find({
         where: { country: Like(`%${country}%`) },
-        relations: ['cases', 'admins'],
+        relations: { cases: true, admins: true },
       });
     }
     return this.officerRepo.find({
-      relations: ['cases', 'admins'],
+      relations: { cases: true, admins: true },
     });
   }
 
   async findOneOfficer(id: number): Promise<CaseOfficerEntity> {
     const officer = await this.officerRepo.findOne({
       where: { id },
-      relations: ['cases', 'admins'],
+      relations: { cases: true, admins: true },
     });
     if (!officer) {
       throw new NotFoundException(`Case Officer with ID ${id} not found`);
@@ -108,7 +108,7 @@ export class CaseOfficerService {
   async findWithDefaultCountry(): Promise<CaseOfficerEntity[]> {
     return this.officerRepo.find({
       where: { country: 'Unknown' },
-      relations: ['cases', 'admins'],
+      relations: { cases: true, admins: true },
     });
   }
 
@@ -121,7 +121,7 @@ export class CaseOfficerService {
         { email: Like(query) },
         { country: Like(query) },
       ],
-      relations: ['cases', 'admins'],
+      relations: { cases: true, admins: true },
     });
   }
 
@@ -227,7 +227,7 @@ export class CaseOfficerService {
   ): Promise<CaseOfficerEntity> {
     const officer = await this.officerRepo.findOne({
       where: { id: officerId },
-      relations: ['admins'],
+      relations: { admins: true },
     });
     if (!officer) {
       throw new NotFoundException(`Case Officer with ID ${officerId} not found`);
@@ -258,7 +258,7 @@ export class CaseOfficerService {
   ): Promise<CaseOfficerEntity> {
     const officer = await this.officerRepo.findOne({
       where: { id: officerId },
-      relations: ['admins'],
+      relations: { admins: true },
     });
     if (!officer) {
       throw new NotFoundException(`Case Officer with ID ${officerId} not found`);
