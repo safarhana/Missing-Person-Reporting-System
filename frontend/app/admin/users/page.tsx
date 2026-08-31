@@ -8,70 +8,48 @@ export default function UsersPage() {
   ];
 
   return (
-    <div className="admin-root">
-      <header className="admin-header">
-        <div className="header-container">
-          <div className="header-brand">
-            <Link href="/admin" className="brand-icon" style={{ textDecoration: "none" }}>
-              ←
-            </Link>
-            <div className="brand-title-wrap">
-              <span className="brand-name">MPRS System Users</span>
-              <p className="brand-sub">User Directory</p>
-            </div>
-          </div>
-          <Link
-            href="/admin"
-            className="admin-btn admin-btn-secondary btn-small"
-            style={{ textDecoration: "none" }}
-          >
-            Dashboard
-          </Link>
-        </div>
+    <div>
+      <header>
+        <nav>
+          <Link href="/admin">← Dashboard</Link>
+        </nav>
+        <h1>System Users</h1>
+        <p>User Directory & Verification</p>
       </header>
 
-      <main className="admin-main admin-main-narrow">
-        <div>
-          <Link href="/admin" className="back-link">
-            ← Back to Dashboard
-          </Link>
-          <div className="dashboard-title-section">
-            <h1 className="dashboard-title">System Users</h1>
-            <p className="dashboard-subtitle">Review, monitor, and inspect registered system user roles and statuses.</p>
-          </div>
-        </div>
+      <hr />
 
-        <div className="directory-list">
-          {users.map((user) => (
-            <Link
-              key={user.id}
-              href={`/admin/users/${user.id}`}
-              className="user-row-card"
-            >
-              <div className="user-row-info">
-                <div className="user-row-avatar">
-                  {user.name.charAt(0)}{user.id}
-                </div>
-                <div>
-                  <h3 className="user-meta-name">{user.name}</h3>
-                  <div className="user-meta-details">
-                     <span>{user.email}</span>
-                     <span className="meta-divider"></span>
-                     <span className="meta-role">{user.role}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="user-row-action">
-                <span>View Details →</span>
-              </div>
-            </Link>
-          ))}
-        </div>
+      <main>
+        <table border={1} cellPadding={8} cellSpacing={0}>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((user) => (
+              <tr key={user.id}>
+                <td>{user.id}</td>
+                <td>{user.name}</td>
+                <td>{user.email}</td>
+                <td>{user.role}</td>
+                <td>
+                  <Link href={`/admin/users/${user.id}`}>View Details</Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </main>
 
-      <footer className="admin-footer">
-        &copy; {new Date().getFullYear()} Missing Person Reporting System. Admin Directory.
+      <hr />
+
+      <footer>
+        <p>&copy; {new Date().getFullYear()} Missing Person Reporting System. Admin Directory.</p>
       </footer>
     </div>
   );

@@ -62,79 +62,63 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="admin-main-centered">
-      <Link href="/" className="back-link">
-        ← Back to Home
-      </Link>
+    <main>
+      <nav>
+        <Link href="/">← Back to Home</Link>
+      </nav>
 
-      <div className="auth-card">
-        <div className="auth-header">
-          <div className="auth-icon">
-            🔑
-          </div>
-          <h1 className="auth-title">Admin Portal</h1>
-          <p className="auth-subtitle">Access MPRS Admin Console</p>
-        </div>
+      <header>
+        <h1>Admin Portal</h1>
+        <p>Access MPRS Admin Console</p>
+      </header>
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          <div className="form-group">
-            <label className="form-label">Username</label>
+      <form onSubmit={handleSubmit}>
+        <fieldset>
+          <legend>Admin Login</legend>
+
+          <div>
+            <label htmlFor="username">Username: </label>
             <input
+              id="username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="e.g. admin_mim"
               disabled={isLoading}
-              className="input-field"
+              required
             />
           </div>
+          <br />
 
-          <div className="form-group">
-            <label className="form-label">Password</label>
+          <div>
+            <label htmlFor="password">Password: </label>
             <input
+              id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               disabled={isLoading}
-              className="input-field"
+              required
             />
           </div>
+          <br />
 
-          {error && (
-            <div className="status-alert error">
-              {error}
-            </div>
-          )}
+          {error && <p><strong>Error:</strong> {error}</p>}
+          {success && <p><strong>Success:</strong> {success}</p>}
 
-          {success && (
-            <div className="status-alert success">
-              {success}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="admin-btn admin-btn-primary btn-large"
-          >
-            {isLoading ? (
-              <div className="btn-spinner"></div>
-            ) : (
-              "Sign In"
-            )}
+          <button type="submit" disabled={isLoading}>
+            {isLoading ? "Signing in..." : "Sign In"}
           </button>
-        </form>
+        </fieldset>
+      </form>
 
-        <div className="auth-footer">
-          <p className="auth-footer-text">
-            Don&apos;t have an admin account?{" "}
-            <Link href="/admin/register" className="auth-footer-link">
-              Register now
-            </Link>
-          </p>
-        </div>
-      </div>
-    </div>
+      <footer>
+        <p>
+          Don&apos;t have an admin account?{" "}
+          <Link href="/admin/register">Register now</Link>
+        </p>
+      </footer>
+    </main>
   );
 }

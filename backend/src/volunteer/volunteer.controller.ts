@@ -68,7 +68,6 @@ export class VolunteerController {
   return this.volunteerService.toggleStatus(id);
  }
 
- //----------------------------------------------------------------------------------------------------------------------------------------
 @Patch(':volunteerId/admin/:adminId')
 @UseGuards(JwtAuthGuard)
 assignAdmin(
@@ -96,8 +95,6 @@ removeAdmin(
   return this.volunteerService.removeAdmin(volunteerId);
 }
 
-//----------------------------------------------------------------------------------------------------------------------------------------
-
 @Post(':volunteerId/mpr/:mprId')
 assignMpr(
   @Param('volunteerId', ParseIntPipe) volunteerId: number,
@@ -119,49 +116,4 @@ removeMpr(
     mprId,
   );
 }
- /*
-  @Get('cases')
-  getAllCases() {
-    return this.volunteerService.getAllCases();
-  }
-
-  @Get('cases/filter') 
-  getCasesByDistrict(@Query('district') district: string) {
-    return this.volunteerService.getCasesByDistrict(district);
-  }
-
-  @Get('cases/:id')
-  getCaseById(@Param('id') id: string) {
-    return this.volunteerService.getCaseById(Number(id));
-  }
-
-  @Get('assigned')
-  getAssignedCases() {
-    return this.volunteerService.getAssignedCases();
-  }
-
-  @Post('join')
-  joinSearch(@Body() dto: VolunteerDto) {
-    return this.volunteerService.joinSearch(dto);
-  }
-
-  @Put('profile/:id')
-  updateProfile(
-    @Param('id') id: string,
-    @Body() dto: VolunteerDto,
-  ) {
-    return this.volunteerService.updateProfile(Number(id), dto);
-  }
-
-  @Patch('case/:id')
-  updateCaseStatus(@Param('id') id: string) {
-    return this.volunteerService.updateCaseStatus(Number(id));
-  }
-
-  @Delete('leave/:id')
-  leaveCase(@Param('id') id: string) {
-    return this.volunteerService.leaveCase(Number(id));
-  }
-    */
-  
 }

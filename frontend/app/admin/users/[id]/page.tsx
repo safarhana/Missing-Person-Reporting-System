@@ -16,86 +16,60 @@ export default async function UserPage({ params }: UserPageProps) {
   }[id] || { name: `Unknown User`, role: "Unassigned", email: "unknown@mprs.com", status: "Inactive", phone: "N/A", joined: "N/A", casesAssigned: 0 };
 
   return (
-    <div className="admin-root">
-      <header className="admin-header">
-        <div className="header-container">
-          <div className="header-brand">
-            <Link href="/admin/users" className="brand-icon" style={{ textDecoration: "none" }}>
-              ←
-            </Link>
-            <div className="brand-title-wrap">
-              <span className="brand-name">User Inspection</span>
-              <p className="brand-sub">User Details</p>
-            </div>
-          </div>
-          <Link
-            href="/admin/users"
-            className="admin-btn admin-btn-secondary btn-small"
-            style={{ textDecoration: "none" }}
-          >
-            Back to Directory
-          </Link>
-        </div>
+    <div>
+      <header>
+        <nav>
+          <Link href="/admin/users">← Back to User Directory</Link>
+        </nav>
+        <h1>User Profile</h1>
+        <p>User details for ID #{id}</p>
       </header>
 
-      <main className="admin-main admin-main-narrow">
-        <div>
-          <Link href="/admin/users" className="back-link">
-            ← Back to User Directory
-          </Link>
-          <div className="dashboard-title-section">
-            <h1 className="dashboard-title">User Profile</h1>
-            <p className="dashboard-subtitle">Reviewing verification status and contact records for user #{id}.</p>
-          </div>
-        </div>
+      <hr />
 
-        <div className="detail-card">
-          <div className="detail-card-header">
-            <div className="detail-avatar">
-              {userDetails.name.charAt(0)}{id}
-            </div>
-            <div className="detail-header-info">
-              <h2 className="detail-name">{userDetails.name}</h2>
-              <div className="detail-badges">
-                <span className="status-badge inactive">
-                  {userDetails.role}
-                </span>
-                <span className={`status-badge ${
-                  userDetails.status === "Active"
-                    ? "active"
-                    : userDetails.status === "Suspended"
-                    ? "suspended"
-                    : "inactive"
-                }`}>
-                  {userDetails.status}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="detail-grid">
-            <div className="detail-item">
-              <span className="detail-label">Email Address</span>
-              <p className="detail-value">{userDetails.email}</p>
-            </div>
-            <div className="detail-item">
-              <span className="detail-label">Phone Number</span>
-              <p className="detail-value">{userDetails.phone}</p>
-            </div>
-            <div className="detail-item">
-              <span className="detail-label">Date Joined</span>
-              <p className="detail-value">{userDetails.joined}</p>
-            </div>
-            <div className="detail-item">
-              <span className="detail-label">Cases Managed</span>
-              <p className="detail-value">{userDetails.casesAssigned} reports</p>
-            </div>
-          </div>
-        </div>
+      <main>
+        <table border={1} cellPadding={8} cellSpacing={0}>
+          <tbody>
+            <tr>
+              <th>User ID</th>
+              <td>{id}</td>
+            </tr>
+            <tr>
+              <th>Full Name</th>
+              <td>{userDetails.name}</td>
+            </tr>
+            <tr>
+              <th>Role</th>
+              <td>{userDetails.role}</td>
+            </tr>
+            <tr>
+              <th>Status</th>
+              <td>{userDetails.status}</td>
+            </tr>
+            <tr>
+              <th>Email Address</th>
+              <td>{userDetails.email}</td>
+            </tr>
+            <tr>
+              <th>Phone Number</th>
+              <td>{userDetails.phone}</td>
+            </tr>
+            <tr>
+              <th>Date Joined</th>
+              <td>{userDetails.joined}</td>
+            </tr>
+            <tr>
+              <th>Cases Managed</th>
+              <td>{userDetails.casesAssigned}</td>
+            </tr>
+          </tbody>
+        </table>
       </main>
 
-      <footer className="admin-footer">
-        &copy; {new Date().getFullYear()} Missing Person Reporting System. User Profiler.
+      <hr />
+
+      <footer>
+        <p>&copy; {new Date().getFullYear()} Missing Person Reporting System. User Profiler.</p>
       </footer>
     </div>
   );

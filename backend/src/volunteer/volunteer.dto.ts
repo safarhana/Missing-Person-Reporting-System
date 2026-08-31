@@ -20,9 +20,6 @@ export class VolunteerDto {
 
   @IsOptional()
   @IsEmail()
-  //@Matches(/^[A-Za-z0-9._%+-]+@aiub\.edu$/, {
-  //   message: 'Email must be an AIUB email.',
-  // })
   email: string;
   
   @IsOptional()

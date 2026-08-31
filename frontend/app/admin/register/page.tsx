@@ -97,103 +97,91 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="admin-main-centered">
-      <Link href="/" className="back-link">
-        ← Back to Home
-      </Link>
+    <main>
+      <nav>
+        <Link href="/">← Back to Home</Link>
+      </nav>
 
-      <div className="auth-card">
-        <div className="auth-header">
-          <div className="auth-icon">
-            👤
-          </div>
-          <h1 className="auth-title">Admin Registration</h1>
-          <p className="auth-subtitle">Create a secure MPRS administrator account</p>
-        </div>
+      <header>
+        <h1>Admin Registration</h1>
+        <p>Create a secure MPRS administrator account</p>
+      </header>
 
-        <form onSubmit={handleSubmit} className="auth-form">
-          <div className="form-group">
-            <label className="form-label">Username</label>
+      <form onSubmit={handleSubmit}>
+        <fieldset>
+          <legend>Account Details</legend>
+
+          <div>
+            <label htmlFor="username">Username: </label>
             <input
+              id="username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="letters, numbers, underscores"
               disabled={isLoading}
-              className="input-field"
+              required
             />
           </div>
+          <br />
 
-          <div className="form-group">
-            <label className="form-label">Full Name</label>
+          <div>
+            <label htmlFor="fullName">Full Name: </label>
             <input
+              id="fullName"
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="letters and spaces only"
               disabled={isLoading}
-              className="input-field"
+              required
             />
           </div>
+          <br />
 
-          <div className="form-group">
-            <label className="form-label">Password</label>
+          <div>
+            <label htmlFor="password">Password: </label>
             <input
+              id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Min 6 chars, 1 special char"
               disabled={isLoading}
-              className="input-field"
+              required
             />
           </div>
+          <br />
 
-          <div className="form-group">
-            <label className="form-label">Confirm Password</label>
+          <div>
+            <label htmlFor="confirmPassword">Confirm Password: </label>
             <input
+              id="confirmPassword"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="re-enter password"
               disabled={isLoading}
-              className="input-field"
+              required
             />
           </div>
+          <br />
 
-          {error && (
-            <div className="status-alert error">
-              {error}
-            </div>
-          )}
+          {error && <p><strong>Error:</strong> {error}</p>}
+          {success && <p><strong>Success:</strong> {success}</p>}
 
-          {success && (
-            <div className="status-alert success">
-              {success}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="admin-btn admin-btn-primary btn-large"
-          >
-            {isLoading ? (
-              <div className="btn-spinner"></div>
-            ) : (
-              "Create Account"
-            )}
+          <button type="submit" disabled={isLoading}>
+            {isLoading ? "Creating Account..." : "Create Account"}
           </button>
-        </form>
+        </fieldset>
+      </form>
 
-        <div className="auth-footer">
-          <p className="auth-footer-text">
-            Already registered?{" "}
-            <Link href="/admin/login" className="auth-footer-link">
-              Sign In
-            </Link>
-          </p>
-        </div>
-      </div>
-    </div>
+      <footer>
+        <p>
+          Already registered?{" "}
+          <Link href="/admin/login">Sign In</Link>
+        </p>
+      </footer>
+    </main>
   );
 }
