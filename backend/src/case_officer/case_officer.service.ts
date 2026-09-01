@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
@@ -13,8 +14,10 @@ import { CaseReportEntity } from './case_report.entity';
 import { Admin } from '../admin/admin.entity';
 
 import { CreateCaseOfficerDto } from './dto/create-case-officer.dto';
+import { CaseOfficerLoginDto } from './dto/login.dto';
 import { CreateCaseDto } from './dto/create-case.dto';
 import { UpdateCaseDto } from './dto/update-case.dto';
+import { UpdateOfficerDto } from './dto/update-officer.dto';
 import { CreateNoteDto } from './dto/note.dto';
 import { UpdateValueDto } from './dto/update-value.dto';
 
@@ -54,17 +57,44 @@ export class CaseOfficerService {
 
     const savedOfficer = await this.officerRepo.save(newOfficer);
 
-    try {
-      await this.mailerService.sendMail({
+    this.mailerService
+      .sendMail({
         to: savedOfficer.email,
         subject: 'Welcome to Missing Person Reporting System',
         text: `Hello ${savedOfficer.name},\n\nYour Case Officer account has been successfully registered. Your Unique ID is ${savedOfficer.uniqueId}.\n\nThank you.`,
+      })
+      .catch((err) => {
+        console.warn('Failed to send registration email:', err.message);
       });
-    } catch (err) {
-      console.warn('Failed to send registration email:', err.message);
-    }
 
     return savedOfficer;
+  }
+
+  async login(dto: CaseOfficerLoginDto) {
+    const officer = await this.officerRepo.findOne({
+      where: { email: dto.email },
+    });
+    if (!officer) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    const isMatch = await bcrypt.compare(dto.password, officer.password);
+    if (!isMatch) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    return {
+      message: 'Login successful',
+      officer: {
+        id: officer.id,
+        uniqueId: officer.uniqueId,
+        name: officer.name,
+        email: officer.email,
+        phone: officer.phone,
+        country: officer.country,
+        joiningDate: officer.joiningDate,
+      },
+    };
   }
 
   async getRegisteredOfficers(country?: string): Promise<CaseOfficerEntity[]> {
@@ -127,7 +157,7 @@ export class CaseOfficerService {
 
   async updateOfficer(
     id: number,
-    updateDto: UpdateCaseDto | UpdateValueDto,
+    updateDto: UpdateOfficerDto | UpdateCaseDto | UpdateValueDto,
   ): Promise<CaseOfficerEntity> {
     const officer = await this.findOneOfficer(id);
     if ('name' in updateDto && updateDto.name) officer.name = updateDto.name;
@@ -159,15 +189,15 @@ export class CaseOfficerService {
 
     const savedCase = await this.caseRepo.save(newCase);
 
-    try {
-      await this.mailerService.sendMail({
+    this.mailerService
+      .sendMail({
         to: officer.email,
         subject: `New Case Assigned: ${savedCase.name}`,
         text: `Hello ${officer.name},\n\nA new missing person case "${savedCase.name}" (ID: ${savedCase.id}) has been assigned to you.\nLast seen location: ${savedCase.lastSeenLocation}.`,
+      })
+      .catch((err) => {
+        console.warn('Failed to send case assignment email:', err.message);
       });
-    } catch (err) {
-      console.warn('Failed to send case assignment email:', err.message);
-    }
 
     return savedCase;
   }

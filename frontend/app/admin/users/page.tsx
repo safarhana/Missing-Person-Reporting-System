@@ -16,7 +16,7 @@ export default function UsersPage() {
       <ul>
         {users.map((user) => (
           <li key={user.id}>
-            <Link href={`/admin/users/${user.id}`} className="text-blue-600 hover:underline">
+            <Link href={`/admin/users/${user.id}`}>
               {user.name}
             </Link>
           </li>

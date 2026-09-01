@@ -6,21 +6,24 @@ import AdminCard from "./components/AdminCard";
 
 export default function AdminPage() {
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [username, setUsername] = useState("");
+  const [isAuthenticated] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      return Boolean(sessionStorage.getItem("token"));
+    }
+    return false;
+  });
+
+  const [username] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("username") || "Admin";
+    }
+    return "Admin";
+  });
 
   useEffect(() => {
     const token = sessionStorage.getItem("token");
-    const savedUsername = sessionStorage.getItem("username");
-
     if (!token) {
-      // Redirect to login if not authenticated
       router.push("/admin/login");
-    } else {
-      setIsAuthenticated(true);
-      if (savedUsername) {
-        setUsername(savedUsername);
-      }
     }
   }, [router]);
 
@@ -36,16 +39,14 @@ export default function AdminPage() {
   return (
     <main>
       <h1>Admin Dashboard</h1>
-
-      <p>Welcome to the Missing Person Reporting System, {username || "Admin"}.</p>
+      <p>Welcome to the Missing Person Reporting System, {username}.</p>
 
       <AdminCard
-        name={username || "Admin"}
+        name={username}
         role="Administrator"
       />
 
       <h2>Admin Tasks</h2>
-
       <ul>
         <li>Manage volunteers</li>
         <li>Manage missing person reports</li>
@@ -54,17 +55,7 @@ export default function AdminPage() {
       </ul>
 
       <br />
-      <button 
-        onClick={handleLogout}
-        style={{
-          padding: "8px 16px",
-          backgroundColor: "#ff4d4f",
-          color: "white",
-          border: "none",
-          borderRadius: "4px",
-          cursor: "pointer"
-        }}
-      >
+      <button onClick={handleLogout}>
         Logout
       </button>
     </main>

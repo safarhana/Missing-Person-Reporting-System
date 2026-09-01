@@ -2,10 +2,10 @@
 
 import { useState, FormEvent } from "react";
 import { z } from "zod";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
-// Zod schema matching NestJS backend CreateAdminDto validation rules
 const registerSchema = z.object({
   username: z
     .string()
@@ -81,71 +81,69 @@ export default function RegisterPage() {
 
       setSuccess("Registration successful! Redirecting to login...");
       
-      // Delay redirection slightly so user can read the success message
       setTimeout(() => {
         router.push("/admin/login");
       }, 1500);
-    } catch (err: any) {
-      console.error(err);
-      setError(err.response?.data?.message || "Registration failed. Please try again.");
+    } catch (err: unknown) {
+      const axiosErr = err as AxiosError<{ message?: string | string[] }>;
+      const msg = axiosErr.response?.data?.message || "Registration failed. Please try again.";
+      setError(Array.isArray(msg) ? msg.join(", ") : msg);
     }
   };
 
   return (
     <div>
+      <nav>
+        <Link href="/">Home</Link>
+        {" | "}
+        <Link href="/admin/login">Admin Login</Link>
+      </nav>
+      <hr />
+
       <h1>Admin Registration</h1>
 
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Username</label>
-          <br />
+          <label>Username: </label>
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
         </div>
-
         <br />
 
         <div>
-          <label>Full Name</label>
-          <br />
+          <label>Full Name: </label>
           <input
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
           />
         </div>
-
         <br />
 
         <div>
-          <label>Password</label>
-          <br />
+          <label>Password: </label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-
         <br />
 
         <div>
-          <label>Confirm Password</label>
-          <br />
+          <label>Confirm Password: </label>
           <input
             type="password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
           />
         </div>
-
         <br />
 
         {error && <p style={{ color: "red" }}>{error}</p>}
-
         {success && <p style={{ color: "green" }}>{success}</p>}
 
         <button type="submit">Register</button>

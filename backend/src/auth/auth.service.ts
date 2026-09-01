@@ -7,6 +7,8 @@ import { Admin } from '../admin/admin.entity';
 import { LoginDto } from './login.dto';
 import { VolunteerEntity } from '../volunteer/volunteer.entity';
 import { VolunteerLoginDto } from './VolunteerLogin.dto';
+import { CaseOfficerEntity } from '../case_officer/case_officer.entity';
+import { CaseOfficerLoginDto } from '../case_officer/dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +17,8 @@ export class AuthService {
     private adminRepository: Repository<Admin>,
     @InjectRepository(VolunteerEntity)
     private volunteerRepository: Repository<VolunteerEntity>,
+    @InjectRepository(CaseOfficerEntity)
+    private caseOfficerRepository: Repository<CaseOfficerEntity>,
     private jwtService: JwtService,
   ) {}
 
@@ -76,6 +80,47 @@ export class AuthService {
 
     return {
       access_token: await this.jwtService.signAsync(payload),
+    };
+  }
+
+  async caseOfficerLogin(loginDto: CaseOfficerLoginDto) {
+    const officer = await this.caseOfficerRepository.findOne({
+      where: {
+        email: loginDto.email,
+      },
+    });
+
+    if (!officer) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    const match = await bcrypt.compare(
+      loginDto.password,
+      officer.password,
+    );
+
+    if (!match) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+
+    const payload = {
+      sub: officer.id,
+      email: officer.email,
+      name: officer.name,
+      role: 'case_officer',
+    };
+
+    return {
+      access_token: await this.jwtService.signAsync(payload),
+      officer: {
+        id: officer.id,
+        uniqueId: officer.uniqueId,
+        name: officer.name,
+        email: officer.email,
+        phone: officer.phone,
+        country: officer.country,
+        joiningDate: officer.joiningDate,
+      },
     };
   }
 }

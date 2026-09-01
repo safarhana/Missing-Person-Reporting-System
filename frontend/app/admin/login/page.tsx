@@ -2,10 +2,10 @@
 
 import { useState, FormEvent } from "react";
 import { z } from "zod";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
-// Zod schema matching NestJS backend LoginDto validation rules
 const loginSchema = z.object({
   username: z
     .string()
@@ -53,53 +53,54 @@ export default function LoginPage() {
         }
       );
 
-      // Save token and username in sessionStorage
       sessionStorage.setItem("token", response.data.access_token);
       sessionStorage.setItem("username", username);
 
       setSuccess("Login successful! Redirecting to dashboard...");
       
-      // Redirect to dashboard page
       setTimeout(() => {
         router.push("/admin");
       }, 1000);
-    } catch (err: any) {
-      console.error(err);
-      setError(err.response?.data?.message || "Invalid username or password.");
+    } catch (err: unknown) {
+      const axiosErr = err as AxiosError<{ message?: string | string[] }>;
+      const msg = axiosErr.response?.data?.message || "Invalid username or password.";
+      setError(Array.isArray(msg) ? msg.join(", ") : msg);
     }
   };
 
   return (
     <div>
+      <nav>
+        <Link href="/">Home</Link>
+        {" | "}
+        <Link href="/admin/register">Admin Register</Link>
+      </nav>
+      <hr />
+
       <h1>Admin Login</h1>
 
       <form onSubmit={handleSubmit}>
         <div>
-          <label>Username</label>
-          <br />
+          <label>Username: </label>
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
         </div>
-
         <br />
 
         <div>
-          <label>Password</label>
-          <br />
+          <label>Password: </label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-
         <br />
 
         {error && <p style={{ color: "red" }}>{error}</p>}
-
         {success && <p style={{ color: "green" }}>{success}</p>}
 
         <button type="submit">Login</button>

@@ -16,11 +16,14 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MulterError, diskStorage } from 'multer';
+import * as fs from 'fs';
 
 import { CaseOfficerService } from './case_officer.service';
 import { CreateCaseOfficerDto } from './dto/create-case-officer.dto';
+import { CaseOfficerLoginDto } from './dto/login.dto';
 import { CreateCaseDto } from './dto/create-case.dto';
 import { UpdateCaseDto } from './dto/update-case.dto';
+import { UpdateOfficerDto } from './dto/update-officer.dto';
 import { UpdateStatusDto } from './dto/status.dto';
 import { CreateNoteDto } from './dto/note.dto';
 import { UpdateCountryDto } from './dto/update-country.dto';
@@ -41,7 +44,13 @@ export class CaseOfficerController {
         }
       },
       storage: diskStorage({
-        destination: './uploads',
+        destination: (req, file, cb) => {
+          const uploadPath = './uploads';
+          if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath, { recursive: true });
+          }
+          cb(null, uploadPath);
+        },
         filename: (req, file, cb) => {
           cb(null, Date.now() + '-' + file.originalname);
         },
@@ -68,6 +77,12 @@ export class CaseOfficerController {
         country: savedOfficer.country,
       },
     };
+  }
+
+  @Post('login')
+  @UsePipes(new ValidationPipe({ whitelist: true }))
+  login(@Body() body: CaseOfficerLoginDto) {
+    return this.caseOfficerService.login(body);
   }
 
   @Get()
@@ -99,7 +114,7 @@ export class CaseOfficerController {
   @UsePipes(new ValidationPipe({ whitelist: true, skipMissingProperties: true }))
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateDto: UpdateCaseDto,
+    @Body() updateDto: UpdateOfficerDto,
   ) {
     return this.caseOfficerService.updateOfficer(id, updateDto);
   }

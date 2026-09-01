@@ -9,6 +9,7 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy/jwt.strategy';
 import { Admin } from '../admin/admin.entity';
 import { VolunteerEntity } from '../volunteer/volunteer.entity';
+import { CaseOfficerEntity } from '../case_officer/case_officer.entity';
 
 @Module({
   imports: [
@@ -27,7 +28,7 @@ import { VolunteerEntity } from '../volunteer/volunteer.entity';
       }),
     }),
 
-    TypeOrmModule.forFeature([Admin, VolunteerEntity]),
+    TypeOrmModule.forFeature([Admin, VolunteerEntity, CaseOfficerEntity]),
   ],
 
   controllers: [AuthController],
