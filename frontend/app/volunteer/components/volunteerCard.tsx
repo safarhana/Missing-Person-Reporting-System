@@ -5,6 +5,7 @@ type VolunteerCardProps = {
     fullName: string;
     email: string;
     phone: string;
+    status: string;
 };
 
 export default function VolunteerCard({
@@ -12,12 +13,14 @@ export default function VolunteerCard({
     fullName,
     email,
     phone,
+    status
 }: VolunteerCardProps) {
     return(
         <div>
             <h3>{fullName}</h3>
             <p>Email: {email}</p>
             <p>Phone: {phone}</p>
+            <p>Status: {status}</p>
             <Link href={`/volunteer/${id}`}>
             View Details
             </Link>

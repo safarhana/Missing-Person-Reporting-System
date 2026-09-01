@@ -1,7 +1,7 @@
 import { Libertinus_Keyboard } from "next/font/google";
 import Link from "next/link";
 
-export default function VolunteerHome() {
+export default function VolunteerNavbar() {
     return(
         <nav>
             <h2>Volunteer Portal</h2>

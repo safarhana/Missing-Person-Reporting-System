@@ -7,18 +7,21 @@ const volunteers = [
     fullName: "Rahim Ahmed",
     email: "rahim@gmail.com",
     phone: "01711111111",
+    status: "Deactive",
   },
   {
     id: "volunteer_09",
     fullName: "Karim Hasan",
     email: "karim@gmail.com",
     phone: "01822222222",
+    status: "Active",
   },
   {
     id: "volunteer_10",
     fullName: "Sakib Khan",
     email: "sakib@gmail.com",
     phone: "01933333333",
+    status: "Active",
   },
 ];
 
@@ -26,14 +29,13 @@ export default function VolunteerHome() {
   return (
     <div>
       <VolunteerNav />
+      <br />
 
       <main>
-        <h1>Volunteer Portal</h1>
-
         <p>
           Welcome to our Volunteer Management System.
         </p>
-
+        <br />
         <h2>Our Volunteers</h2>
 
         {volunteers.map((volunteer) => (
@@ -43,6 +45,7 @@ export default function VolunteerHome() {
             fullName={volunteer.fullName}
             email={volunteer.email}
             phone={volunteer.phone}
+            status={volunteer.status}
           />
         ))}
       </main>
