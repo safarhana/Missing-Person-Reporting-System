@@ -95,7 +95,13 @@ export default function CaseOfficerLoginPage() {
         );
       }
 
-      const { officer, access_token } = response.data || {};
+      const data = response.data;
+      if (!data || typeof data !== "object" || (!data.officer && !data.access_token)) {
+        setServerError("Invalid response received from server. Please check backend connection.");
+        return;
+      }
+
+      const { officer, access_token } = data;
 
       if (access_token) {
         sessionStorage.setItem("token", access_token);
