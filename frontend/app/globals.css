@@ -17,26 +17,27 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f8fafc;
+  background: linear-gradient(135deg, #fdf2f8 0%, #ffffff 50%, #ffe4e6 100%);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   padding: 1.5rem;
+  position: relative;
 }
 
 .landing-card {
   width: 100%;
   max-width: 720px;
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.5rem;
+  border: 1px solid #fce7f3;
+  border-radius: 1.25rem;
   padding: 3rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 10px 25px -5px rgba(244, 114, 182, 0.1), 0 8px 10px -6px rgba(244, 114, 182, 0.05);
   text-align: left;
 }
 
 .landing-title {
   font-size: 2.25rem;
-  font-weight: 700;
-  color: #1e293b;
+  font-weight: 800;
+  color: #0f172a;
   margin: 0 0 1rem 0;
   letter-spacing: -0.025em;
 }
@@ -45,17 +46,22 @@ body {
   font-size: 1rem;
   color: #64748b;
   margin: 0 0 1.75rem 0;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .landing-divider {
   border: 0;
-  border-top: 1.5px solid #e2e8f0;
+  border-top: 1.5px solid #fce7f3;
   margin: 0 0 2rem 0;
 }
 
 .landing-section {
   margin-bottom: 2rem;
+  background-color: #fff1f2;
+  background: linear-gradient(135deg, #fff1f2 0%, #ffffff 100%);
+  border: 1px solid #fce7f3;
+  border-radius: 1rem;
+  padding: 1.5rem;
 }
 
 .landing-section:last-of-type {
@@ -65,12 +71,12 @@ body {
 .landing-section-title {
   font-size: 1.25rem;
   font-weight: 750;
-  color: #2563eb;
+  color: #db2777;
   margin: 0 0 0.5rem 0;
 }
 
 .landing-section-title.dark {
-  color: #334155;
+  color: #1e293b;
 }
 
 .landing-section-desc {
@@ -82,39 +88,43 @@ body {
 .landing-btn-group {
   display: flex;
   gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .landing-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem 1.25rem;
+  padding: 0.6rem 1.5rem;
   font-size: 0.9rem;
   font-weight: 600;
-  border-radius: 0.25rem;
+  border-radius: 0.75rem;
   cursor: pointer;
   text-decoration: none;
   transition: all 0.2s ease;
-  height: 2.5rem;
+  height: 2.6rem;
 }
 
 .btn-auth-primary {
-  background-color: #1e293b;
+  background-color: #db2777;
   color: #ffffff;
-  border: 1px solid #1e293b;
+  border: 1px solid #db2777;
+  box-shadow: 0 4px 12px rgba(219, 39, 119, 0.25);
 }
 
 .btn-auth-primary:hover {
-  background-color: #0f172a;
-  border-color: #0f172a;
+  background-color: #be185d;
+  border-color: #be185d;
+  box-shadow: 0 6px 16px rgba(219, 39, 119, 0.35);
 }
 
 .btn-auth-secondary {
   background-color: #ffffff;
-  color: #1e293b;
-  border: 1px solid #1e293b;
+  color: #be185d;
+  border: 1px solid #fbcfe8;
 }
 
 .btn-auth-secondary:hover {
-  background-color: rgba(30, 41, 59, 0.04);
+  background-color: #fdf2f8;
+  border-color: #f472b6;
 }
