@@ -127,8 +127,6 @@ export default function VolunteersManagementPage() {
       return;
     }
 
-    if (!confirm(`Unassign Volunteer #${volId} from your supervision?`)) return;
-
     setActionLoading(true);
     setMessage(null);
     try {

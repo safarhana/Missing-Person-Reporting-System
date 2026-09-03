@@ -128,8 +128,6 @@ export default function CaseOfficersManagementPage() {
       return;
     }
 
-    if (!confirm(`Remove Case Officer #${offId} from your administrative jurisdiction?`)) return;
-
     setActionLoading(true);
     setMessage(null);
     try {

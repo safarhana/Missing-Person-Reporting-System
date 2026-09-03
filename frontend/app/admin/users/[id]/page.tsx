@@ -26,6 +26,7 @@ export default function UserDetailPage({ params }: PageProps) {
   const [editErrors, setEditErrors] = useState<{ fullName?: string; password?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [updateMessage, setUpdateMessage] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const fetchAdminDetails = async () => {
     setIsLoading(true);
@@ -101,19 +102,23 @@ export default function UserDetailPage({ params }: PageProps) {
       const newStatus = !admin.isActive;
       await updateAdminStatus(admin.username, newStatus);
       setAdmin({ ...admin, isActive: newStatus });
+      setUpdateMessage(`Account status changed to ${newStatus ? 'Active' : 'Inactive'}.`);
     } catch (err: any) {
-      alert("Failed to toggle status");
+      setError(err.response?.data?.message || "Failed to toggle status");
     }
   };
 
   const handleDelete = async () => {
     if (!admin) return;
-    if (!confirm(`Permanently remove administrator @${admin.username}?`)) return;
+    setIsSubmitting(true);
     try {
       await deleteAdmin(admin.username);
+      setShowDeleteModal(false);
       router.push("/admin/users");
     } catch (err: any) {
-      alert("Failed to delete administrator");
+      setError(err.response?.data?.message || "Failed to delete administrator");
+      setIsSubmitting(false);
+      setShowDeleteModal(false);
     }
   };
 
@@ -213,7 +218,7 @@ export default function UserDetailPage({ params }: PageProps) {
               {admin.isActive ? "Deactivate" : "Activate"}
             </button>
             <button
-              onClick={handleDelete}
+              onClick={() => setShowDeleteModal(true)}
               className="rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-3 py-2 text-xs font-semibold transition-colors"
             >
               Delete
@@ -354,6 +359,43 @@ export default function UserDetailPage({ params }: PageProps) {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showDeleteModal && admin && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-pink-100">
+            <div className="flex items-center gap-3 text-rose-600 mb-4">
+              <div className="h-10 w-10 rounded-xl bg-rose-50 flex items-center justify-center font-bold text-lg">
+                ⚠️
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Delete Administrator</h3>
+                <p className="text-xs text-slate-500">This action cannot be undone.</p>
+              </div>
+            </div>
+            <p className="text-sm text-slate-600 mb-6">
+              Are you sure you want to permanently delete administrator <strong className="text-slate-900">@{admin.username}</strong>?
+            </p>
+            <div className="flex justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={isSubmitting}
+                className="btn btn-sm rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border-none font-medium px-4"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={isSubmitting}
+                className="btn btn-sm rounded-xl bg-rose-600 hover:bg-rose-500 text-white border-none font-medium shadow-sm shadow-rose-200 px-4"
+              >
+                {isSubmitting ? "Deleting..." : "Yes, Delete"}
+              </button>
+            </div>
           </div>
         </div>
       )}

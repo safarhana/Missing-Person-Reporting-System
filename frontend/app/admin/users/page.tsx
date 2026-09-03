@@ -11,6 +11,7 @@ export default function UsersDirectoryPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+  const [adminToDelete, setAdminToDelete] = useState<string | null>(null);
 
   const fetchAdmins = async () => {
     setIsLoading(true);
@@ -96,11 +97,13 @@ export default function UsersDirectoryPage() {
     }
   };
 
-  const handleDelete = async (username: string) => {
-    if (!confirm(`Are you sure you want to delete administrator @${username}?`)) {
-      return;
-    }
+  const requestDelete = (username: string) => {
+    setAdminToDelete(username);
+  };
 
+  const confirmDelete = async () => {
+    if (!adminToDelete) return;
+    const username = adminToDelete;
     setActionLoading(username);
     setMessage(null);
     try {
@@ -110,6 +113,7 @@ export default function UsersDirectoryPage() {
         text: `Administrator @${username} was deleted successfully.`,
         type: "success",
       });
+      setAdminToDelete(null);
     } catch (err: any) {
       setMessage({
         text: err.response?.data?.message || "Failed to delete administrator account.",
@@ -291,7 +295,7 @@ export default function UsersDirectoryPage() {
                       </Link>
 
                       <button
-                        onClick={() => handleDelete(admin.username)}
+                        onClick={() => requestDelete(admin.username)}
                         disabled={actionLoading === admin.username}
                         className="btn btn-xs rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-2.5 py-1 text-xs font-medium transition-colors"
                       >
@@ -312,6 +316,43 @@ export default function UsersDirectoryPage() {
           </span>
         </div>
       </div>
+
+      {adminToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-pink-100">
+            <div className="flex items-center gap-3 text-rose-600 mb-4">
+              <div className="h-10 w-10 rounded-xl bg-rose-50 flex items-center justify-center font-bold text-lg">
+                ⚠️
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Delete Administrator</h3>
+                <p className="text-xs text-slate-500">This action cannot be undone.</p>
+              </div>
+            </div>
+            <p className="text-sm text-slate-600 mb-6">
+              Are you sure you want to permanently delete administrator <strong className="text-slate-900">@{adminToDelete}</strong>?
+            </p>
+            <div className="flex justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setAdminToDelete(null)}
+                disabled={actionLoading === adminToDelete}
+                className="btn btn-sm rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border-none font-medium px-4"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                disabled={actionLoading === adminToDelete}
+                className="btn btn-sm rounded-xl bg-rose-600 hover:bg-rose-500 text-white border-none font-medium shadow-sm shadow-rose-200 px-4"
+              >
+                {actionLoading === adminToDelete ? "Deleting..." : "Yes, Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
