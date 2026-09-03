@@ -1,15 +1,11 @@
 import {
   Entity,
   Column,
-  PrimaryColumn,
-  BeforeInsert,
-
-
+  PrimaryGeneratedColumn,
   OneToMany,
   ManyToMany,
   JoinTable,
 } from 'typeorm';
-
 
 import { VolunteerEntity } from '../volunteer/volunteer.entity';
 import { CaseOfficerEntity } from '../case_officer/case_officer.entity';
@@ -17,13 +13,8 @@ import { CaseOfficerEntity } from '../case_officer/case_officer.entity';
 @Entity()
 export class Admin {
 
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: number;
-
-  @BeforeInsert()
-  generateId() {
-    this.id = Math.floor(Math.random() * 1000000);
-  }
 
   @Column({
     type: 'varchar',

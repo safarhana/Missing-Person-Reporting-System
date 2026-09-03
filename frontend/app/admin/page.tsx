@@ -105,7 +105,7 @@ export default function AdminDashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <AdminCard
           title="Administrators"
-          value={adminCount || 1}
+          value={isLoading ? "..." : adminCount}
           subtitle="Registered admin accounts"
           badge="Active"
           badgeType="info"
@@ -113,10 +113,10 @@ export default function AdminDashboardPage() {
 
         <AdminCard
           title="Account Status"
-          value={profile?.isActive ? "Active" : "Active"}
-          subtitle="Admin privileges active"
-          badge="Verified"
-          badgeType="success"
+          value={profile?.isActive ? "Active" : "Inactive"}
+          subtitle={profile?.isActive ? "Admin privileges active" : "Account deactivated"}
+          badge={profile?.isActive ? "Verified" : "Inactive"}
+          badgeType={profile?.isActive ? "success" : "danger"}
         />
 
         <AdminCard
@@ -149,7 +149,9 @@ export default function AdminDashboardPage() {
             <div className="space-y-3 text-xs text-slate-600">
               <div className="flex justify-between py-1.5 border-b border-pink-100">
                 <span className="text-slate-500">Admin ID:</span>
-                <span className="font-mono text-slate-900 font-medium">#{profile?.id || "1"}</span>
+                <span className="font-mono text-slate-900 font-medium">
+                  {profile?.id ? `#${profile.id}` : "N/A"}
+                </span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-pink-100">
                 <span className="text-slate-500">Role:</span>
@@ -159,14 +161,16 @@ export default function AdminDashboardPage() {
                 <span className="text-slate-500">Realtime Alerts:</span>
                 <span className="text-emerald-600 font-medium">Active</span>
               </div>
-              <div className="pt-2">
-                <Link
-                  href={`/admin/users/${profile?.id || 1}`}
-                  className="w-full inline-flex items-center justify-center rounded-xl bg-pink-50 hover:bg-pink-100 text-pink-700 px-3 py-2 text-xs font-semibold border border-pink-200 transition-colors"
-                >
-                  View Profile
-                </Link>
-              </div>
+              {profile?.id && (
+                <div className="pt-2">
+                  <Link
+                    href={`/admin/users/${profile.id}`}
+                    className="w-full inline-flex items-center justify-center rounded-xl bg-pink-50 hover:bg-pink-100 text-pink-700 px-3 py-2 text-xs font-semibold border border-pink-200 transition-colors"
+                  >
+                    View Profile
+                  </Link>
+                </div>
+              )}
             </div>
           </AdminCard>
         </div>

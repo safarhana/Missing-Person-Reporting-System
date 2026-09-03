@@ -5,9 +5,19 @@ import Link from "next/link";
 import { getAdminVolunteers, assignVolunteerToAdmin, removeVolunteerFromAdmin, getAdminByUsername } from "../services/api";
 import { getStoredUsername, assignmentSchema } from "../utils/validation";
 
+export interface Volunteer {
+  id: number;
+  username?: string;
+  fullName?: string;
+  name?: string;
+  phone?: string;
+  contactNumber?: string;
+  email?: string;
+}
+
 export default function VolunteersManagementPage() {
   const [adminId, setAdminId] = useState<number | null>(null);
-  const [volunteers, setVolunteers] = useState<any[]>([]);
+  const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
   const [volunteerIdInput, setVolunteerIdInput] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -21,20 +31,40 @@ export default function VolunteersManagementPage() {
       const username = getStoredUsername();
       let currentAdminId = adminId;
 
-      if (!currentAdminId && username) {
+      if (!currentAdminId) {
+        if (!username) {
+          setMessage({
+            text: "No logged-in administrator session detected. Please log in.",
+            type: "error",
+          });
+          setIsLoading(false);
+          return;
+        }
+
         try {
           const profile = await getAdminByUsername(username);
           currentAdminId = profile.id;
           setAdminId(profile.id);
         } catch (e) {
-          console.warn("Could not fetch admin ID, using fallback 1", e);
-          currentAdminId = 1;
-          setAdminId(1);
+          setMessage({
+            text: "Could not identify current admin account. Please refresh or re-login.",
+            type: "error",
+          });
+          setIsLoading(false);
+          return;
         }
       }
 
-      const effectiveId = currentAdminId || 1;
-      const data = await getAdminVolunteers(effectiveId);
+      if (!currentAdminId) {
+        setMessage({
+          text: "Administrator ID could not be determined. Operation halted.",
+          type: "error",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      const data = await getAdminVolunteers(currentAdminId);
       setVolunteers(Array.isArray(data) ? data : []);
     } catch (err: any) {
       setMessage({
@@ -55,6 +85,14 @@ export default function VolunteersManagementPage() {
     setInputError("");
     setMessage(null);
 
+    if (!adminId) {
+      setMessage({
+        text: "Cannot assign volunteer: Administrator ID is missing. Please re-login.",
+        type: "error",
+      });
+      return;
+    }
+
     const validation = assignmentSchema.safeParse({ targetId: volunteerIdInput });
     if (!validation.success) {
       setInputError(validation.error.issues[0].message);
@@ -63,10 +101,9 @@ export default function VolunteersManagementPage() {
 
     setActionLoading(true);
     try {
-      const targetAdminId = adminId || 1;
-      await assignVolunteerToAdmin(targetAdminId, volunteerIdInput);
+      await assignVolunteerToAdmin(adminId, volunteerIdInput);
       setMessage({
-        text: `Volunteer #${volunteerIdInput} assigned to Admin #${targetAdminId} successfully!`,
+        text: `Volunteer #${volunteerIdInput} assigned to Admin #${adminId} successfully!`,
         type: "success",
       });
       setVolunteerIdInput("");
@@ -82,13 +119,20 @@ export default function VolunteersManagementPage() {
   };
 
   const handleRemove = async (volId: number | string) => {
+    if (!adminId) {
+      setMessage({
+        text: "Cannot unassign volunteer: Administrator ID is missing.",
+        type: "error",
+      });
+      return;
+    }
+
     if (!confirm(`Unassign Volunteer #${volId} from your supervision?`)) return;
 
     setActionLoading(true);
     setMessage(null);
     try {
-      const targetAdminId = adminId || 1;
-      await removeVolunteerFromAdmin(targetAdminId, volId);
+      await removeVolunteerFromAdmin(adminId, volId);
       setMessage({
         text: `Volunteer #${volId} successfully unassigned.`,
         type: "success",

@@ -5,9 +5,20 @@ import Link from "next/link";
 import { getAdminCaseOfficers, assignCaseOfficerToAdmin, removeCaseOfficerFromAdmin, getAdminByUsername } from "../services/api";
 import { getStoredUsername, assignmentSchema } from "../utils/validation";
 
+export interface CaseOfficer {
+  id: number;
+  name?: string;
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  country?: string;
+  uniqueId?: string;
+  badgeNumber?: string;
+}
+
 export default function CaseOfficersManagementPage() {
   const [adminId, setAdminId] = useState<number | null>(null);
-  const [officers, setOfficers] = useState<any[]>([]);
+  const [officers, setOfficers] = useState<CaseOfficer[]>([]);
   const [officerIdInput, setOfficerIdInput] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -21,20 +32,40 @@ export default function CaseOfficersManagementPage() {
       const username = getStoredUsername();
       let currentAdminId = adminId;
 
-      if (!currentAdminId && username) {
+      if (!currentAdminId) {
+        if (!username) {
+          setMessage({
+            text: "No logged-in administrator session detected. Please log in.",
+            type: "error",
+          });
+          setIsLoading(false);
+          return;
+        }
+
         try {
           const profile = await getAdminByUsername(username);
           currentAdminId = profile.id;
           setAdminId(profile.id);
         } catch (e) {
-          console.warn("Could not fetch admin ID, using fallback 1", e);
-          currentAdminId = 1;
-          setAdminId(1);
+          setMessage({
+            text: "Could not identify current admin account. Please refresh or re-login.",
+            type: "error",
+          });
+          setIsLoading(false);
+          return;
         }
       }
 
-      const effectiveId = currentAdminId || 1;
-      const data = await getAdminCaseOfficers(effectiveId);
+      if (!currentAdminId) {
+        setMessage({
+          text: "Administrator ID could not be determined. Operation halted.",
+          type: "error",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      const data = await getAdminCaseOfficers(currentAdminId);
       setOfficers(Array.isArray(data) ? data : []);
     } catch (err: any) {
       setMessage({
@@ -55,6 +86,14 @@ export default function CaseOfficersManagementPage() {
     setInputError("");
     setMessage(null);
 
+    if (!adminId) {
+      setMessage({
+        text: "Cannot assign case officer: Administrator ID is missing. Please re-login.",
+        type: "error",
+      });
+      return;
+    }
+
     const validation = assignmentSchema.safeParse({ targetId: officerIdInput });
     if (!validation.success) {
       setInputError(validation.error.issues[0].message);
@@ -63,10 +102,9 @@ export default function CaseOfficersManagementPage() {
 
     setActionLoading(true);
     try {
-      const targetAdminId = adminId || 1;
-      await assignCaseOfficerToAdmin(targetAdminId, officerIdInput);
+      await assignCaseOfficerToAdmin(adminId, officerIdInput);
       setMessage({
-        text: `Case Officer #${officerIdInput} linked to Admin #${targetAdminId} successfully!`,
+        text: `Case Officer #${officerIdInput} linked to Admin #${adminId} successfully!`,
         type: "success",
       });
       setOfficerIdInput("");
@@ -82,13 +120,20 @@ export default function CaseOfficersManagementPage() {
   };
 
   const handleRemove = async (offId: number | string) => {
+    if (!adminId) {
+      setMessage({
+        text: "Cannot unlink case officer: Administrator ID is missing.",
+        type: "error",
+      });
+      return;
+    }
+
     if (!confirm(`Remove Case Officer #${offId} from your administrative jurisdiction?`)) return;
 
     setActionLoading(true);
     setMessage(null);
     try {
-      const targetAdminId = adminId || 1;
-      await removeCaseOfficerFromAdmin(targetAdminId, offId);
+      await removeCaseOfficerFromAdmin(adminId, offId);
       setMessage({
         text: `Case Officer #${offId} successfully unlinked.`,
         type: "success",
