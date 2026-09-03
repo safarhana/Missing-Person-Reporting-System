@@ -16,6 +16,7 @@ import {
 
 import { AdminService } from './admin.service';
 import { CreateAdminDto } from './dto/create-admin.dto';
+import { UpdateStatusDto } from './dto/update-status.dto';
 import { TriggerAlertDto } from './dto/alert.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth/jwt-auth.guard';
 
@@ -91,12 +92,12 @@ export class AdminController {
     @Param('username')
     username: string,
 
-    @Body('isActive')
-    isActive: boolean,
+    @Body()
+    updateStatusDto: UpdateStatusDto,
   ) {
     return this.adminService.updateStatus(
       username,
-      isActive,
+      updateStatusDto.isActive,
     );
   }
 
