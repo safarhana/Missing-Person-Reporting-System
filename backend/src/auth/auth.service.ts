@@ -29,6 +29,10 @@ export class AuthService {
       throw new UnauthorizedException('Invalid username');
     }
 
+    if (!admin.isActive) {
+      throw new UnauthorizedException('Account is inactive. Please contact system administrator.');
+    }
+
     const passwordMatch = await bcrypt.compare(
      loginDto.password,
      admin.password,
@@ -41,6 +45,7 @@ export class AuthService {
     const payload = {
       sub: admin.id,
       username: admin.username,
+      role: 'admin',
     };
 
     return {

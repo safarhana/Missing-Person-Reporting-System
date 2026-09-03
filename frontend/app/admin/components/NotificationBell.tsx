@@ -46,8 +46,13 @@ export default function NotificationBell() {
   }, []);
 
   useEffect(() => {
-    const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY || "e4c86e08ddcbbf0e932b";
+    const pusherKey = process.env.NEXT_PUBLIC_PUSHER_KEY;
     const pusherCluster = process.env.NEXT_PUBLIC_PUSHER_CLUSTER || "ap2";
+
+    if (!pusherKey) {
+      console.warn("Pusher key (NEXT_PUBLIC_PUSHER_KEY) is not configured.");
+      return;
+    }
 
     try {
       const pusher = new Pusher(pusherKey, {

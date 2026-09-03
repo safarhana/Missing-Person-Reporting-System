@@ -1,6 +1,7 @@
-import{
+import {
   IsNotEmpty,
   IsString,
+  IsBoolean,
   MaxLength,
   Matches,
 } from 'class-validator';
@@ -15,15 +16,16 @@ export class CreateAdminDto {
   username: string;
 
   @IsNotEmpty({
-  message: 'Password is required.',
+    message: 'Password is required.',
   })
   @Matches(/^(?=.*[!@#$%^&*(),.?":{}|<>]).+$/, {
-  message: 'Password must contain at least one special character.',
- })
- password: string;
+    message: 'Password must contain at least one special character.',
+  })
+  password: string;
 
-@IsNotEmpty()
-isActive: boolean;
+  @IsNotEmpty()
+  @IsBoolean()
+  isActive: boolean;
 
   @IsNotEmpty()
   @IsString()

@@ -75,12 +75,14 @@ export default function UserDetailPage({ params }: PageProps) {
 
     setIsSubmitting(true);
     try {
-      const updated = await updateAdmin(admin.username, {
+      const updatePayload: { username: string; fullName: string; isActive: boolean; password?: string } = {
         username: admin.username,
         fullName: editFullName,
-        password: editPassword ? editPassword : "admin-keep-current",
         isActive: editStatus,
-      });
+        ...(editPassword.trim() ? { password: editPassword.trim() } : {}),
+      };
+
+      const updated = await updateAdmin(admin.username, updatePayload);
 
       setAdmin(updated);
       setIsEditOpen(false);
