@@ -11,6 +11,7 @@ export default function UsersDirectoryPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+  const [adminToDelete, setAdminToDelete] = useState<string | null>(null);
 
   const fetchAdmins = async () => {
     setIsLoading(true);
@@ -96,23 +97,25 @@ export default function UsersDirectoryPage() {
     }
   };
 
-  const handleDelete = async (username: string) => {
-    if (!confirm(`Are you sure you want to delete administrator @${username}?`)) {
-      return;
-    }
+  const requestDelete = (username: string) => {
+    setAdminToDelete(username);
+  };
 
-    setActionLoading(username);
+  const confirmDelete = async () => {
+    if (!adminToDelete) return;
+    setActionLoading(adminToDelete);
     setMessage(null);
     try {
-      await deleteAdmin(username);
-      setAdmins((prev) => prev.filter((adm) => adm.username !== username));
+      await deleteAdmin(adminToDelete);
+      setAdmins((prev) => prev.filter((adm) => adm.username !== adminToDelete));
       setMessage({
-        text: `Administrator @${username} was deleted successfully.`,
+        text: `Administrator ${adminToDelete} was permanently removed.`,
         type: "success",
       });
+      setAdminToDelete(null);
     } catch (err: any) {
       setMessage({
-        text: err.response?.data?.message || "Failed to delete administrator account.",
+        text: err.response?.data?.message || "Failed to delete administrator.",
         type: "error",
       });
     } finally {
@@ -125,31 +128,31 @@ export default function UsersDirectoryPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-xs text-slate-500 mb-1">
-            <Link href="/admin" className="hover:text-pink-600 transition-colors">
+            <Link href="/admin" className="hover:text-slate-900 transition-colors">
               Admin
             </Link>
             <span>/</span>
-            <span className="text-pink-600 font-medium">Users</span>
+            <span className="text-slate-900 font-semibold">Users</span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-800 tracking-tight">
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
             Administrator Directory
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Manage administrator accounts, search personnel, and update account status
+            Manage administrative personnel, credentials, and access credentials
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <Link
             href="/admin/register"
-            className="inline-flex items-center gap-1.5 rounded-xl bg-pink-600 hover:bg-pink-500 px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition-colors"
           >
             <span>+ Add Admin</span>
           </Link>
           <button
             onClick={fetchAdmins}
             disabled={isLoading}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-white hover:bg-pink-50 border border-pink-200 px-3.5 py-2 text-xs font-semibold text-slate-700 transition-colors shadow-xs"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 px-3.5 py-2 text-xs font-semibold text-slate-700 transition-colors shadow-xs cursor-pointer"
           >
             ↻ Refresh
           </button>
@@ -160,8 +163,8 @@ export default function UsersDirectoryPage() {
         <div
           className={`alert rounded-xl p-3 text-xs flex items-center justify-between border ${
             message.type === "success"
-              ? "alert-success bg-emerald-50 text-emerald-700 border-emerald-200"
-              : "alert-error bg-rose-50 text-rose-700 border-rose-200"
+              ? "alert-success bg-emerald-50 text-emerald-800 border-emerald-300"
+              : "alert-error bg-red-50 text-red-700 border-red-300"
           }`}
         >
           <div className="flex items-center gap-2">
@@ -169,7 +172,7 @@ export default function UsersDirectoryPage() {
             {message.type === "error" && message.text.includes("sign in") && (
               <Link
                 href="/admin/login"
-                className="underline font-semibold text-pink-700 hover:text-pink-800 ml-2"
+                className="underline font-semibold text-slate-900 hover:text-slate-700 ml-2"
               >
                 Go to Sign In →
               </Link>
@@ -188,13 +191,13 @@ export default function UsersDirectoryPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search administrators by name..."
-            className="input input-bordered w-full rounded-xl bg-white border border-pink-200 px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-500/20 shadow-xs"
+            className="input input-bordered w-full rounded-xl bg-white border border-slate-300 px-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10 shadow-xs"
           />
         </div>
         <button
           type="submit"
           disabled={isLoading}
-          className="btn btn-sm rounded-xl bg-pink-600 hover:bg-pink-500 px-5 py-2.5 text-xs font-semibold text-white shadow-xs transition-colors border-none"
+          className="btn btn-sm rounded-xl bg-slate-900 hover:bg-slate-800 px-5 py-2.5 text-xs font-semibold text-white shadow-xs transition-colors border-none cursor-pointer"
         >
           Search
         </button>
@@ -205,17 +208,17 @@ export default function UsersDirectoryPage() {
               setSearchQuery("");
               fetchAdmins();
             }}
-            className="btn btn-sm rounded-xl bg-white border border-pink-200 px-3 py-2.5 text-xs text-slate-500 hover:text-slate-800"
+            className="btn btn-sm rounded-xl bg-white border border-slate-300 px-3 py-2.5 text-xs text-slate-600 hover:text-slate-900 cursor-pointer"
           >
             Clear
           </button>
         )}
       </form>
 
-      <div className="card rounded-xl border border-pink-100 bg-white overflow-hidden shadow-xs">
+      <div className="card rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
-          <table className="table w-full text-left text-sm text-slate-600">
-            <thead className="bg-pink-50/60 text-[11px] uppercase tracking-wider text-slate-600 border-b border-pink-100 font-semibold">
+          <table className="table w-full text-left text-sm text-slate-700">
+            <thead className="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-600 border-b border-slate-200 font-semibold">
               <tr>
                 <th className="px-6 py-3.5">ID</th>
                 <th className="px-6 py-3.5">Administrator</th>
@@ -225,12 +228,12 @@ export default function UsersDirectoryPage() {
                 <th className="px-6 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-pink-100">
+            <tbody className="divide-y divide-slate-100">
               {isLoading ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-xs text-slate-500">
                     <div className="flex flex-col items-center justify-center gap-2">
-                      <div className="h-6 w-6 rounded-full border-2 border-pink-200 border-t-pink-600 animate-spin"></div>
+                      <div className="h-6 w-6 rounded-full border-2 border-slate-200 border-t-slate-900 animate-spin"></div>
                       <span>Loading administrators...</span>
                     </div>
                   </td>
@@ -243,23 +246,23 @@ export default function UsersDirectoryPage() {
                 </tr>
               ) : (
                 admins.map((admin) => (
-                  <tr key={admin.id} className="hover:bg-pink-50/40 transition-colors">
+                  <tr key={admin.id} className="hover:bg-slate-50/70 transition-colors">
                     <td className="px-6 py-4 font-mono text-xs text-slate-400">
                       #{admin.id}
                     </td>
                     <td className="px-6 py-4 font-semibold text-slate-900">
                       <Link
                         href={`/admin/users/${admin.id}`}
-                        className="hover:text-pink-600 transition-colors"
+                        className="hover:text-blue-900 transition-colors"
                       >
                         {admin.fullName || "Administrator"}
                       </Link>
                     </td>
-                    <td className="px-6 py-4 text-xs font-mono text-pink-700">
+                    <td className="px-6 py-4 text-xs font-mono text-slate-700">
                       @{admin.username}
                     </td>
                     <td className="px-6 py-4">
-                      <span className="badge badge-sm inline-flex items-center rounded-md bg-pink-50 px-2 py-0.5 text-xs font-medium text-pink-700 border border-pink-200">
+                      <span className="badge badge-sm inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-800 border border-slate-300">
                         Admin
                       </span>
                     </td>
@@ -270,8 +273,8 @@ export default function UsersDirectoryPage() {
                         title="Click to toggle status"
                         className={`badge badge-sm inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold border transition-all cursor-pointer ${
                           admin.isActive
-                            ? "badge-success bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
-                            : "bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200"
+                            ? "badge-success bg-emerald-50 text-emerald-800 border-emerald-300 hover:bg-emerald-100"
+                            : "bg-slate-100 text-slate-600 border-slate-300 hover:bg-slate-200"
                         }`}
                       >
                         <span
@@ -285,15 +288,15 @@ export default function UsersDirectoryPage() {
                     <td className="px-6 py-4 text-right space-x-2">
                       <Link
                         href={`/admin/users/${admin.id}`}
-                        className="btn btn-xs rounded-lg bg-pink-50 hover:bg-pink-100 px-2.5 py-1 text-xs font-medium text-pink-700 border border-pink-200 transition-colors"
+                        className="btn btn-xs rounded-lg bg-slate-100 hover:bg-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-800 border border-slate-300 transition-colors"
                       >
                         View Profile
                       </Link>
 
                       <button
-                        onClick={() => handleDelete(admin.username)}
+                        onClick={() => requestDelete(admin.username)}
                         disabled={actionLoading === admin.username}
-                        className="btn btn-xs rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-2.5 py-1 text-xs font-medium transition-colors"
+                        className="btn btn-xs rounded-lg bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 px-2.5 py-1 text-xs font-semibold transition-colors cursor-pointer"
                       >
                         Delete
                       </button>
@@ -305,13 +308,50 @@ export default function UsersDirectoryPage() {
           </table>
         </div>
 
-        <div className="bg-pink-50/40 px-6 py-3 border-t border-pink-100 flex items-center justify-between text-xs text-slate-500">
+        <div className="bg-slate-50 px-6 py-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
           <span>Total Administrators: {admins.length}</span>
           <span className="text-[11px] text-slate-400">
             Click an administrator name or "View Profile" to see full details
           </span>
         </div>
       </div>
+
+      {adminToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+            <div className="flex items-center gap-3 text-red-600 mb-4">
+              <div className="h-10 w-10 rounded-xl bg-red-50 border border-red-200 flex items-center justify-center font-bold text-lg">
+                ⚠️
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">Delete Administrator</h3>
+                <p className="text-xs text-slate-500">This action cannot be undone.</p>
+              </div>
+            </div>
+            <p className="text-sm text-slate-600 mb-6">
+              Are you sure you want to permanently delete administrator <strong className="text-slate-900">@{adminToDelete}</strong>?
+            </p>
+            <div className="flex justify-end gap-2.5">
+              <button
+                type="button"
+                onClick={() => setAdminToDelete(null)}
+                disabled={actionLoading === adminToDelete}
+                className="btn btn-sm rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border-none font-medium px-4 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                disabled={actionLoading === adminToDelete}
+                className="btn btn-sm rounded-xl bg-red-600 hover:bg-red-700 text-white border-none font-medium shadow-sm px-4 cursor-pointer"
+              >
+                {actionLoading === adminToDelete ? "Deleting..." : "Yes, Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -100,18 +100,20 @@ export default function CaseOfficersManagementPage() {
       return;
     }
 
+    const targetOfficerId = parseInt(officerIdInput, 10);
     setActionLoading(true);
+
     try {
-      await assignCaseOfficerToAdmin(adminId, officerIdInput);
+      await assignCaseOfficerToAdmin(adminId, targetOfficerId);
       setMessage({
-        text: `Case Officer #${officerIdInput} linked to Admin #${adminId} successfully!`,
+        text: `Case Officer #${targetOfficerId} assigned to your supervision roster.`,
         type: "success",
       });
       setOfficerIdInput("");
       await loadOfficers();
     } catch (err: any) {
       setMessage({
-        text: err.response?.data?.message || `Failed to link Case Officer #${officerIdInput}. Check if officer exists.`,
+        text: err.response?.data?.message || "Failed to assign case officer. Verify the Officer ID.",
         type: "error",
       });
     } finally {
@@ -119,29 +121,21 @@ export default function CaseOfficersManagementPage() {
     }
   };
 
-  const handleRemove = async (offId: number | string) => {
-    if (!adminId) {
-      setMessage({
-        text: "Cannot unlink case officer: Administrator ID is missing.",
-        type: "error",
-      });
-      return;
-    }
-
-    if (!confirm(`Remove Case Officer #${offId} from your administrative jurisdiction?`)) return;
-
+  const handleRemove = async (officerId: number) => {
+    if (!adminId) return;
     setActionLoading(true);
     setMessage(null);
+
     try {
-      await removeCaseOfficerFromAdmin(adminId, offId);
+      await removeCaseOfficerFromAdmin(adminId, officerId);
       setMessage({
-        text: `Case Officer #${offId} successfully unlinked.`,
+        text: `Case Officer #${officerId} removed from supervision.`,
         type: "success",
       });
-      await loadOfficers();
+      setOfficers((prev) => prev.filter((o) => o.id !== officerId));
     } catch (err: any) {
       setMessage({
-        text: err.response?.data?.message || "Failed to remove case officer linkage.",
+        text: err.response?.data?.message || "Failed to remove case officer assignment.",
         type: "error",
       });
     } finally {
@@ -154,13 +148,13 @@ export default function CaseOfficersManagementPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-xs text-slate-500 mb-1">
-            <Link href="/admin" className="hover:text-pink-600 transition-colors">
+            <Link href="/admin" className="hover:text-slate-900 transition-colors">
               Admin
             </Link>
             <span>/</span>
-            <span className="text-pink-600 font-medium">Case Officers</span>
+            <span className="text-slate-900 font-semibold">Case Officers</span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-800 tracking-tight">
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
             Case Officer Supervision
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
@@ -171,7 +165,7 @@ export default function CaseOfficersManagementPage() {
         <button
           onClick={loadOfficers}
           disabled={isLoading}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-white hover:bg-pink-50 border border-pink-200 px-3.5 py-2 text-xs font-semibold text-slate-700 transition-colors shadow-xs"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 px-3.5 py-2 text-xs font-semibold text-slate-700 transition-colors shadow-xs cursor-pointer"
         >
           ↻ Refresh Officers
         </button>
@@ -181,8 +175,8 @@ export default function CaseOfficersManagementPage() {
         <div
           className={`rounded-xl p-3 text-xs flex items-center justify-between border ${
             message.type === "success"
-              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-              : "bg-rose-50 text-rose-700 border-rose-200"
+              ? "bg-emerald-50 text-emerald-800 border-emerald-300"
+              : "bg-red-50 text-red-700 border-red-300"
           }`}
         >
           <span>{message.text}</span>
@@ -192,8 +186,8 @@ export default function CaseOfficersManagementPage() {
         </div>
       )}
 
-      <div className="rounded-xl border border-pink-100 bg-white p-5 shadow-xs">
-        <h2 className="text-sm font-bold text-slate-800 mb-1">Assign Case Officer</h2>
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs">
+        <h2 className="text-sm font-bold text-slate-900 mb-1">Assign Case Officer</h2>
         <p className="text-xs text-slate-500 mb-4">
           Enter the numeric ID of a case officer to place their investigations under your oversight.
         </p>
@@ -206,36 +200,36 @@ export default function CaseOfficersManagementPage() {
               onChange={(e) => setOfficerIdInput(e.target.value)}
               placeholder="Enter Case Officer ID (e.g. 1)"
               disabled={actionLoading}
-              className={`w-full rounded-xl bg-white border px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pink-500/20 ${
-                inputError ? "border-rose-500" : "border-pink-200 focus:border-pink-500"
+              className={`w-full rounded-xl bg-white border px-3.5 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 ${
+                inputError ? "border-red-500" : "border-slate-300 focus:border-slate-900"
               }`}
             />
-            {inputError && <p className="mt-1 text-[11px] text-rose-600">{inputError}</p>}
+            {inputError && <p className="mt-1 text-[11px] text-red-600">{inputError}</p>}
           </div>
 
           <button
             type="submit"
             disabled={actionLoading}
-            className="rounded-xl bg-pink-600 hover:bg-pink-500 text-white px-4 py-2 text-xs font-semibold shadow-xs disabled:opacity-50 transition-colors"
+            className="rounded-xl bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 text-xs font-semibold shadow-xs disabled:opacity-50 transition-colors cursor-pointer"
           >
             {actionLoading ? "Assigning..." : "Assign Officer"}
           </button>
         </form>
       </div>
 
-      <div className="rounded-xl border border-pink-100 bg-white overflow-hidden shadow-xs">
-        <div className="p-4 bg-pink-50/60 border-b border-pink-100 flex items-center justify-between font-semibold">
-          <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+      <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-xs">
+        <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between font-semibold">
+          <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
             Supervised Officers
           </h3>
-          <span className="text-xs text-slate-500 font-medium">
+          <span className="text-xs text-slate-600 font-medium">
             {officers.length} Supervised
           </span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-600">
-            <thead className="bg-pink-50/40 text-[11px] uppercase tracking-wider text-slate-500 border-b border-pink-100 font-semibold">
+          <table className="w-full text-left text-sm text-slate-700">
+            <thead className="bg-slate-50/70 text-[11px] uppercase tracking-wider text-slate-600 border-b border-slate-200 font-semibold">
               <tr>
                 <th className="px-6 py-3">Officer ID</th>
                 <th className="px-6 py-3">Name</th>
@@ -244,7 +238,7 @@ export default function CaseOfficersManagementPage() {
                 <th className="px-6 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-pink-100">
+            <tbody className="divide-y divide-slate-100">
               {isLoading ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-8 text-center text-xs text-slate-400">
@@ -259,14 +253,14 @@ export default function CaseOfficersManagementPage() {
                 </tr>
               ) : (
                 officers.map((officer) => (
-                  <tr key={officer.id} className="hover:bg-pink-50/40 transition-colors">
-                    <td className="px-6 py-3.5 font-mono text-xs text-pink-600">#{officer.id}</td>
+                  <tr key={officer.id} className="hover:bg-slate-50/70 transition-colors">
+                    <td className="px-6 py-3.5 font-mono text-xs text-slate-700">#{officer.id}</td>
                     <td className="px-6 py-3.5 font-semibold text-slate-900">
                       {officer.fullName || officer.name || `Officer #${officer.id}`}
                     </td>
                     <td className="px-6 py-3.5 text-xs text-slate-500">{officer.email || officer.badgeNumber || "N/A"}</td>
                     <td className="px-6 py-3.5">
-                      <span className="inline-flex items-center rounded-full bg-pink-50 px-2.5 py-0.5 text-[11px] font-medium text-pink-700 border border-pink-200">
+                      <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-semibold text-amber-800 border border-amber-300">
                         Supervised
                       </span>
                     </td>
@@ -274,7 +268,7 @@ export default function CaseOfficersManagementPage() {
                       <button
                         onClick={() => handleRemove(officer.id)}
                         disabled={actionLoading}
-                        className="inline-flex items-center rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-2.5 py-1 text-xs font-medium transition-colors"
+                        className="inline-flex items-center rounded-lg bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 px-2.5 py-1 text-xs font-semibold transition-colors cursor-pointer"
                       >
                         Remove
                       </button>

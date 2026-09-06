@@ -43,6 +43,11 @@ export default function RegisterPage() {
       return;
     }
 
+    if (password !== confirmPassword) {
+      setFieldErrors({ confirmPassword: "Passwords do not match" });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -53,7 +58,7 @@ export default function RegisterPage() {
         isActive: true,
       });
 
-      setSuccess("Administrator account created successfully! A notification email has been queued. Redirecting to sign in...");
+      setSuccess("Administrator account created successfully! Redirecting to sign in...");
       setTimeout(() => {
         router.push("/admin/login");
       }, 1500);
@@ -73,25 +78,25 @@ export default function RegisterPage() {
       <div className="mb-6">
         <Link
           href="/admin/users"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-pink-600 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors"
         >
           ← Back to Administrators
         </Link>
       </div>
 
-      <div className="card rounded-2xl border border-pink-100 bg-white p-8 shadow-xl">
+      <div className="card rounded-2xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-900/5">
         <div className="text-center mb-6">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-pink-600 text-white font-black text-xl shadow-xs mb-3">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white font-black text-xl shadow-xs mb-3">
             +
           </div>
           <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Register Administrator</h2>
           <p className="mt-1 text-xs text-slate-500">
-            Create a new administrator account for system management
+            Create a new authorized administrator account for system operations
           </p>
         </div>
 
         {error && (
-          <div className="alert alert-error mb-5 rounded-xl bg-rose-50 border border-rose-200 p-3 text-xs text-rose-700">
+          <div className="alert alert-error mb-5 rounded-xl bg-red-50 border border-red-200 p-3 text-xs text-red-700">
             {error}
           </div>
         )}
@@ -116,12 +121,12 @@ export default function RegisterPage() {
               disabled={isLoading}
               className={`input input-bordered w-full rounded-xl bg-white border px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 transition-colors focus:outline-none focus:ring-2 ${
                 fieldErrors.username
-                  ? "border-rose-500 focus:ring-rose-500/20"
-                  : "border-pink-200 focus:border-pink-500 focus:ring-pink-500/20"
+                  ? "border-red-500 focus:ring-red-500/20"
+                  : "border-slate-300 focus:border-slate-900 focus:ring-slate-900/10"
               }`}
             />
             {fieldErrors.username && (
-              <p className="mt-1 text-[11px] text-rose-600">{fieldErrors.username}</p>
+              <p className="mt-1 text-[11px] text-red-600">{fieldErrors.username}</p>
             )}
           </div>
 
@@ -138,12 +143,12 @@ export default function RegisterPage() {
               disabled={isLoading}
               className={`input input-bordered w-full rounded-xl bg-white border px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 transition-colors focus:outline-none focus:ring-2 ${
                 fieldErrors.fullName
-                  ? "border-rose-500 focus:ring-rose-500/20"
-                  : "border-pink-200 focus:border-pink-500 focus:ring-pink-500/20"
+                  ? "border-red-500 focus:ring-red-500/20"
+                  : "border-slate-300 focus:border-slate-900 focus:ring-slate-900/10"
               }`}
             />
             {fieldErrors.fullName && (
-              <p className="mt-1 text-[11px] text-rose-600">{fieldErrors.fullName}</p>
+              <p className="mt-1 text-[11px] text-red-600">{fieldErrors.fullName}</p>
             )}
           </div>
 
@@ -161,12 +166,12 @@ export default function RegisterPage() {
                 disabled={isLoading}
                 className={`input input-bordered w-full rounded-xl bg-white border px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 transition-colors focus:outline-none focus:ring-2 ${
                   fieldErrors.password
-                    ? "border-rose-500 focus:ring-rose-500/20"
-                    : "border-pink-200 focus:border-pink-500 focus:ring-pink-500/20"
+                    ? "border-red-500 focus:ring-red-500/20"
+                    : "border-slate-300 focus:border-slate-900 focus:ring-slate-900/10"
                 }`}
               />
               {fieldErrors.password && (
-                <p className="mt-1 text-[11px] text-rose-600">{fieldErrors.password}</p>
+                <p className="mt-1 text-[11px] text-red-600">{fieldErrors.password}</p>
               )}
             </div>
 
@@ -183,12 +188,12 @@ export default function RegisterPage() {
                 disabled={isLoading}
                 className={`input input-bordered w-full rounded-xl bg-white border px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 transition-colors focus:outline-none focus:ring-2 ${
                   fieldErrors.confirmPassword
-                    ? "border-rose-500 focus:ring-rose-500/20"
-                    : "border-pink-200 focus:border-pink-500 focus:ring-pink-500/20"
+                    ? "border-red-500 focus:ring-red-500/20"
+                    : "border-slate-300 focus:border-slate-900 focus:ring-slate-900/10"
                 }`}
               />
               {fieldErrors.confirmPassword && (
-                <p className="mt-1 text-[11px] text-rose-600">{fieldErrors.confirmPassword}</p>
+                <p className="mt-1 text-[11px] text-red-600">{fieldErrors.confirmPassword}</p>
               )}
             </div>
           </div>
@@ -196,7 +201,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="btn w-full mt-4 inline-flex items-center justify-center rounded-xl bg-pink-600 hover:bg-pink-500 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition-all disabled:opacity-50 disabled:cursor-not-allowed border-none"
+            className="btn w-full mt-4 inline-flex items-center justify-center rounded-xl bg-slate-900 hover:bg-slate-800 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition-all disabled:opacity-50 disabled:cursor-not-allowed border-none cursor-pointer"
           >
             {isLoading ? (
               <span className="flex items-center gap-2">
@@ -209,10 +214,10 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <div className="mt-6 pt-5 border-t border-pink-100 text-center">
+        <div className="mt-6 pt-5 border-t border-slate-200 text-center">
           <p className="text-xs text-slate-500">
             Already registered?{" "}
-            <Link href="/admin/login" className="font-semibold text-pink-600 hover:text-pink-700 underline">
+            <Link href="/admin/login" className="font-semibold text-slate-900 hover:text-slate-700 underline">
               Sign In here
             </Link>
           </p>

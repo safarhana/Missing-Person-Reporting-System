@@ -116,29 +116,29 @@ export default function NotificationBell() {
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="relative px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-pink-600 rounded-lg hover:bg-pink-50 border border-pink-200 transition-colors focus:outline-none"
+        className="relative px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 rounded-lg hover:bg-slate-100 border border-slate-200 transition-colors focus:outline-none cursor-pointer"
         aria-label="Notifications"
         title="PusherJS Realtime Notifications"
       >
         <span>Alerts</span>
         {unreadCount > 0 && (
-          <span className="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-pink-600 px-1 text-[10px] font-bold text-white shadow-xs">
+          <span className="ml-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold text-white shadow-xs">
             {unreadCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-xl bg-white border border-pink-200 shadow-2xl z-50 overflow-hidden">
-          <div className="p-3 bg-pink-50 border-b border-pink-100 flex items-center justify-between">
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-white border border-slate-200 shadow-2xl z-50 overflow-hidden">
+          <div className="p-3.5 bg-slate-900 border-b border-slate-800 flex items-center justify-between text-white">
             <div className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-pink-500 animate-pulse"></span>
-              <h4 className="text-sm font-semibold text-slate-800">Pusher Realtime Alerts</h4>
+              <span className="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse"></span>
+              <h4 className="text-sm font-semibold tracking-tight">Realtime Ops Alerts</h4>
             </div>
             <div className="flex gap-2 text-xs">
               <button
                 onClick={triggerSimulation}
-                className="text-pink-600 hover:text-pink-700 font-semibold transition-colors"
+                className="text-amber-400 hover:text-amber-300 font-semibold transition-colors cursor-pointer"
                 title="Simulate live Pusher event"
               >
                 + Test Alert
@@ -146,7 +146,7 @@ export default function NotificationBell() {
               {unreadCount > 0 && (
                 <button
                   onClick={markAllAsRead}
-                  className="text-slate-500 hover:text-slate-800 transition-colors"
+                  className="text-slate-300 hover:text-white transition-colors cursor-pointer"
                 >
                   Mark read
                 </button>
@@ -154,29 +154,29 @@ export default function NotificationBell() {
             </div>
           </div>
 
-          <div className="max-h-72 overflow-y-auto divide-y divide-pink-100">
+          <div className="max-h-72 overflow-y-auto divide-y divide-slate-100">
             {notifications.length === 0 ? (
               <div className="p-4 text-center text-xs text-slate-400">
-                No new notifications.
+                No active notifications.
               </div>
             ) : (
               notifications.map((n) => (
                 <div
                   key={n.id}
-                  className={`p-3 transition-colors ${
-                    n.read ? "bg-white opacity-80" : "bg-pink-50/50"
+                  className={`p-3.5 transition-colors ${
+                    n.read ? "bg-white opacity-85" : "bg-slate-50 font-medium"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <span
-                      className={`text-xs font-semibold ${
+                      className={`text-xs font-bold ${
                         n.type === "alert"
-                          ? "text-rose-600"
+                          ? "text-red-600 uppercase tracking-wide"
                           : n.type === "warning"
                           ? "text-amber-600"
                           : n.type === "success"
-                          ? "text-emerald-600"
-                          : "text-pink-600"
+                          ? "text-emerald-700"
+                          : "text-slate-800"
                       }`}
                     >
                       {n.title}
@@ -189,8 +189,8 @@ export default function NotificationBell() {
             )}
           </div>
 
-          <div className="p-2 bg-pink-50/70 text-[11px] text-slate-500 text-center border-t border-pink-100">
-            Channel: <code className="text-pink-600 font-medium">mprs-admin-channel</code>
+          <div className="p-2.5 bg-slate-50 text-[11px] text-slate-500 text-center border-t border-slate-200">
+            Channel: <code className="text-slate-800 font-mono font-semibold">mprs-admin-channel</code>
           </div>
         </div>
       )}
