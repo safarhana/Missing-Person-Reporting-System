@@ -61,15 +61,15 @@ export default function LoginPage() {
       <div className="mb-6">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-pink-600 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors"
         >
           ← Back to Public Portal
         </Link>
       </div>
 
-      <div className="card rounded-2xl border border-pink-100 bg-white p-8 shadow-xl">
+      <div className="card rounded-2xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-900/5">
         <div className="text-center mb-8">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-pink-600 text-white font-black text-xl shadow-xs mb-3">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white font-black text-xl shadow-xs mb-3">
             M
           </div>
           <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Admin Sign In</h2>
@@ -79,7 +79,7 @@ export default function LoginPage() {
         </div>
 
         {error && (
-          <div className="alert alert-error mb-5 rounded-xl bg-rose-50 border border-rose-200 p-3 text-xs text-rose-700">
+          <div className="alert alert-error mb-5 rounded-xl bg-red-50 border border-red-200 p-3 text-xs text-red-700">
             {error}
           </div>
         )}
@@ -104,12 +104,12 @@ export default function LoginPage() {
               disabled={isLoading}
               className={`input input-bordered w-full rounded-xl bg-white border px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 transition-colors focus:outline-none focus:ring-2 ${
                 fieldErrors.username
-                  ? "border-rose-500 focus:ring-rose-500/20"
-                  : "border-pink-200 focus:border-pink-500 focus:ring-pink-500/20"
+                  ? "border-red-500 focus:ring-red-500/20"
+                  : "border-slate-300 focus:border-slate-900 focus:ring-slate-900/10"
               }`}
             />
             {fieldErrors.username && (
-              <p className="mt-1 text-[11px] text-rose-600">{fieldErrors.username}</p>
+              <p className="mt-1 text-[11px] text-red-600">{fieldErrors.username}</p>
             )}
           </div>
 
@@ -126,19 +126,19 @@ export default function LoginPage() {
               disabled={isLoading}
               className={`input input-bordered w-full rounded-xl bg-white border px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 transition-colors focus:outline-none focus:ring-2 ${
                 fieldErrors.password
-                  ? "border-rose-500 focus:ring-rose-500/20"
-                  : "border-pink-200 focus:border-pink-500 focus:ring-pink-500/20"
+                  ? "border-red-500 focus:ring-red-500/20"
+                  : "border-slate-300 focus:border-slate-900 focus:ring-slate-900/10"
               }`}
             />
             {fieldErrors.password && (
-              <p className="mt-1 text-[11px] text-rose-600">{fieldErrors.password}</p>
+              <p className="mt-1 text-[11px] text-red-600">{fieldErrors.password}</p>
             )}
           </div>
 
           <button
             type="submit"
             disabled={isLoading}
-            className="btn w-full mt-2 inline-flex items-center justify-center rounded-xl bg-pink-600 hover:bg-pink-500 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition-all disabled:opacity-50 disabled:cursor-not-allowed border-none"
+            className="btn w-full mt-2 inline-flex items-center justify-center rounded-xl bg-slate-900 hover:bg-slate-800 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition-all disabled:opacity-50 disabled:cursor-not-allowed border-none cursor-pointer"
           >
             {isLoading ? (
               <span className="flex items-center gap-2">
@@ -151,10 +151,10 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="mt-6 pt-5 border-t border-pink-100 text-center">
+        <div className="mt-6 pt-5 border-t border-slate-200 text-center">
           <p className="text-xs text-slate-500">
             Need to register a new administrator?{" "}
-            <Link href="/admin/register" className="font-semibold text-pink-600 hover:text-pink-700 underline">
+            <Link href="/admin/register" className="font-semibold text-slate-900 hover:text-slate-700 underline">
               Register here
             </Link>
           </p>

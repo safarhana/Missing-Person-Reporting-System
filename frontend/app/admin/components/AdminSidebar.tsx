@@ -34,10 +34,10 @@ export default function AdminSidebar() {
   ];
 
   return (
-    <aside className="w-full md:w-64 bg-white border-r border-pink-100 flex flex-col shrink-0">
+    <aside className="w-full md:w-64 bg-white border-r border-slate-200 flex flex-col shrink-0">
       <div className="p-4 flex-1">
-        <p className="text-[11px] font-semibold text-pink-700/80 uppercase tracking-wider px-3 mb-2">
-          Admin Management
+        <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider px-3 mb-2">
+          Operations Management
         </p>
         <nav className="space-y-1">
           {navigation.map((item) => {
@@ -52,15 +52,15 @@ export default function AdminSidebar() {
                 href={item.href}
                 className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                   isActive
-                    ? "bg-pink-600 text-white shadow-sm"
-                    : "text-slate-600 hover:bg-pink-50 hover:text-pink-700"
+                    ? "bg-slate-900 text-white shadow-sm"
+                    : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
                 }`}
               >
                 <div
                   className={`flex h-6 w-6 items-center justify-center rounded-lg text-xs font-bold transition-colors ${
                     isActive
                       ? "bg-white/20 text-white"
-                      : "bg-pink-50 text-pink-600 group-hover:bg-pink-100"
+                      : "bg-slate-100 text-slate-700 group-hover:bg-slate-200"
                   }`}
                 >
                   {item.tag}
@@ -69,7 +69,7 @@ export default function AdminSidebar() {
                   <span>{item.name}</span>
                   <span
                     className={`text-[10px] leading-tight ${
-                      isActive ? "text-pink-100" : "text-slate-400"
+                      isActive ? "text-slate-300" : "text-slate-400"
                     }`}
                   >
                     {item.description}
@@ -81,14 +81,14 @@ export default function AdminSidebar() {
         </nav>
       </div>
 
-      <div className="p-4 border-t border-pink-100 bg-pink-50/40">
-        <div className="rounded-xl bg-white p-3 border border-pink-100 shadow-xs">
+      <div className="p-4 border-t border-slate-200 bg-slate-50">
+        <div className="rounded-xl bg-white p-3 border border-slate-200 shadow-xs">
           <div className="flex items-center gap-2 mb-1">
-            <span className="flex h-2 w-2 rounded-full bg-pink-500"></span>
-            <span className="text-xs font-semibold text-slate-800">System Online</span>
+            <span className="flex h-2 w-2 rounded-full bg-emerald-500"></span>
+            <span className="text-xs font-semibold text-slate-800">Dispatch Online</span>
           </div>
           <p className="text-[11px] text-slate-500 leading-snug">
-            Missing Person Reporting System Admin Console
+            Missing Person Operations & Authority Network
           </p>
         </div>
       </div>

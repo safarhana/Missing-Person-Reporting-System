@@ -1,19 +1,15 @@
 "use client";
 
-import { use, useEffect, useState, FormEvent } from "react";
+import { useEffect, useState, FormEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { getAdminById, updateAdmin, updateAdminStatus, deleteAdmin, AdminUser } from "../../services/api";
 import { updateAdminSchema } from "../../utils/validation";
 
-interface PageProps {
-  params: Promise<{ id: string }>;
-}
-
-export default function UserDetailPage({ params }: PageProps) {
+export default function UserDetailPage() {
   const router = useRouter();
-  const resolvedParams = use(params);
-  const { id } = resolvedParams;
+  const routeParams = useParams();
+  const id = Array.isArray(routeParams.id) ? routeParams.id[0] : (routeParams.id as string);
 
   const [admin, setAdmin] = useState<AdminUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -125,30 +121,30 @@ export default function UserDetailPage({ params }: PageProps) {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-3">
-        <div className="h-8 w-8 rounded-full border-2 border-indigo-500/20 border-t-indigo-500 animate-spin"></div>
-        <p className="text-xs text-slate-400">Fetching dynamic profile for ID #{id}...</p>
+        <div className="h-8 w-8 rounded-full border-2 border-slate-300 border-t-slate-900 animate-spin"></div>
+        <p className="text-xs text-slate-500">Fetching dynamic profile for ID #{id}...</p>
       </div>
     );
   }
 
   if (error || !admin) {
     return (
-      <div className="rounded-2xl border border-red-500/30 bg-slate-900/90 p-8 text-center max-w-lg mx-auto">
-        <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-red-500/10 text-red-400 mb-3">
+      <div className="rounded-2xl border border-red-200 bg-white p-8 text-center max-w-lg mx-auto shadow-md">
+        <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 border border-red-200 text-red-600 mb-3 text-lg font-bold">
           ⚠️
         </div>
-        <h2 className="text-lg font-bold text-white">Administrator Record Missing</h2>
-        <p className="mt-1 text-xs text-slate-400">{error}</p>
+        <h2 className="text-lg font-bold text-slate-900">Administrator Record Missing</h2>
+        <p className="mt-1 text-xs text-slate-500">{error}</p>
         <div className="mt-6 flex justify-center gap-3">
           <Link
             href="/admin/users"
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-semibold text-white hover:bg-indigo-500 transition-colors"
+            className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-800 transition-colors"
           >
             ← Back to Directory
           </Link>
           <button
             onClick={fetchAdminDetails}
-            className="rounded-lg bg-slate-800 border border-slate-700 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-700"
+            className="rounded-xl bg-slate-100 border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-200 cursor-pointer"
           >
             Retry
           </button>
@@ -160,28 +156,28 @@ export default function UserDetailPage({ params }: PageProps) {
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       <div className="flex items-center gap-2 text-xs text-slate-500">
-        <Link href="/admin" className="hover:text-pink-600 transition-colors">
+        <Link href="/admin" className="hover:text-slate-900 transition-colors">
           Admin
         </Link>
         <span>/</span>
-        <Link href="/admin/users" className="hover:text-pink-600 transition-colors">
+        <Link href="/admin/users" className="hover:text-slate-900 transition-colors">
           User Directory
         </Link>
         <span>/</span>
-        <span className="text-pink-600 font-medium">Profile #{id}</span>
+        <span className="text-slate-900 font-semibold">Profile #{id}</span>
       </div>
 
       {updateMessage && (
-        <div className="rounded-xl bg-pink-50 border border-pink-200 p-3 text-xs text-pink-700 flex justify-between items-center">
+        <div className="rounded-xl bg-slate-100 border border-slate-300 p-3 text-xs text-slate-800 flex justify-between items-center">
           <span>{updateMessage}</span>
           <button onClick={() => setUpdateMessage(null)} className="text-slate-400 hover:text-slate-700">✕</button>
         </div>
       )}
 
-      <div className="rounded-2xl border border-pink-100 bg-white p-6 sm:p-8 shadow-xs">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-pink-100 pb-6">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-xs">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200 pb-6">
           <div className="flex items-center gap-4">
-            <div className="h-16 w-16 rounded-2xl bg-pink-600 flex items-center justify-center text-white text-2xl font-black shadow-xs">
+            <div className="h-16 w-16 rounded-2xl bg-slate-900 flex items-center justify-center text-white text-2xl font-black shadow-xs">
               {admin.fullName ? admin.fullName.charAt(0).toUpperCase() : "A"}
             </div>
             <div>
@@ -192,34 +188,34 @@ export default function UserDetailPage({ params }: PageProps) {
                 <span
                   className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold border ${
                     admin.isActive
-                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                      : "bg-slate-100 text-slate-600 border-slate-200"
+                      ? "bg-emerald-50 text-emerald-800 border-emerald-300"
+                      : "bg-slate-100 text-slate-600 border-slate-300"
                   }`}
                 >
                   {admin.isActive ? "Active" : "Inactive"}
                 </span>
               </div>
-              <p className="text-xs text-pink-600 font-mono mt-0.5">@{admin.username}</p>
+              <p className="text-xs text-slate-500 font-mono mt-0.5">@{admin.username}</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               onClick={() => setIsEditOpen(true)}
-              className="flex-1 sm:flex-initial rounded-xl bg-pink-600 hover:bg-pink-500 px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors"
+              className="flex-1 sm:flex-initial rounded-xl bg-slate-900 hover:bg-slate-800 px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors cursor-pointer"
             >
               Edit Profile
             </button>
             <button
               onClick={handleToggleStatus}
-              className="rounded-xl bg-white hover:bg-pink-50 border border-pink-200 px-3 py-2 text-xs font-semibold text-slate-700 transition-colors shadow-xs"
+              className="rounded-xl bg-white hover:bg-slate-50 border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 transition-colors shadow-xs cursor-pointer"
               title="Toggle status"
             >
               {admin.isActive ? "Deactivate" : "Activate"}
             </button>
             <button
               onClick={() => setShowDeleteModal(true)}
-              className="rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-3 py-2 text-xs font-semibold transition-colors"
+              className="rounded-xl bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 px-3 py-2 text-xs font-semibold transition-colors cursor-pointer"
             >
               Delete
             </button>
@@ -227,19 +223,19 @@ export default function UserDetailPage({ params }: PageProps) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6">
-          <div className="rounded-xl bg-pink-50/40 p-4 border border-pink-100 space-y-3 text-xs text-slate-600">
+          <div className="rounded-xl bg-slate-50 p-4 border border-slate-200 space-y-3 text-xs text-slate-600">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
               Account Details
             </h3>
-            <div className="flex justify-between py-1 border-b border-pink-100">
+            <div className="flex justify-between py-1 border-b border-slate-200">
               <span className="text-slate-500">Admin ID:</span>
-              <span className="font-mono text-slate-900 font-medium">#{admin.id}</span>
+              <span className="font-mono text-slate-900 font-semibold">#{admin.id}</span>
             </div>
-            <div className="flex justify-between py-1 border-b border-pink-100">
+            <div className="flex justify-between py-1 border-b border-slate-200">
               <span className="text-slate-500">Username:</span>
-              <span className="font-mono text-pink-700 font-medium">@{admin.username}</span>
+              <span className="font-mono text-slate-900 font-semibold">@{admin.username}</span>
             </div>
-            <div className="flex justify-between py-1 border-b border-pink-100">
+            <div className="flex justify-between py-1 border-b border-slate-200">
               <span className="text-slate-500">Role:</span>
               <span className="text-slate-900 font-medium">System Administrator</span>
             </div>
@@ -251,28 +247,28 @@ export default function UserDetailPage({ params }: PageProps) {
             </div>
           </div>
 
-          <div className="rounded-xl bg-pink-50/40 p-4 border border-pink-100 space-y-3 text-xs text-slate-600">
+          <div className="rounded-xl bg-slate-50 p-4 border border-slate-200 space-y-3 text-xs text-slate-600">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
               Assigned Personnel
             </h3>
-            <div className="flex justify-between py-1 border-b border-pink-100">
+            <div className="flex justify-between py-1 border-b border-slate-200">
               <span className="text-slate-500">Assigned Volunteers:</span>
               <span className="font-bold text-slate-900">{admin.volunteers?.length || 0}</span>
             </div>
-            <div className="flex justify-between py-1 border-b border-pink-100">
+            <div className="flex justify-between py-1 border-b border-slate-200">
               <span className="text-slate-500">Supervised Case Officers:</span>
               <span className="font-bold text-slate-900">{admin.caseOfficers?.length || 0}</span>
             </div>
             <div className="pt-2 flex gap-2">
               <Link
                 href="/admin/volunteers"
-                className="flex-1 text-center py-1.5 rounded-lg bg-white hover:bg-pink-50 border border-pink-200 text-[11px] font-medium text-pink-700 transition-colors shadow-xs"
+                className="flex-1 text-center py-1.5 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-[11px] font-semibold text-slate-800 transition-colors shadow-xs"
               >
                 Manage Volunteers →
               </Link>
               <Link
                 href="/admin/case-officers"
-                className="flex-1 text-center py-1.5 rounded-lg bg-white hover:bg-pink-50 border border-pink-200 text-[11px] font-medium text-pink-700 transition-colors shadow-xs"
+                className="flex-1 text-center py-1.5 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-[11px] font-semibold text-slate-800 transition-colors shadow-xs"
               >
                 Manage Officers →
               </Link>
@@ -283,14 +279,14 @@ export default function UserDetailPage({ params }: PageProps) {
 
       {isEditOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white border border-pink-200 p-6 shadow-2xl">
-            <div className="flex items-center justify-between pb-4 border-b border-pink-100 mb-4">
+          <div className="w-full max-w-md rounded-2xl bg-white border border-slate-200 p-6 shadow-2xl">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-200 mb-4">
               <h3 className="text-base font-bold text-slate-900">
                 Edit Profile — @{admin.username}
               </h3>
               <button
                 onClick={() => setIsEditOpen(false)}
-                className="text-slate-400 hover:text-slate-700 text-lg"
+                className="text-slate-400 hover:text-slate-700 text-lg cursor-pointer"
               >
                 ✕
               </button>
@@ -305,11 +301,11 @@ export default function UserDetailPage({ params }: PageProps) {
                   type="text"
                   value={editFullName}
                   onChange={(e) => setEditFullName(e.target.value)}
-                  className="w-full rounded-xl bg-white border border-pink-200 px-3 py-2 text-slate-900 focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20"
+                  className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
                   required
                 />
                 {editErrors.fullName && (
-                  <p className="mt-1 text-rose-600">{editErrors.fullName}</p>
+                  <p className="mt-1 text-red-600">{editErrors.fullName}</p>
                 )}
               </div>
 
@@ -322,10 +318,10 @@ export default function UserDetailPage({ params }: PageProps) {
                   value={editPassword}
                   onChange={(e) => setEditPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full rounded-xl bg-white border border-pink-200 px-3 py-2 text-slate-900 focus:outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20"
+                  className="w-full rounded-xl bg-white border border-slate-300 px-3 py-2 text-slate-900 focus:outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10"
                 />
                 {editErrors.password && (
-                  <p className="mt-1 text-rose-600">{editErrors.password}</p>
+                  <p className="mt-1 text-red-600">{editErrors.password}</p>
                 )}
               </div>
 
@@ -335,7 +331,7 @@ export default function UserDetailPage({ params }: PageProps) {
                   id="modalStatus"
                   checked={editStatus}
                   onChange={(e) => setEditStatus(e.target.checked)}
-                  className="h-4 w-4 rounded border-pink-300 text-pink-600 focus:ring-pink-500"
+                  className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
                 />
                 <label htmlFor="modalStatus" className="text-slate-700">
                   Account is Active
@@ -346,14 +342,14 @@ export default function UserDetailPage({ params }: PageProps) {
                 <button
                   type="button"
                   onClick={() => setIsEditOpen(false)}
-                  className="flex-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 font-semibold transition-colors"
+                  className="flex-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 font-semibold transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 rounded-xl bg-pink-600 hover:bg-pink-500 text-white py-2 font-semibold shadow-xs transition-colors"
+                  className="flex-1 rounded-xl bg-slate-900 hover:bg-slate-800 text-white py-2 font-semibold shadow-xs transition-colors cursor-pointer"
                 >
                   {isSubmitting ? "Saving..." : "Save Changes"}
                 </button>
@@ -365,9 +361,9 @@ export default function UserDetailPage({ params }: PageProps) {
 
       {showDeleteModal && admin && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-pink-100">
-            <div className="flex items-center gap-3 text-rose-600 mb-4">
-              <div className="h-10 w-10 rounded-xl bg-rose-50 flex items-center justify-center font-bold text-lg">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+            <div className="flex items-center gap-3 text-red-600 mb-4">
+              <div className="h-10 w-10 rounded-xl bg-red-50 border border-red-200 flex items-center justify-center font-bold text-lg">
                 ⚠️
               </div>
               <div>
@@ -383,7 +379,7 @@ export default function UserDetailPage({ params }: PageProps) {
                 type="button"
                 onClick={() => setShowDeleteModal(false)}
                 disabled={isSubmitting}
-                className="btn btn-sm rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border-none font-medium px-4"
+                className="btn btn-sm rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border-none font-medium px-4 cursor-pointer"
               >
                 Cancel
               </button>
@@ -391,7 +387,7 @@ export default function UserDetailPage({ params }: PageProps) {
                 type="button"
                 onClick={handleDelete}
                 disabled={isSubmitting}
-                className="btn btn-sm rounded-xl bg-rose-600 hover:bg-rose-500 text-white border-none font-medium shadow-sm shadow-rose-200 px-4"
+                className="btn btn-sm rounded-xl bg-red-600 hover:bg-red-700 text-white border-none font-medium shadow-sm px-4 cursor-pointer"
               >
                 {isSubmitting ? "Deleting..." : "Yes, Delete"}
               </button>
