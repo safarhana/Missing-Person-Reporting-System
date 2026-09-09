@@ -1,11 +1,11 @@
 import Link from "next/link";
 
 type VolunteerCardProps = {
-    id: string;
+    id: number;
     fullName: string;
     email: string;
     phone: string;
-    status: string;
+    isActive : boolean;
 };
 
 export default function VolunteerCard({
@@ -13,17 +13,21 @@ export default function VolunteerCard({
     fullName,
     email,
     phone,
-    status
+    isActive
 }: VolunteerCardProps) {
     return(
         <div>
-            <h3>{fullName}</h3>
-            <p>Email: {email}</p>
-            <p>Phone: {phone}</p>
-            <p>Status: {status}</p>
-            <Link href={`/volunteer/${id}`}>
-            View Details
-            </Link>
+        <p>ID: {id}</p>
+        <h3>{fullName}</h3>
+        {/* <p>Email: {email}</p>
+        <p>Phone: {phone}</p>
+        <p>Status: {isActive ? "Active" : "Inactive"}</p> */}
+
+      <Link href={`/volunteer/${id}`}>
+        View Details
+      </Link>
+
+      <br />
         </div>
     )
 }

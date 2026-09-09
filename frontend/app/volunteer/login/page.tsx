@@ -3,6 +3,8 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "../components/volunteerValidation";
+import { useRouter } from "next/navigation";
+import axios from "axios";
 
 
 
@@ -12,16 +14,40 @@ type LoginForm = {
 }
 
 export default function LoginPage() {
+
+  const router = useRouter();
+
     const {
         register, handleSubmit, formState: { errors }
     } = useForm<LoginForm>({
         resolver: zodResolver(loginSchema),
     });
 
-    const onSubmit = (data: LoginForm) => {
-        console.log(data);
-        alert("Login successful!");
-    };
+    const onSubmit = async(data: LoginForm) => {
+        try {
+           const response = await axios.post( "http://localhost:5000/auth/volunteer-login",
+             data );
+              console.log("Login response:", response.data);
+
+              localStorage.setItem("token", response.data.access_token);
+
+               localStorage.setItem( "volunteer",
+                      JSON.stringify(response.data.volunteer));
+
+               alert("Login successful!");
+
+               router.push("/volunteer/dashboard");
+    }catch(error: any) {
+
+        console.log(error);
+
+        if (error.response) {
+           alert( error.response.data.message || "Invalid username or password" );
+          } else {
+             alert("Cannot connect to backend");
+            }
+          }
+    }
 
     return (
     <div>
@@ -64,6 +90,18 @@ export default function LoginPage() {
         <button type="submit">
           Login
         </button>
+
+        <br />
+
+        <button type="button" onClick={() => router.push("/volunteer/register")}>
+          haven't any account? Register
+        </button>
+
+        <br/>
+        <button type="button" onClick={() => router.push("/volunteer/management")} >
+         Management Page 
+         </button>
+
 
       </form>
     </div>

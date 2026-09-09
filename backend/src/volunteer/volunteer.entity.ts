@@ -50,6 +50,7 @@ export class VolunteerEntity {
   @Column({
     type: 'bigint',
     unsigned: true,
+    nullable: true,
   })
   phone: string;
 

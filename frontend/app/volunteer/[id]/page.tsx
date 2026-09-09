@@ -1,31 +1,62 @@
+import axios from "axios";
+
 type VolunteerDetailsProps = {
   params: Promise<{
     id: string;
-    fullName: string;
-    email: string;
-    phone: string;
-    status: string;
   }>;
 };
+
+type Volunteer = {
+  id: number;
+  username: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  isActive: boolean;
+};
+
+export const dynamic = "force-dynamic";
 
 export default async function VolunteerDetails({
   params,
 }: VolunteerDetailsProps) {
-  const { id,fullName,email,phone,status } = await params;
+
+  const { id } = await params;
+
+  const response = await axios.get(
+    `http://localhost:5000/volunteer/${id}`
+  );
+
+  const volunteer: Volunteer = response.data;
 
   return (
     <div>
       <h1>Volunteer Details</h1>
 
-      <p>Volunteer ID: {id}</p>
+      <p>
+        <strong>ID:</strong> {volunteer.id}
+      </p>
 
-      <p>Full Name: {fullName}</p>
+      <p>
+        <strong>Username:</strong> {volunteer.username}
+      </p>
 
-      <p>Email: {email}</p>
+      <p>
+        <strong>Full Name:</strong> {volunteer.fullName}
+      </p>
 
-      <p>Phone: {phone}</p>
+      <p>
+        <strong>Email:</strong> {volunteer.email}
+      </p>
 
-      <p>Status: {status}</p>
+      <p>
+        <strong>Phone:</strong> {volunteer.phone}
+      </p>
+
+      <p>
+        <strong>Status:</strong>{" "}
+        {volunteer.isActive ? "Active" : "Inactive"}
+      </p>
     </div>
   );
 }

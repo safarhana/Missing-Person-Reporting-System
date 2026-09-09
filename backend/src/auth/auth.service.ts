@@ -76,6 +76,14 @@ export class AuthService {
 
     return {
       access_token: await this.jwtService.signAsync(payload),
-    };
+  volunteer: {
+    id: volunteer.id,
+    username: volunteer.username,
+    fullName: volunteer.fullName,
+    email: volunteer.email,
+    phone: volunteer.phone,
+    isActive: volunteer.isActive,
+    }
+    }
   }
 }

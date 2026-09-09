@@ -1,14 +1,16 @@
 import { Injectable,
   NotFoundException,
   ConflictException,
-  BadRequestException, } from '@nestjs/common';
+  BadRequestException,
+  UnauthorizedException,
+ } from '@nestjs/common';
 import { VolunteerDto } from './volunteer.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { VolunteerEntity } from './volunteer.entity';
 import { Repository,IsNull, Like } from 'typeorm';
 import { Admin } from '../admin/admin.entity';
 import * as bcrypt from 'bcrypt';
-import { Mpr } from 'src/missing_person_reporter/mpr.entity';
+import { Mpr } from '../missing_person_reporter/mpr.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
@@ -49,23 +51,37 @@ export class VolunteerService {
 }
 
 
-async updatePhnName(id: number, phone: string, fullName: string): Promise<VolunteerEntity | null> {
-  await this.volunteerRepo.update(id, { phone, fullName });
+
+
+async updatePhnNameEmail(id: number, phone: string, fullName: string, email: string): Promise<VolunteerEntity | null> {
+  await this.volunteerRepo.update(id, { phone, fullName, email });
 
   return await this.volunteerRepo.findOne({
     where: { id },
   });
 }
 
-async getUsersWithNullName(): Promise<VolunteerEntity[]> {
+async getVolunteersWithMissingInfo(): Promise<VolunteerEntity[]> {
   return await this.volunteerRepo.find({
-    where: {
-      fullName: IsNull(),
-    },
+    where: [
+      {
+        fullName: IsNull(),
+      },
+      {
+        phone: IsNull(),
+      },
+      {
+        email: IsNull(),
+      },
+    ],
   });
 }
 
-async deleteUser(id: number): Promise<{ message: string }> {
+async deleteUser(
+  id: number,
+  username: string,
+  password: string,
+): Promise<{ message: string }> {
 
   const volunteer = await this.volunteerRepo.findOne({
     where: { id },
@@ -74,18 +90,40 @@ async deleteUser(id: number): Promise<{ message: string }> {
   if (!volunteer) {
     throw new NotFoundException('Volunteer not found');
   }
-  
+
+  if (volunteer.username !== username) {
+    throw new UnauthorizedException('Invalid username or password');
+  }
+
+  const passwordMatch = await bcrypt.compare(
+    password,
+    volunteer.password,
+  );
+
+  if (!passwordMatch) {
+    throw new UnauthorizedException('Invalid username or password');
+  }
+
   await this.volunteerRepo.delete(id);
+
   return {
     message: `Volunteer id=${id} deleted successfully`,
   };
 }
 
+
 async getAllVolunteers(): Promise<VolunteerEntity[]> {
   return await this.volunteerRepo.find();
 }
 
-async getUserById(id: number): Promise<VolunteerEntity | null> {
+async getUserById(id: number): Promise< {
+  id: number;
+  username: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  isActive: boolean;
+}> {
 
   const volunteer = await this.volunteerRepo.findOne({
     where: { id },
@@ -95,9 +133,14 @@ async getUserById(id: number): Promise<VolunteerEntity | null> {
     throw new NotFoundException('Volunteer not found');
   }
 
-  return await this.volunteerRepo.findOne({
-    where: { id },
-  });
+  return {
+    id: volunteer.id,
+    username: volunteer.username,
+    fullName: volunteer.fullName,
+    email: volunteer.email,
+    phone: volunteer.phone,
+    isActive: volunteer.isActive,
+  };
 }
 
 
@@ -188,12 +231,17 @@ async assignAdmin(
 
 async getVolunteersByAdmin(id: number) {
 
-  return await this.adminRepo.findOne({
+  const admin = await this.adminRepo.findOne({
     where: { id },
     relations:  {
     volunteers: true,
   },
   });
+    if (!admin) {
+    throw new NotFoundException("Admin not found");
+  }
+
+  return admin.volunteers;
 }
 
 

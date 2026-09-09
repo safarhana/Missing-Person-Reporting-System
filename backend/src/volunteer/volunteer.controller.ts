@@ -18,30 +18,38 @@ export class VolunteerController {
 
   @Put(':id')
   @UseGuards(JwtAuthGuard)
-  updatePhnName(
+  updatePhnNameEmail(
     @Param('id', ParseIntPipe) id: string,
     @Body('phone') phone: string,
     @Body('fullName') fullName: string,
+    @Body('email') email: string
   ) {
-    return this.volunteerService.updatePhnName(
+    return this.volunteerService.updatePhnNameEmail(
       Number(id),
       phone,
       fullName,
+      email,
     );
   }
 
-  @Get('null-name')
-  getUsersWithNullName() {
-    return this.volunteerService.getUsersWithNullName();
+  @Get('getVolunteersWithMissingInfo')
+  getVolunteersWithMissingInfo() {
+    return this.volunteerService.getVolunteersWithMissingInfo();
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
-  deleteUser(@Param('id') id: string) {
-    return this.volunteerService.deleteUser(
-      Number(id),
-    );
-  }
+@UseGuards(JwtAuthGuard)
+deleteUser(
+  @Param('id', ParseIntPipe) id: number,
+  @Body('username') username: string,
+  @Body('password') password: string,
+) {
+  return this.volunteerService.deleteUser(
+    id,
+    username,
+    password,
+  );
+}
 
   @Get()
   getAllVolunteers() {
@@ -70,7 +78,7 @@ export class VolunteerController {
 
  //----------------------------------------------------------------------------------------------------------------------------------------
 @Patch(':volunteerId/admin/:adminId')
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 assignAdmin(
   @Param('volunteerId', ParseIntPipe) volunteerId: number,
   @Param('adminId', ParseIntPipe) adminId: number,
@@ -89,7 +97,7 @@ getVolunteersByAdmin(
 }
 
 @Delete(':volunteerId/admin')
-@UseGuards(JwtAuthGuard)
+//@UseGuards(JwtAuthGuard)
 removeAdmin(
   @Param('volunteerId', ParseIntPipe) volunteerId: number,
 ) {
