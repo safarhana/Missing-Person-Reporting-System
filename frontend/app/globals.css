@@ -1,1 +1,164 @@
+@import "tailwindcss";
+@plugin "daisyui";
 
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --primary-navy: #0f172a;
+  --primary-navy-hover: #1e293b;
+  --primary-blue: #1e3a8a;
+  --alert-crimson: #dc2626;
+  --alert-crimson-hover: #b91c1c;
+  --accent-amber: #d97706;
+  --accent-amber-hover: #b45309;
+  --neutral-slate-bg: #f8fafc;
+  --neutral-slate-card: #ffffff;
+  --neutral-slate-border: #e2e8f0;
+}
+
+body {
+  background: #f8fafc;
+  color: #0f172a;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.landing-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f1f5f9 0%, #f8fafc 50%, #e2e8f0 100%);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  padding: 1.5rem;
+  position: relative;
+}
+
+.landing-card {
+  width: 100%;
+  max-width: 760px;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 1.25rem;
+  padding: 3rem;
+  box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+  text-align: left;
+}
+
+.landing-title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 1rem 0;
+  letter-spacing: -0.025em;
+}
+
+.landing-desc {
+  font-size: 1rem;
+  color: #475569;
+  margin: 0 0 1.75rem 0;
+  line-height: 1.6;
+}
+
+.landing-divider {
+  border: 0;
+  border-top: 1px solid #e2e8f0;
+  margin: 0 0 2rem 0;
+}
+
+.landing-section {
+  margin-bottom: 2rem;
+  background-color: #ffffff;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  padding: 1.5rem;
+}
+
+.landing-section:last-of-type {
+  margin-bottom: 0;
+}
+
+.landing-section-title {
+  font-size: 1.25rem;
+  font-weight: 750;
+  color: #0f172a;
+  margin: 0 0 0.5rem 0;
+}
+
+.landing-section-title.dark {
+  color: #0f172a;
+}
+
+.landing-section-desc {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin: 0 0 1.25rem 0;
+}
+
+.landing-btn-group {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.landing-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  height: 2.6rem;
+}
+
+.btn-auth-primary {
+  background-color: #0f172a;
+  color: #ffffff;
+  border: 1px solid #0f172a;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+}
+
+.btn-auth-primary:hover {
+  background-color: #1e293b;
+  border-color: #1e293b;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.3);
+}
+
+.btn-auth-secondary {
+  background-color: #ffffff;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+}
+
+.btn-auth-secondary:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.btn-alert-critical {
+  background-color: #dc2626;
+  color: #ffffff;
+  border: 1px solid #b91c1c;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+}
+
+.btn-alert-critical:hover {
+  background-color: #b91c1c;
+  border-color: #991b1b;
+}
+
+.btn-accent-amber {
+  background-color: #d97706;
+  color: #ffffff;
+  border: 1px solid #b45309;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);
+}
+
+.btn-accent-amber:hover {
+  background-color: #b45309;
+  border-color: #92400e;
+}

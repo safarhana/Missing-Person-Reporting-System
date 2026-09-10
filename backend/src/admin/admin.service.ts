@@ -1,6 +1,7 @@
 import {
   Injectable,
   NotFoundException,
+  Logger,
 } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,9 +14,13 @@ import { CaseOfficerEntity } from '../case_officer/case_officer.entity';
 
 import * as bcrypt from 'bcrypt';
 import { MailerService } from '@nestjs-modules/mailer';
+import { ConfigService } from '@nestjs/config';
+import { PusherService } from './pusher.service';
 
 @Injectable()
 export class AdminService {
+  private readonly logger = new Logger(AdminService.name);
+
   constructor(
     @InjectRepository(Admin)
     private readonly adminRepository: Repository<Admin>,
@@ -27,6 +32,8 @@ export class AdminService {
     private readonly caseOfficerRepository: Repository<CaseOfficerEntity>,
 
     private readonly mailerService: MailerService,
+    private readonly configService: ConfigService,
+    private readonly pusherService: PusherService,
   ) {}
 
   async create(createAdminDto: CreateAdminDto) {
@@ -41,10 +48,26 @@ export class AdminService {
 
     const savedAdmin = await this.adminRepository.save(admin);
 
-    await this.mailerService.sendMail({
-      to: 'farhana.mim080@gmail.com',
-      subject: 'Admin Registration',
-      text: `Welcome ${savedAdmin.fullName}! Your account has been created successfully.`,
+    const recipientEmail =
+      this.configService.get<string>('ADMIN_REGISTRATION_EMAIL') ||
+      this.configService.get<string>('MAIL_USER');
+
+    if (!recipientEmail) {
+      this.logger.warn(
+        'No recipient email configured (ADMIN_REGISTRATION_EMAIL / MAIL_USER); skipping registration notification email.',
+      );
+    } else {
+      await this.mailerService.sendMail({
+        to: recipientEmail,
+        subject: 'Admin Registration',
+        text: `Welcome ${savedAdmin.fullName}! Your account has been created successfully.`,
+      });
+    }
+
+    await this.pusherService.triggerAdminAlert({
+      title: 'New Admin Registered',
+      message: `Admin ${savedAdmin.fullName} has joined the system.`,
+      type: 'success',
     });
 
     return savedAdmin;
@@ -86,13 +109,15 @@ export class AdminService {
     return admin;
   }
 
-  async update(username: string, updateData: CreateAdminDto) {
+  async update(username: string, updateData: Partial<CreateAdminDto>) {
     const admin = await this.findByUsername(username);
 
-    admin.username = updateData.username;
-    admin.fullName = updateData.fullName;
-    admin.password = updateData.password;
-    admin.isActive = updateData.isActive;
+    if (updateData.username) admin.username = updateData.username;
+    if (updateData.fullName) admin.fullName = updateData.fullName;
+    if (updateData.password) {
+      admin.password = await bcrypt.hash(updateData.password, 10);
+    }
+    if (updateData.isActive !== undefined) admin.isActive = updateData.isActive;
 
     return this.adminRepository.save(admin);
   }
@@ -102,7 +127,15 @@ export class AdminService {
 
     admin.isActive = isActive;
 
-    return this.adminRepository.save(admin);
+    const updatedAdmin = await this.adminRepository.save(admin);
+
+    await this.pusherService.triggerAdminAlert({
+      title: 'Admin Status Changed',
+      message: `Admin "${username}" account is now ${isActive ? 'Active' : 'Inactive'}.`,
+      type: isActive ? 'success' : 'warning',
+    });
+
+    return updatedAdmin;
   }
 
   async remove(username: string) {
@@ -140,12 +173,20 @@ export class AdminService {
       },
     );
 
-    return this.volunteerRepository.findOne({
+    const result = await this.volunteerRepository.findOne({
       where: { id: volunteerId },
       relations: {
         admin: true,
       },
     });
+
+    await this.pusherService.triggerAdminAlert({
+      title: 'Volunteer Assigned',
+      message: `Volunteer "${volunteer.fullName || volunteer.username}" has been assigned to Admin #${adminId}.`,
+      type: 'info',
+    });
+
+    return result;
   }
 
   async getVolunteers(adminId: number) {
@@ -219,12 +260,20 @@ export class AdminService {
 
     await this.adminRepository.save(admin);
 
-    return this.adminRepository.findOne({
+    const result = await this.adminRepository.findOne({
       where: { id: adminId },
       relations: {
         caseOfficers: true,
       },
     });
+
+    await this.pusherService.triggerAdminAlert({
+      title: 'Case Officer Assigned',
+      message: `Case Officer "${caseOfficer.name || caseOfficerId}" assigned to Admin #${adminId}.`,
+      type: 'info',
+    });
+
+    return result;
   }
 
   async getCaseOfficers(adminId: number) {
@@ -266,5 +315,13 @@ export class AdminService {
     await this.adminRepository.save(admin);
 
     return admin;
+  }
+
+  async broadcastAlert(data: {
+    title: string;
+    message: string;
+    type?: 'info' | 'warning' | 'success' | 'alert';
+  }) {
+    return await this.pusherService.triggerAdminAlert(data);
   }
 }

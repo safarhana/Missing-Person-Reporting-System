@@ -37,21 +37,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
       }),
     }),
 
-   
-    MailerModule.forRoot({
-      transport: {
-        host: 'smtp.gmail.com',
-        port: 465,
-        secure: true, 
-        auth: {
-          user: 'remondwasi24@gmail.com', 
-          pass: 'mimg qaij gpnh pxph',   
-        },
-      },
-      defaults: {
-        from: '"Missing Person System" <no-reply@mprsystem.com>',
-      },
-    }),
+
 
     MailerModule.forRootAsync({
       imports: [ConfigModule],

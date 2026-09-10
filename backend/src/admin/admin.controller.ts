@@ -11,11 +11,13 @@ import {
   ValidationPipe,
   ParseIntPipe,
   DefaultValuePipe,
+  UseGuards,
 } from '@nestjs/common';
 
 import { AdminService } from './admin.service';
 import { CreateAdminDto } from './dto/create-admin.dto';
-import { UseGuards } from '@nestjs/common';
+import { UpdateStatusDto } from './dto/update-status.dto';
+import { TriggerAlertDto } from './dto/alert.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth/jwt-auth.guard';
 
 @Controller('admin')
@@ -30,6 +32,15 @@ export class AdminController {
     return this.adminService.create(createAdminDto);
   }
 
+  @Post('alerts')
+  @UseGuards(JwtAuthGuard)
+  broadcastAlert(
+    @Body(new ValidationPipe())
+    dto: TriggerAlertDto,
+  ) {
+    return this.adminService.broadcastAlert(dto);
+  }
+
   @Get()
   @UseGuards(JwtAuthGuard)
   findAll() {
@@ -37,6 +48,7 @@ export class AdminController {
   }
 
   @Get('search')
+  @UseGuards(JwtAuthGuard)
   findByFullName(
     @Query('name', new DefaultValuePipe(''))
     name: string,
@@ -45,6 +57,7 @@ export class AdminController {
   }
 
   @Get('id/:id')
+  @UseGuards(JwtAuthGuard)
   findById(
     @Param('id', ParseIntPipe)
     id: number,
@@ -53,6 +66,7 @@ export class AdminController {
   }
 
   @Get(':username')
+  @UseGuards(JwtAuthGuard)
   findByUsername(
     @Param('username')
     username: string,
@@ -61,6 +75,7 @@ export class AdminController {
   }
 
   @Put(':username')
+  @UseGuards(JwtAuthGuard)
   update(
     @Param('username')
     username: string,
@@ -72,20 +87,22 @@ export class AdminController {
   }
 
   @Patch('status/:username')
+  @UseGuards(JwtAuthGuard)
   updateStatus(
     @Param('username')
     username: string,
 
-    @Body('isActive')
-    isActive: boolean,
+    @Body()
+    updateStatusDto: UpdateStatusDto,
   ) {
     return this.adminService.updateStatus(
       username,
-      isActive,
+      updateStatusDto.isActive,
     );
   }
 
   @Delete(':username')
+  @UseGuards(JwtAuthGuard)
   remove(
     @Param('username')
     username: string,
@@ -94,6 +111,7 @@ export class AdminController {
   }
 
   @Post(':adminId/volunteer/:volunteerId')
+  @UseGuards(JwtAuthGuard)
   assignVolunteer(
     @Param('adminId', ParseIntPipe)
     adminId: number,
@@ -107,8 +125,8 @@ export class AdminController {
     );
   }
 
-
   @Get(':adminId/volunteers')
+  @UseGuards(JwtAuthGuard)
   getVolunteers(
     @Param('adminId', ParseIntPipe)
     adminId: number,
@@ -116,8 +134,8 @@ export class AdminController {
     return this.adminService.getVolunteers(adminId);
   }
 
-  
   @Delete(':adminId/volunteer/:volunteerId')
+  @UseGuards(JwtAuthGuard)
   removeVolunteer(
     @Param('adminId', ParseIntPipe)
     adminId: number,
@@ -132,40 +150,43 @@ export class AdminController {
   }
 
   @Post(':adminId/case-officer/:caseOfficerId')
-assignCaseOfficer(
-  @Param('adminId', ParseIntPipe)
-  adminId: number,
+  @UseGuards(JwtAuthGuard)
+  assignCaseOfficer(
+    @Param('adminId', ParseIntPipe)
+    adminId: number,
 
-  @Param('caseOfficerId', ParseIntPipe)
-  caseOfficerId: number,
-) {
-  return this.adminService.assignCaseOfficer(
-    adminId,
-    caseOfficerId,
-  );
-}
+    @Param('caseOfficerId', ParseIntPipe)
+    caseOfficerId: number,
+  ) {
+    return this.adminService.assignCaseOfficer(
+      adminId,
+      caseOfficerId,
+    );
+  }
 
-@Get(':adminId/case-officers')
-getCaseOfficers(
-  @Param('adminId', ParseIntPipe)
-  adminId: number,
-) {
-  return this.adminService.getCaseOfficers(
-    adminId,
-  );
-}
+  @Get(':adminId/case-officers')
+  @UseGuards(JwtAuthGuard)
+  getCaseOfficers(
+    @Param('adminId', ParseIntPipe)
+    adminId: number,
+  ) {
+    return this.adminService.getCaseOfficers(
+      adminId,
+    );
+  }
 
-@Delete(':adminId/case-officer/:caseOfficerId')
-removeCaseOfficer(
-  @Param('adminId', ParseIntPipe)
-  adminId: number,
+  @Delete(':adminId/case-officer/:caseOfficerId')
+  @UseGuards(JwtAuthGuard)
+  removeCaseOfficer(
+    @Param('adminId', ParseIntPipe)
+    adminId: number,
 
-  @Param('caseOfficerId', ParseIntPipe)
-  caseOfficerId: number,
-) {
-  return this.adminService.removeCaseOfficer(
-    adminId,
-    caseOfficerId,
-  );
-}
+    @Param('caseOfficerId', ParseIntPipe)
+    caseOfficerId: number,
+  ) {
+    return this.adminService.removeCaseOfficer(
+      adminId,
+      caseOfficerId,
+    );
+  }
 }
