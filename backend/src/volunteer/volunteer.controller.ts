@@ -70,7 +70,7 @@ deleteUser(
  }
 
  @Patch(':id/status')
- @UseGuards(JwtAuthGuard)
+ //@UseGuards(JwtAuthGuard)
  toggleStatus(
   @Param('id', ParseIntPipe) id: number,) {
   return this.volunteerService.toggleStatus(id);

@@ -1,5 +1,7 @@
 import axios from "axios";
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import StatusButton from "../components/statusButton";
 
 type VolunteerDetailsProps = {
   params: Promise<{
@@ -23,45 +25,41 @@ export default async function VolunteerDetails({
 }: VolunteerDetailsProps) {
 
   const { id } = await params;
+  let volunteer: Volunteer;
 
   try {
     const response = await axios.get(
       `http://localhost:5000/volunteer/${id}`
     );
 
-    const volunteer: Volunteer = response.data;
-
-    return (
-      <div>
-        <h1>Volunteer Details</h1>
-
-        <p>
-          <strong>ID:</strong> {volunteer.id}
-        </p>
-
-        <p>
-          <strong>Username:</strong> {volunteer.username}
-        </p>
-
-        <p>
-          <strong>Full Name:</strong> {volunteer.fullName}
-        </p>
-
-        <p>
-          <strong>Email:</strong> {volunteer.email}
-        </p>
-
-        <p>
-          <strong>Phone:</strong> {volunteer.phone}
-        </p>
-
-        <p>
-          <strong>Status:</strong>{" "}
-          {volunteer.isActive ? "Active" : "Inactive"}
-        </p>
-      </div>
-    );
-  } catch (error) {
+    volunteer = response.data;
+  } catch {
     notFound();
   }
+
+  return (
+    <main className="mx-auto min-h-screen max-w-4xl px-6 py-16">
+        <Link href="/volunteer/management" className="link link-primary">← Back to volunteers</Link>
+        <div className="card mt-6 border border-base-300 bg-base-100 shadow-xl">
+          <div className="card-body">
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-wider text-primary">Volunteer #{volunteer.id}</p>
+                <h1 className="mt-2 text-4xl font-bold">{volunteer.fullName}</h1>
+                <p className="mt-1 text-base-content/60">@{volunteer.username}</p>
+              </div>
+             {/* <span className={`badge badge-lg ${volunteer.isActive ? "badge-success" : "badge-ghost"}`}>{volunteer.isActive ? "Active" : "Inactive"}</span> */}
+            <StatusButton
+              id={volunteer.id}
+      initialStatus={volunteer.isActive}
+            />
+            </div>
+            <div className="mt-8 grid gap-4 sm:grid-cols-2">
+              <div className="rounded-xl bg-base-200 p-4"><p className="text-sm text-base-content/60">Email</p><p className="mt-1 font-medium">{volunteer.email}</p></div>
+              <div className="rounded-xl bg-base-200 p-4"><p className="text-sm text-base-content/60">Phone</p><p className="mt-1 font-medium">{volunteer.phone}</p></div>
+            </div>
+          </div>
+        </div>
+    </main>
+  );
 }

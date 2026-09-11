@@ -89,74 +89,35 @@ export default function UpdateVolunteer() {
   };
 
   if (!volunteer) {
-    return <p>Loading...</p>;
+    return <div className="flex min-h-screen items-center justify-center bg-base-200"><span className="loading loading-spinner loading-lg text-primary" /></div>;
   }
 
   return (
-    <div>
-      <h1>Update Your Information</h1>
-
-      <br />
-
-      <p>
-        <strong>ID:</strong> {volunteer.id}
-      </p>
-
-      <p>
-        <strong>Username:</strong> {volunteer.username}
-      </p>
-
-      <br />
-
-      <label>Full Name</label>
-      <br />
-
-      <input
-        type="text"
-        value={fullName}
-        onChange={(e) => setFullName(e.target.value)}
-        className="border border-gray-400"
-      />
-
-      <br />
-      <br />
-
-      <label>Phone</label>
-      <br />
-
-      <input
-        type="text"
-        value={phone}
-        onChange={(e) => setPhone(e.target.value)}
-        className="border border-gray-400"
-      />
-
-      <br />
-      <br />
-
-      <label>Email</label>
-      <br />
-
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="border border-gray-400"
-      />
-
-      <br />
-      <br />
-
-      <button onClick={updateVolunteer}>
-        Update
-      </button>
-
-      <br />
-      <br />
-
-      <button onClick={() => router.push("/volunteer/dashboard")}>
-        Back to Dashboard
-      </button>
+    <div className="min-h-screen bg-base-200">
+      <div className="mx-auto max-w-2xl px-6 py-12">
+        <div className="card border border-base-300 bg-base-100 shadow-xl">
+          <div className="card-body">
+            <p className="font-semibold text-primary">Volunteer Portal</p>
+            <h1 className="card-title text-3xl">Update your information</h1>
+            <p className="text-sm text-base-content/60">Keep your contact information accurate.</p>
+            <div className="mt-4 rounded-xl bg-base-200 p-4 text-sm"><span className="font-semibold">#{volunteer.id}</span> · @{volunteer.username}</div>
+            <div className="mt-4 space-y-4">
+              {[
+                ["Full name", fullName, setFullName, "text"],
+                ["Phone", phone, setPhone, "text"],
+                ["Email", email, setEmail, "email"],
+              ].map(([label, value, setter, type]) => (
+                <label key={label as string} className="form-control">
+                  <span className="label-text mb-2">{label as string}</span>
+                  <input type={type as string} value={value as string} onChange={(e) => (setter as (value: string) => void)(e.target.value)} className="input input-bordered w-full" />
+                </label>
+              ))}
+            </div>
+            <button className="btn btn-primary mt-4" onClick={updateVolunteer}>Save changes</button>
+            <button className="btn btn-ghost" onClick={() => router.push("/volunteer/dashboard")}>Back to dashboard</button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -102,55 +102,25 @@ export default function DeleteVolunteer() {
   };
 
   if (!volunteer) {
-    return <p>Loading...</p>;
+    return <div className="flex min-h-screen items-center justify-center bg-base-200"><span className="loading loading-spinner loading-lg text-primary" /></div>;
   }
 
   return (
-    <div>
-      <h1>Delete Account</h1>
-
-      <p>
-        <strong>ID:</strong> {volunteer.id}
-      </p>
-
-      <br />
-
-      <label>Username</label>
-      <br />
-
-      <input
-        type="text"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        className="border border-gray-400"
-      />
-
-      <br />
-      <br />
-
-      <label>Password</label>
-      <br />
-
-      <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="border border-gray-400"
-      />
-
-      <br />
-      <br />
-
-      <button onClick={handleDelete}>
-        Delete Account
-      </button>
-
-      <br />
-      <br />
-
-      <button onClick={() => router.push("/volunteer/dashboard")}>
-        Cancel
-      </button>
+    <div className="min-h-screen bg-base-200">
+      <div className="mx-auto max-w-xl px-6 py-12">
+        <div className="card border border-error/30 bg-base-100 shadow-xl">
+          <div className="card-body">
+            <p className="font-semibold text-error">Account settings</p>
+            <h1 className="card-title text-3xl">Delete account</h1>
+            <p className="text-sm text-base-content/60">This action is permanent. Confirm your credentials to continue.</p>
+            <div className="mt-4 rounded-xl bg-base-200 p-4 text-sm"><span className="font-semibold">Volunteer #{volunteer.id}</span> · @{volunteer.username}</div>
+            <label className="form-control mt-4"><span className="label-text mb-2">Username</span><input type="text" value={username} onChange={(e) => setUsername(e.target.value)} className="input input-bordered w-full" /></label>
+            <label className="form-control mt-4"><span className="label-text mb-2">Password</span><input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="input input-bordered w-full" /></label>
+            <button className="btn btn-error mt-4" onClick={handleDelete}>Delete account</button>
+            <button className="btn btn-ghost" onClick={() => router.push("/volunteer/dashboard")}>Cancel</button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import VolunteerNav from "../components/volunteerNavbar";
 import ManagementSidebar from "../components/managementSidebar";
 import VolunteerCard from "../components/volunteerCard";
 import axios from "axios";
@@ -54,45 +53,40 @@ export default function VolunteerHome() {
   }, []);
 
   return (
-    <div className="flex">
+    <div className="flex min-h-screen flex-col bg-base-200 lg:flex-row">
        <ManagementSidebar />
-
-      <br />
-
-      <main className="p-8">
-         <h1 className="text-2xl font-bold">
+      <main className="flex-1 p-6 lg:p-12">
+        <div className="mx-auto max-w-6xl">
+         <p className="font-semibold text-primary">Coordinator workspace</p>
+         <h1 className="mt-2 text-3xl font-bold">
           Volunteer Management
         </h1>
-        <p className="mt-3">
+        <p className="mt-3 text-base-content/60">
           Select an operation from the sidebar.
         </p>
+        <h2 className="mt-10 text-2xl font-bold">Our volunteers</h2>
 
-         
-        <br />
+        {loading && <div className="py-10"><span className="loading loading-spinner text-primary" /></div>}
 
-        <h2>Our Volunteers</h2>
+        {error && <div className="alert alert-error mt-4">{error}</div>}
 
-        {/* Loading message */}
-        {loading && <p>Loading volunteers...</p>}
-
-        {/* Error message */}
-        {error && <p>{error}</p>}
-
-        {/* Show volunteers */}
         {!loading && !error && volunteers.length === 0 && (
-          <p>No volunteers found.</p>
+          <p className="mt-4 rounded-xl border border-dashed border-base-300 p-8 text-center text-base-content/60">No volunteers found.</p>
         )}
 
-        {volunteers.map((volunteer) => (
-          <VolunteerCard
-            key={volunteer.id}
-            id={volunteer.id}
-            fullName={volunteer.fullName}
-            email={volunteer.email}
-            phone={volunteer.phone}
-            isActive={volunteer.isActive}
-          />
-        ))}
+        <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {volunteers.map((volunteer) => (
+            <VolunteerCard
+              key={volunteer.id}
+              id={volunteer.id}
+              fullName={volunteer.fullName}
+              email={volunteer.email}
+              phone={volunteer.phone}
+              isActive={volunteer.isActive}
+            />
+          ))}
+        </div>
+        </div>
       </main>
     </div>
   );

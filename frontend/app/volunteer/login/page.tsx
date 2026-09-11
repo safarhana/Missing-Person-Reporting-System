@@ -50,60 +50,31 @@ export default function LoginPage() {
     }
 
     return (
-    <div>
-      <h1>Volunteer Login</h1>
-
-      <form onSubmit={handleSubmit(onSubmit)}>
-
-        <div>
-          <label>Username</label>
-
-          <br />
-
-          <input
-            type="text"
-            {...register("username")}
-            className="border border-gray-400"
-          />
-
-          <p>{errors.username?.message}</p>
+    <main className="flex min-h-screen items-center justify-center bg-base-200 px-4 py-12">
+      <div className="card w-full max-w-md border border-base-300 bg-base-100 shadow-xl">
+        <div className="card-body">
+          <p className="font-semibold text-primary">Volunteer Portal</p>
+          <h1 className="card-title text-3xl">Welcome back</h1>
+          <p className="text-sm text-base-content/60">Sign in to manage your volunteer profile.</p>
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
+            <div>
+              <label className="label" htmlFor="username"><span className="label-text">Username</span></label>
+              <input id="username" type="text" {...register("username")} className="input input-bordered w-full" />
+              {errors.username?.message && <p className="mt-1 text-sm text-error">{errors.username.message}</p>}
+            </div>
+            <div>
+              <label className="label" htmlFor="password"><span className="label-text">Password</span></label>
+              <input id="password" type="password" {...register("password")} className="input input-bordered w-full" />
+              {errors.password?.message && <p className="mt-1 text-sm text-error">{errors.password.message}</p>}
+            </div>
+            <button type="submit" className="btn btn-primary w-full">Login</button>
+            <div className="flex flex-col gap-2 text-center text-sm">
+              <button type="button" className="link link-primary" onClick={() => router.push("/volunteer/register")}>Need an account? Register</button>
+              <button type="button" className="link link-hover" onClick={() => router.push("/volunteer/management")}>Management Page</button>
+            </div>
+          </form>
         </div>
-
-        <br />
-
-        <div>
-          <label>Password</label>
-
-          <br />
-
-          <input
-            type="password"
-            {...register("password")}
-            className="border border-gray-400"
-          />
-
-          <p>{errors.password?.message}</p>
-        </div>
-
-        <br />
-
-        <button type="submit">
-          Login
-        </button>
-
-        <br />
-
-        <button type="button" onClick={() => router.push("/volunteer/register")}>
-          haven't any account? Register
-        </button>
-
-        <br/>
-        <button type="button" onClick={() => router.push("/volunteer/management")} >
-         Management Page 
-         </button>
-
-
-      </form>
-    </div>
+      </div>
+    </main>
   );
 }

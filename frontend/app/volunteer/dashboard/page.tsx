@@ -81,46 +81,38 @@ const toggleStatus = async () => {
 
 
     return (
-        <div>
-
-            <VolunteerNavbar />
-
-            <h1>Volunteer Dashboard</h1>
-            <br />
-            <h2>Your Information</h2>
-
-            <p>
-                <strong>ID:</strong> {volunteer?.id}
-            </p>
-
-            <p>
-                <strong>Username:</strong> {volunteer?.username}
-            </p>
-
-            <p>
-                <strong>Full Name:</strong> {volunteer?.fullName}
-            </p>
-
-            <p>
-                <strong>Email:</strong> {volunteer?.email}
-            </p>
-
-            <p>
-                <strong>Phone:</strong> {volunteer?.phone}
-            </p>
-
-            <p>
-                <strong>Status:</strong>{" "}
-                {volunteer?.isActive ? "Active" : "Inactive"}
-            </p>
-
-            <button onClick={toggleStatus}>Deactivate Account: 
-            {volunteer?.isActive ? "Deactivate" : "Activate"}
-            </button>
-
-            <br />
-
-        </div>
+      <div className="min-h-screen bg-base-200">
+        <VolunteerNavbar />
+        <main className="mx-auto max-w-6xl px-6 py-12">
+          <div className="mb-8">
+            <p className="font-semibold text-primary">Volunteer Portal</p>
+            <h1 className="mt-2 text-4xl font-bold">Your dashboard</h1>
+            <p className="mt-2 text-base-content/60">Manage your profile and availability from one place.</p>
+          </div>
+          <div className="grid gap-6 lg:grid-cols-[1fr_0.35fr]">
+            <section className="card border border-base-300 bg-base-100 shadow-sm">
+              <div className="card-body">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="card-title">Your information</h2>
+                  <span className={`badge ${volunteer?.isActive ? "badge-success" : "badge-error"}`}>{volunteer?.isActive ? "Active" : "Inactive"}</span>
+                </div>
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  {[["ID", volunteer?.id], ["Username", volunteer?.username], ["Full name", volunteer?.fullName], ["Email", volunteer?.email], ["Phone", volunteer?.phone]].map(([label, value]) => (
+                    <div key={label} className="rounded-xl bg-base-200 p-4"><p className="text-sm text-base-content/60">{label}</p><p className="mt-1 font-medium">{value || "Not provided"}</p></div>
+                  ))}
+                </div>
+              </div>
+            </section>
+            <aside className="card border border-base-300 bg-base-100 shadow-sm">
+              <div className="card-body">
+                <h2 className="card-title text-lg">Availability</h2>
+                <p className="text-sm text-base-content/70">Update your public status when your availability changes.</p>
+                <button className="btn btn-primary mt-4" onClick={toggleStatus}>{volunteer?.isActive ? "Deactivate" : "Activate"} account</button>
+                {/* <button className="btn btn-outline mt-2" onClick={logout}>Sign out</button> */}
+              </div>
+            </aside>
+          </div>
+        </main>
+      </div>
     );
 }
-

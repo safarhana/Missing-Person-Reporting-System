@@ -16,50 +16,32 @@ export default function VolunteerNavbar() {
   };
 
   return (
-    <nav className="text-black shadow-md">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-
-        {/* Website Name */}
-        <div>
-          <h2 className="text-2xl font-bold">
+    <nav className="navbar border-b border-base-300 bg-base-100 shadow-sm">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
+        <div className="navbar-start">
+          <Link href="/volunteer" className="text-lg font-bold text-primary sm:text-xl">
+            <span className="mr-2 rounded-lg bg-primary px-2 py-1 text-primary-content">V</span>
             Volunteer Portal
-          </h2>
-          <p className="text-sm ">
-            Volunteer Management System
-          </p>
+          </Link>
         </div>
-
-        {/* Navigation Links */}
-        <div className="flex items-center gap-2">
-
-          <Link
-            href="/volunteer/dashboard"
-            className="px-4 py-2 rounded-lg transition"
-          >
-            Dashboard
-          </Link>
-
-          <Link
-            href="/volunteer/updateinformation"
-            className="px-4 py-2 rounded-lg transition"
-          >
-            Update Information
-          </Link>
-
-          <Link
-            href="/volunteer/delete"
-            className="px-4 py-2 rounded-lg transition"
-          > 
-            Delete Account
-          </Link>
-
-          <button
-            onClick={logout}
-            className="px-4 py-2 rounded-lg transition"
-          >
-            Logout
-          </button>
-
+        <div className="navbar-end gap-2">
+          <div className="dropdown dropdown-end sm:hidden">
+            <button className="btn btn-ghost btn-square" aria-label="Open navigation menu">
+              <span className="text-xl">☰</span>
+            </button>
+            <ul className="menu dropdown-content z-10 mt-3 w-56 rounded-box bg-base-100 p-2 shadow">
+              <li><Link href="/volunteer/dashboard">Dashboard</Link></li>
+              <li><Link href="/volunteer/updateinformation">Update Information</Link></li>
+              <li><Link href="/volunteer/delete">Delete Account</Link></li>
+              <li><button onClick={logout}>Logout</button></li>
+            </ul>
+          </div>
+          <div className="hidden items-center gap-1 sm:flex">
+            <Link href="/volunteer/dashboard" className="btn btn-ghost btn-sm">Dashboard</Link>
+            <Link href="/volunteer/updateinformation" className="btn btn-ghost btn-sm">Update</Link>
+            <Link href="/volunteer/delete" className="btn btn-ghost btn-sm">Delete Account</Link>
+            <button onClick={logout} className="btn btn-primary btn-sm">Logout</button>
+          </div>
         </div>
       </div>
     </nav>

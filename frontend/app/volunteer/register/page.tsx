@@ -44,75 +44,34 @@ export default function VolunteerRegister() {
     };
 
     return (
-        <div>
-            <h1>Volunteer Registration</h1>
-
-            <form onSubmit={handleSubmit(onSubmit)}>
-                
-
-                <div>
-                    <label>Username</label>
-                    <br />
-
-                    <input type="text" {...register("username")} 
-                    className="border border-gray-400"/>
-
-                    <p>{errors.username?.message}</p>
+      <main className="flex min-h-screen items-center justify-center bg-base-200 px-4 py-12">
+        <div className="card w-full max-w-2xl border border-base-300 bg-base-100 shadow-xl">
+          <div className="card-body">
+            <p className="font-semibold text-primary">Volunteer Portal</p>
+            <h1 className="card-title text-3xl">Create your volunteer profile</h1>
+            <p className="text-sm text-base-content/60">Share your details so the community can connect with you.</p>
+            <form onSubmit={handleSubmit(onSubmit)} className="mt-4 grid gap-4 sm:grid-cols-2">
+              {[
+                ["username", "Username", "text"],
+                ["password", "Password", "password"],
+                ["fullName", "Full name", "text"],
+                ["email", "Email", "email"],
+                ["phone", "Phone", "text"],
+              ].map(([name, label, type]) => (
+                <div key={name} className={name === "fullName" ? "sm:col-span-2" : ""}>
+                  <label className="label" htmlFor={name}><span className="label-text">{label}</span></label>
+                  <input id={name} type={type} {...register(name as keyof RegisterForm)} className="input input-bordered w-full" />
+                  {errors[name as keyof RegisterForm]?.message && <p className="mt-1 text-sm text-error">{errors[name as keyof RegisterForm]?.message}</p>}
                 </div>
-
-                <div>
-                    <label>Password</label>
-                    <br />
-
-                    <input type="password" {...register("password")}
-                    className="border border-gray-400"/>
-
-                    <p>{errors.password?.message}</p>
-                </div>
-
-
-                <div>
-                    <label>Full Name</label>
-                    <br />
-
-                    <input type="text" {...register("fullName")}
-                    className="border border-gray-400" />
-
-                    <p>{errors.fullName?.message}</p>
-                </div>
-
-                <div>
-                    <label>Email</label>
-                    <br />  
-
-                    <input type="email" {...register("email")} 
-                    className="border border-gray-400" />  
-
-                    <p>{errors.email?.message}</p>
-                </div>
-
-                <div>
-                    <label>Phone</label>
-                    <br />
-
-                    <input type="text" {...register("phone")} 
-                    className="border border-gray-400" />
-
-                    <p>{errors.phone?.message}</p>
-                </div>
-
-                <br />
-
-                <button type="submit">Register</button>
-
-                <br />
-
-                <button type="button" onClick={() => router.push("/volunteer/login")}>
-                    Already have an account? Login
-                </button>
+              ))}
+              <div className="sm:col-span-2">
+                <button type="submit" className="btn btn-primary w-full">Register</button>
+                <button type="button" className="btn btn-ghost mt-2 w-full" onClick={() => router.push("/volunteer/login")}>Already have an account? Login</button>
+              </div>
             </form>
-
+          </div>
         </div>
+      </main>
     )
 
 }
