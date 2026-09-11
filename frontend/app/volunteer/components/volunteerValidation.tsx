@@ -19,7 +19,11 @@ export const volunteerValidation = z.object({
 
     password: z
     .string()
-    .min(6, "Password must be at least 6 characters."),
+    .min(6, "Password must be at least 6 characters.")
+    .regex(
+        /[A-Z]/,
+        "Password must contain at least one uppercase letter."
+      ),
 });
 
 export const loginSchema = z.object({
@@ -29,5 +33,45 @@ export const loginSchema = z.object({
     
     password: z
     .string()
-    .min(6, "Password must be at least 6 characters."),
+    .min(6, "Password must be at least 6 characters.")
+    .regex(
+        /[A-Z]/,
+        "Password must contain at least one uppercase letter."
+      ),
 });
+
+export const forgotPasswordSchema = z.object({
+  username: z
+    .string()
+    .min(3, "Username must be at least 3 characters."),
+});
+
+
+export const verifyCodeSchema = z.object({
+  code: z
+    .string()
+    .length(6, "Code must be exactly 6 digits.")
+    .regex(/^\d{6}$/, "Code must contain only numbers."),
+});
+
+
+export const newPasswordSchema = z
+  .object({
+    password: z
+      .string()
+      .min(6, "Password must be at least 6 characters.")
+      .regex(
+        /[A-Z]/,
+        "Password must contain at least one uppercase letter."
+      ),
+
+    confirmPassword: z
+      .string()
+      .min(1, "Please confirm your password."),
+  })
+  .refine(
+    (data) => data.password === data.confirmPassword,
+    {
+      message: "Passwords do not match.",
+      path: ["confirmPassword"],
+    });

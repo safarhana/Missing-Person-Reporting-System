@@ -23,7 +23,7 @@ export default function VolunteerCard({
               <p className="text-xs font-semibold uppercase tracking-wider text-base-content/50">Volunteer #{id}</p>
               <h3 className="mt-1 text-xl font-bold">{fullName || "Name not provided"}</h3>
             </div>
-            <span className={`badge ${isActive ? "badge-success" : "badge-ghost"}`}>
+            <span className={`badge ${isActive ? "badge-success" : "badge-error"}`}>
               {isActive ? "Active" : "Inactive"}
             </span>
           </div>

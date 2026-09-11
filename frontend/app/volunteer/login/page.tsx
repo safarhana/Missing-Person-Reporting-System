@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 
 
-
 type LoginForm = {
     username: string;
     password: string;   
@@ -69,6 +68,7 @@ export default function LoginPage() {
             </div>
             <button type="submit" className="btn btn-primary w-full">Login</button>
             <div className="flex flex-col gap-2 text-center text-sm">
+              <button type="button" className="link link-hover" onClick={() => router.push("/volunteer/forgot-password")}>Forgot Password?</button>
               <button type="button" className="link link-primary" onClick={() => router.push("/volunteer/register")}>Need an account? Register</button>
               <button type="button" className="link link-hover" onClick={() => router.push("/volunteer/management")}>Management Page</button>
             </div>
