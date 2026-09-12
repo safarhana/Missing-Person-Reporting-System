@@ -7,7 +7,7 @@ export default function VolunteerNavbar() {
   const router = useRouter();
 
   const logout = () => {
-    localStorage.removeItem("token");
+    //localStorage.removeItem("token");
     localStorage.removeItem("volunteer");
 
     alert("Logged out successfully!");

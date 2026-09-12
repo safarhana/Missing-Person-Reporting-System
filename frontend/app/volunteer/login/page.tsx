@@ -25,10 +25,10 @@ export default function LoginPage() {
     const onSubmit = async(data: LoginForm) => {
         try {
            const response = await axios.post( "http://localhost:5000/auth/volunteer-login",
-             data );
+             data,
+             { withCredentials: true }
+            );
               console.log("Login response:", response.data);
-
-              localStorage.setItem("token", response.data.access_token);
 
                localStorage.setItem( "volunteer",
                       JSON.stringify(response.data.volunteer));

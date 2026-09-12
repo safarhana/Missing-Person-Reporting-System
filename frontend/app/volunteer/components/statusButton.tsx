@@ -19,15 +19,11 @@ export default function StatusButton({
     try {
       setLoading(true);
 
-      const token = localStorage.getItem("token");
-
       const response = await axios.patch(
         `http://localhost:5000/volunteer/${id}/status`,
         {},
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+            withCredentials: true,
         }
       );
 
@@ -50,19 +46,7 @@ export default function StatusButton({
   };
 
   return (
-    // <button
-    //   onClick={toggleStatus}
-    //   disabled={loading}
-    //   className={`btn ${
-    //     isActive ? "btn-error" : "btn-success"
-    //   }`}
-    // >
-    //   {loading
-    //     ? "Updating..."
-    //     : isActive
-    //     ? "Deactivate"
-    //     : "Activate"}
-    // </button>
+
  <button
       onClick={toggleStatus}
       disabled={loading}

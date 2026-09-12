@@ -31,6 +31,13 @@ export default function ManagementSidebar() {
         </Link>
 
         <Link
+          href="/volunteer/management/volunteers-by-admin"
+          className="rounded-lg p-3 hover:bg-base-300"
+        >
+          Volunteers by Admin
+        </Link>
+
+        <Link
           href="/volunteer/management/assign-mpr"
           className="rounded-lg p-3 hover:bg-base-300"
         >

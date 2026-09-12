@@ -34,19 +34,11 @@ export default function VolunteersByAdminPage() {
       setLoading(true);
       setError("");
 
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        router.push("/volunteer/login");
-        return;
-      }
 
       const response = await axios.get(
         `http://localhost:5000/volunteer/admin/${adminId}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true,
         }
       );
 
@@ -72,43 +64,38 @@ export default function VolunteersByAdminPage() {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen flex-col bg-base-200 lg:flex-row">
 
       {/* Management Sidebar */}
       <ManagementSidebar />
 
-       <main className="flex-1 p-8">
+       <main className="flex-1 p-6 lg:p-12">
+        <div className="mx-auto max-w-5xl">
 
-        <h1 className="text-2xl font-bold">
+        <h1 className="text-3xl font-bold">
           Volunteers By Admin
         </h1>
 
-        <p className="mt-2">
+        <p className="mt-2 text-base-content/60">
           Enter an Admin ID to see the volunteers assigned to that admin.
         </p>
 
         <br />
 
-         <label>
-          Admin ID
-        </label>
-
-        <br />
-
+         <label className="form-control mt-6 max-w-md">
+          <span className="label-text">Admin ID</span>
         <input
           type="text"
           value={adminId}
           onChange={(e) => setAdminId(e.target.value)}
           placeholder="Enter Admin ID"
-          className="border border-gray-400 p-2"
+          className="input input-bordered mt-2 w-full"
         />
-
-        <br />
-        <br />
+        </label>
 
         <button
           onClick={getVolunteersByAdmin}
-          className="border border-gray-500 px-4 py-2"
+          className="btn btn-primary mt-4"
         >
           Show Volunteers
         </button>
@@ -118,32 +105,33 @@ export default function VolunteersByAdminPage() {
 
         
         {loading && (
-          <p>Loading volunteers...</p>
+          <div className="mt-6"><span className="loading loading-spinner text-primary" /></div>
         )}
 
        
         {error && (
-          <p>{error}</p>
+          <div className="alert alert-error mt-6">{error}</div>
         )}
  
         {!loading &&
           !error &&
           adminId &&
           volunteers.length === 0 && (
-            <p>No volunteers found for this admin.</p>
+            <p className="alert alert-info mt-6">No volunteers found for this admin.</p>
           )}
 
          {!loading && volunteers.length > 0 && (
-          <div>
-            <h2 className="text-xl font-bold mb-4">
+          <div className="mt-8">
+            <h2 className="mb-4 text-xl font-bold">
               Assigned Volunteers
             </h2>
 
             {volunteers.map((volunteer) => (
               <div
                 key={volunteer.id}
-                className="border border-gray-400 p-4 mb-4"
+                className="card mb-4 border border-base-300 bg-base-100 shadow-sm"
               >
+                <div className="card-body grid gap-2 sm:grid-cols-2">
                 <p>
                   <strong>ID:</strong> {volunteer.id}
                 </p>
@@ -170,11 +158,13 @@ export default function VolunteersByAdminPage() {
                     ? "Active"
                     : "Inactive"}
                 </p>
+                </div>
               </div>
             ))}
           </div>
         )}
 
+        </div>
       </main>
     </div>
   );

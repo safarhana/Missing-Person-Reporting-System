@@ -1,7 +1,8 @@
-import { Body, Controller, Post, ValidationPipe, } from '@nestjs/common';
+import { Body, Controller, Post, ValidationPipe,Res, } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './login.dto';
 import { VolunteerLoginDto } from './VolunteerLogin.dto';
+import { Response } from 'express';
 import {
   ForgotPasswordDto,
   VerifyResetCodeDto,
@@ -20,9 +21,20 @@ export class AuthController {
   }
 
   @Post('volunteer-login')
-  volunteerLogin(@Body() loginDto: VolunteerLoginDto) {
-    return this.authService.volunteerLogin(loginDto);
-  }
+  async volunteerLogin(
+    @Body() loginDto: VolunteerLoginDto,
+    @Res({ passthrough: true }) res: Response, 
+  ) {
+     const result = await this.authService.volunteerLogin(loginDto); 
+     res.cookie( 'access_token', result.access_token, 
+    { httpOnly: true, 
+      secure: false, 
+      sameSite: 'lax', 
+      maxAge: 60 * 60 * 1000, 
+    }, );
+     
+    return  { volunteer: result.volunteer }; 
+    }
 
   @Post('forgot-password')
   forgotPassword(

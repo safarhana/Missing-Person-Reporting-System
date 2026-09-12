@@ -57,6 +57,7 @@ deleteUser(
   }
 
   @Get(':id')
+  //@UseGuards(JwtAuthGuard)
  getUserById(@Param('id', ParseIntPipe) id: number) {
   return this.volunteerService.getUserById(id);
  }

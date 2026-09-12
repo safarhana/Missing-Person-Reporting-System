@@ -22,43 +22,54 @@ export default function  VolunteerDashboard() {
     useState<Volunteer | null>(null);
 
   useEffect(() => {
-     const token = localStorage.getItem("token");
-    const savedVolunteer =
-      localStorage.getItem("volunteer");
+  const getVolunteer = async () => {
+    try {
+      const savedVolunteer =
+        localStorage.getItem("volunteer");
 
-    if (!token) {
-      router.push("/volunteer/login");
-      return;
+      if (!savedVolunteer) {
+        router.push("/volunteer/login");
+        return;
+      }
+
+      const savedData = JSON.parse(savedVolunteer);
+
+      const response = await axios.get(
+        `http://localhost:5000/volunteer/${savedData.id}`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      setVolunteer(response.data);
+
+    } catch (error: any) {
+      console.log("Dashboard error:", error);
+      console.log("Response:", error.response?.data);
+      console.log("Status:", error.response?.status);
+
     }
+  };
 
-    if (savedVolunteer) {
-      setVolunteer(JSON.parse(savedVolunteer));
-    }
-
-  }, [router]);
+  getVolunteer();
+}, [router]);
 
 const toggleStatus = async () => {
   if (!volunteer) return;
 
   try {
-    const token = localStorage.getItem("token");
+    
 
     const response = await axios.patch(
       `http://localhost:5000/volunteer/${volunteer.id}/status`,
       {},
       {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+          withCredentials: true,
+        
       }
     );
 
     setVolunteer(response.data);
-
-    localStorage.setItem(
-      "volunteer",
-      JSON.stringify(response.data)
-    );
 
     alert("Status updated successfully!");
   } catch (error: any) {
@@ -73,7 +84,6 @@ const toggleStatus = async () => {
   }
 };
   const logout = () => {
-    localStorage.removeItem("token");
     localStorage.removeItem("volunteer");
 
     router.push("/volunteer/login");

@@ -15,35 +15,25 @@ export default function AssignAdminPage() {
   const [error, setError] = useState("");
 
   const assignAdmin = async () => {
-    // Check Volunteer ID
-    if (!volunteerId.trim()) {
+     if (!volunteerId.trim()) {
       setError("Please enter Volunteer ID.");
       setMessage("");
       return;
     }
 
-    // Check Admin ID
-    if (!adminId.trim()) {
+     if (!adminId.trim()) {
       setError("Please enter Admin ID.");
       setMessage("");
       return;
     }
 
     try {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        router.push("/volunteer/login");
-        return;
-      }
 
       const response = await axios.patch(
         `http://localhost:5000/volunteer/${volunteerId}/admin/${adminId}`,
         {},
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true,
         }
       );
 
@@ -72,80 +62,62 @@ export default function AssignAdminPage() {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen flex-col bg-base-200 lg:flex-row">
 
-      {/* Left Sidebar */}
-      <ManagementSidebar />
+       <ManagementSidebar />
 
-      {/* Right Side - Assign Admin */}
-      <main className="flex-1 p-8">
+       <main className="flex-1 p-6 lg:p-12">
+        <div className="card mx-auto max-w-2xl border border-base-300 bg-base-100 shadow-sm">
+        <div className="card-body">
 
-        <h1 className="text-2xl font-bold">
+        <h1 className="card-title text-3xl">
           Assign Admin
         </h1>
 
-        <p className="mt-2">
+        <p className="text-base-content/60">
           Assign an admin to a volunteer.
         </p>
 
-        <br />
-
-        {/* Volunteer ID */}
-        <label>
-          Volunteer ID
-        </label>
-
-        <br />
-
+        <div className="mt-6 space-y-4">
+        <label className="form-control">
+          <span className="label-text">Volunteer ID</span>
         <input
           type="text"
           value={volunteerId}
           onChange={(e) => setVolunteerId(e.target.value)}
           placeholder="Enter Volunteer ID"
-          className="border border-gray-400 p-2"
+          className="input input-bordered mt-2 w-full"
         />
-
-        <br />
-        <br />
-
-        {/* Admin ID */}
-        <label>
-          Admin ID
         </label>
-
-        <br />
-
+        <label className="form-control">
+          <span className="label-text">Admin ID</span>
         <input
           type="text"
           value={adminId}
           onChange={(e) => setAdminId(e.target.value)}
           placeholder="Enter Admin ID"
-          className="border border-gray-400 p-2"
+          className="input input-bordered mt-2 w-full"
         />
-
-        <br />
-        <br />
+        </label>
 
         <button
           onClick={assignAdmin}
-          className="border border-gray-500 px-4 py-2"
+          className="btn btn-primary w-full"
         >
           Assign Admin
         </button>
 
-        <br />
-        <br />
-
-        {/* Success message */}
-        {message && (
-          <p>{message}</p>
+         {message && (
+          <div className="alert alert-success">{message}</div>
         )}
 
-        {/* Error message */}
-        {error && (
-          <p>{error}</p>
+         {error && (
+          <div className="alert alert-error">{error}</div>
         )}
 
+        </div>
+        </div>
+        </div>
       </main>
 
     </div>

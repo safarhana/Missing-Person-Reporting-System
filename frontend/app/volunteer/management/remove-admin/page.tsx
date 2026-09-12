@@ -13,15 +13,13 @@ export default function RemoveAdminPage() {
   const [error, setError] = useState("");
 
   const removeAdmin = async () => {
-    // Check Volunteer ID
-    if (!volunteerId.trim()) {
+     if (!volunteerId.trim()) {
       setError("Please enter Volunteer ID.");
       setMessage("");
       return;
     }
 
-    // Confirmation popup
-    const confirmed = window.confirm(
+     const confirmed = window.confirm(
       "Are you sure you want to remove the admin from this volunteer?"
     );
 
@@ -30,19 +28,11 @@ export default function RemoveAdminPage() {
     }
 
     try {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        router.push("/volunteer/login");
-        return;
-      }
 
       const response = await axios.delete(
         `http://localhost:5000/volunteer/${volunteerId}/admin`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true,
         }
       );
 
@@ -51,8 +41,7 @@ export default function RemoveAdminPage() {
       setMessage("Admin removed successfully.");
       setError("");
 
-      // Clear input
-      setVolunteerId("");
+       setVolunteerId("");
 
     } catch (error: any) {
       console.log(error);
@@ -71,63 +60,48 @@ export default function RemoveAdminPage() {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen flex-col bg-base-200 lg:flex-row">
 
-      {/* Management Sidebar */}
-      <ManagementSidebar />
+       <ManagementSidebar />
 
-      {/* Main Content */}
-      <main className="flex-1 p-8">
+       <main className="flex-1 p-6 lg:p-12">
+      <div className="card mx-auto max-w-2xl border border-base-300 bg-base-100 shadow-sm"><div className="card-body">
 
-        <h1 className="text-2xl font-bold">
+        <h1 className="card-title text-3xl">
           Remove Admin
         </h1>
 
-        <p className="mt-2">
+        <p className="text-base-content/60">
           Remove the admin assigned to a volunteer.
         </p>
 
-        <br />
-
-        {/* Volunteer ID */}
-        <label>
-          Volunteer ID
-        </label>
-
-        <br />
-
+        <label className="form-control mt-6">
+          <span className="label-text">Volunteer ID</span>
         <input
           type="text"
           value={volunteerId}
           onChange={(e) => setVolunteerId(e.target.value)}
           placeholder="Enter Volunteer ID"
-          className="border border-gray-400 p-2"
+          className="input input-bordered mt-2 w-full"
         />
-
-        <br />
-        <br />
+        </label>
 
         <button
           onClick={removeAdmin}
-          className="border border-gray-500 px-4 py-2"
+          className="btn btn-error mt-4 w-full"
         >
           Remove Admin
         </button>
 
-        <br />
-        <br />
-
-        {/* Success message */}
-        {message && (
-          <p>{message}</p>
+         {message && (
+          <div className="alert alert-success">{message}</div>
         )}
 
-        {/* Error message */}
-        {error && (
-          <p>{error}</p>
+         {error && (
+          <div className="alert alert-error">{error}</div>
         )}
 
-      </main>
+      </div></div></main>
     </div>
   );
 }

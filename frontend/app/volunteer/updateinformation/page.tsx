@@ -22,30 +22,49 @@ export default function UpdateVolunteer() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const savedVolunteer = localStorage.getItem("volunteer");
+ useEffect(() => {
+  const getVolunteer = async () => {
+    try {
+      const savedVolunteer =
+        localStorage.getItem("volunteer");
 
-    if (!token) {
-      router.push("/volunteer/login");
-      return;
-    }
+      if (!savedVolunteer) {
+        router.push("/volunteer/login");
+        return;
+      }
 
-    if (savedVolunteer) {
-      const data = JSON.parse(savedVolunteer);
+      const savedData = JSON.parse(savedVolunteer);
+
+      const response = await axios.get(
+        `http://localhost:5000/volunteer/${savedData.id}`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      const data = response.data;
 
       setVolunteer(data);
       setFullName(data.fullName || "");
       setPhone(data.phone || "");
       setEmail(data.email || "");
+
+    } catch (error: any) {
+      console.log(error);
+
+      if (error.response?.status === 401) {
+        router.push("/volunteer/login");
+      }
     }
-  }, [router]);
+  };
+
+  getVolunteer();
+}, [router]);
 
   const updateVolunteer = async () => {
     try {
-      const token = localStorage.getItem("token");
 
-      if (!token || !volunteer) {
+      if (!volunteer) {
         return;
       }
 
@@ -57,9 +76,7 @@ export default function UpdateVolunteer() {
           email: email,
         },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true,
         }
       );
 
@@ -70,6 +87,7 @@ export default function UpdateVolunteer() {
         "volunteer",
         JSON.stringify(response.data)
       );
+        setVolunteer(response.data);
 
       alert("Information updated successfully!");
 

@@ -21,13 +21,7 @@ export default function DeleteVolunteer() {
   const [password, setPassword] = useState("");
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
     const savedVolunteer = localStorage.getItem("volunteer");
-
-    if (!token) {
-      router.push("/volunteer/login");
-      return;
-    }
 
     if (savedVolunteer) {
       const data = JSON.parse(savedVolunteer);
@@ -53,9 +47,7 @@ export default function DeleteVolunteer() {
       const response = await axios.delete(
         `http://localhost:5000/volunteer/${volunteer.id}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true,
           data: {
             username: username,
             password: password,

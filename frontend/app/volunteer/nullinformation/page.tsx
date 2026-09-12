@@ -34,19 +34,28 @@ export default function NullInformationPage() {
   }, []);
 
   return (
-    <div>
-      <h1>Volunteers With Missing Information</h1>
+    <main className="min-h-screen bg-base-200 px-6 py-12">
+      <div className="mx-auto max-w-5xl">
+      <p className="font-semibold text-primary">Coordinator workspace</p>
+      <h1 className="mt-2 text-3xl font-bold">Volunteers with missing information</h1>
+      <p className="mt-2 text-base-content/60">Review profiles that still need contact details.</p>
 
+      {volunteers.length === 0 && <div className="alert alert-info mt-8">No volunteers with missing information were found.</div>}
+      <div className="mt-8 grid gap-5 md:grid-cols-2">
       {volunteers.map((volunteer) => (
-        <div key={volunteer.id}>
+        <div className="card border border-base-300 bg-base-100 shadow-sm" key={volunteer.id}>
+          <div className="card-body">
           <p>ID: {volunteer.id}</p>
           <p>Username: {volunteer.username}</p>
           <p>Full Name: {volunteer.fullName || "Missing"}</p>
           <p>Email: {volunteer.email || "Missing"}</p>
           <p>Phone: {volunteer.phone || "Missing"}</p>
-          <hr />
+          <span className={`badge mt-3 ${volunteer.isActive ? "badge-success" : "badge-ghost"}`}>{volunteer.isActive ? "Active" : "Inactive"}</span>
+          </div>
         </div>
       ))}
-    </div>
+      </div>
+      </div>
+    </main>
   );
 }

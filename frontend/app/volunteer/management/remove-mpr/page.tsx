@@ -15,22 +15,19 @@ export default function RemoveMprPage() {
   const [error, setError] = useState("");
 
   const removeMpr = async () => {
-    // Check Volunteer ID
-    if (!volunteerId.trim()) {
+     if (!volunteerId.trim()) {
       setError("Please enter Volunteer ID.");
       setMessage("");
       return;
     }
 
-    // Check MPR ID
-    if (!mprId.trim()) {
+     if (!mprId.trim()) {
       setError("Please enter Missing Person Reporter (MPR) ID.");
       setMessage("");
       return;
     }
 
-    // Confirmation popup
-    const confirmed = window.confirm(
+     const confirmed = window.confirm(
       "Are you sure you want to remove this reporter from this volunteer?"
     );
 
@@ -39,19 +36,12 @@ export default function RemoveMprPage() {
     }
 
     try {
-      const token = localStorage.getItem("token");
 
-      if (!token) {
-        router.push("/volunteer/login");
-        return;
-      }
 
       const response = await axios.delete(
         `http://localhost:5000/volunteer/${volunteerId}/mpr/${mprId}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true,
         }
       );
 
@@ -60,8 +50,7 @@ export default function RemoveMprPage() {
       setMessage("Missing person reporter removed successfully.");
       setError("");
 
-      // Clear input fields
-      setVolunteerId("");
+       setVolunteerId("");
       setMprId("");
     } catch (error: any) {
       console.log(error);
@@ -80,22 +69,18 @@ export default function RemoveMprPage() {
   };
 
   return (
-    <div className="flex min-h-screen">
-      {/* Management Sidebar */}
-      <ManagementSidebar />
+    <div className="flex min-h-screen flex-col bg-base-200 lg:flex-row">
+       <ManagementSidebar />
 
-      {/* Main Content */}
-      <main className="flex-1 p-8">
-        <h1 className="text-2xl font-bold">Remove Missing Person Reporter</h1>
+       <main className="flex-1 p-6 lg:p-12">
+      <div className="card mx-auto max-w-2xl border border-base-300 bg-base-100 shadow-sm"><div className="card-body">
+        <h1 className="card-title text-3xl">Remove Missing Person Reporter</h1>
 
-        <p className="mt-2">
+        <p className="text-base-content/60">
           Remove an assigned missing person reporter from a volunteer.
         </p>
 
-        <br />
-
-        {/* Volunteer ID */}
-        <label>Volunteer ID</label>
+        <label className="form-control mt-6">Volunteer ID
 
         <br />
 
@@ -104,14 +89,11 @@ export default function RemoveMprPage() {
           value={volunteerId}
           onChange={(e) => setVolunteerId(e.target.value)}
           placeholder="Enter Volunteer ID"
-          className="border border-gray-400 p-2"
+          className="input input-bordered mt-2 w-full"
         />
+        </label>
 
-        <br />
-        <br />
-
-        {/* MPR ID */}
-        <label>Reporter (MPR) ID</label>
+         <label className="form-control mt-4">Reporter (MPR) ID
 
         <br />
 
@@ -120,28 +102,21 @@ export default function RemoveMprPage() {
           value={mprId}
           onChange={(e) => setMprId(e.target.value)}
           placeholder="Enter MPR ID"
-          className="border border-gray-400 p-2"
+          className="input input-bordered mt-2 w-full"
         />
-
-        <br />
-        <br />
+        </label>
 
         <button
           onClick={removeMpr}
-          className="border border-gray-500 px-4 py-2"
+          className="btn btn-error mt-4 w-full"
         >
           Remove Reporter
         </button>
 
-        <br />
-        <br />
+         {message && <div className="alert alert-success">{message}</div>}
 
-        {/* Success message */}
-        {message && <p className="text-600">{message}</p>}
-
-        {/* Error message */}
-        {error && <p className="text-600">{error}</p>}
-      </main>
+         {error && <div className="alert alert-error">{error}</div>}
+      </div></div></main>
     </div>
   );
 }

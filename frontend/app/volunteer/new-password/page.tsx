@@ -70,17 +70,19 @@ export default function NewPasswordPage() {
   };
 
   return (
-    <main>
-      <div>
-        <h1>New Password</h1>
+    <main className="flex min-h-screen items-center justify-center bg-base-200 px-4 py-12">
+      <div className="card w-full max-w-md border border-base-300 bg-base-100 shadow-xl">
+        <div className="card-body">
+        <p className="font-semibold text-primary">Volunteer Portal</p>
+        <h1 className="card-title text-3xl">Create new password</h1>
 
-        <p>
+        <p className="text-sm text-base-content/60">
           Enter your new password and confirm your password.
         </p>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
           <div>
-            <label htmlFor="password">
+            <label className="label" htmlFor="password">
               New Password
             </label>
 
@@ -89,15 +91,16 @@ export default function NewPasswordPage() {
               type="password"
               {...register("password")}
               placeholder="Enter new password"
+              className="input input-bordered w-full"
             />
 
             {errors.password?.message && (
-              <p>{errors.password.message}</p>
+              <p className="text-sm text-error">{errors.password.message}</p>
             )}
           </div>
 
           <div>
-            <label htmlFor="confirmPassword">
+            <label className="label" htmlFor="confirmPassword">
               Confirm Password
             </label>
 
@@ -106,14 +109,15 @@ export default function NewPasswordPage() {
               type="password"
               {...register("confirmPassword")}
               placeholder="Confirm new password"
+              className="input input-bordered w-full"
             />
 
             {errors.confirmPassword?.message && (
-              <p>{errors.confirmPassword.message}</p>
+              <p className="text-sm text-error">{errors.confirmPassword.message}</p>
             )}
           </div>
 
-          <button type="submit">
+          <button type="submit" className="btn btn-primary w-full">
             Reset Password
           </button>
         </form>
@@ -121,13 +125,14 @@ export default function NewPasswordPage() {
         <br />
 
         <button
+          className="btn btn-ghost w-full"
           type="button"
           onClick={() => router.push("/volunteer/login")}
         >
           Back to Login
         </button>
+        </div>
       </div>
     </main>
   );
 }
-
