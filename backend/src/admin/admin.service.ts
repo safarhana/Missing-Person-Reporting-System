@@ -100,6 +100,10 @@ export class AdminService {
   async findByUsername(username: string) {
     const admin = await this.adminRepository.findOne({
       where: { username },
+      relations: {
+        volunteers: true,
+        caseOfficers: true,
+      },
     });
 
     if (!admin) {
