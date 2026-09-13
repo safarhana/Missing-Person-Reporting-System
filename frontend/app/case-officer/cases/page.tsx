@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import axios from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import { useEffect, useState } from "react";
 
 import CaseCard from "../components/CaseCard";
 
@@ -128,7 +128,7 @@ export default function MyCasesPage() {
             {(["All", "Urgent", "Active", "Investigating", "Found", "Closed"] as const).map((s) => (
               <button key={s} onClick={() => setFilterStatus(s)} type="button"
                 className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${filterStatus === s ? "bg-slate-900 text-white border-slate-900" : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"}`}>
-                {s}
+                {s === "Urgent" ? "Urgent" : s}
               </button>
             ))}
           </div>
