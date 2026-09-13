@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios, { AxiosError } from "axios";
 import { z } from "zod";
-import OfficerNavbar from "../components/OfficerNavbar";
 
 const registerSchema = z
   .object({
@@ -21,9 +20,7 @@ const registerSchema = z
       .string()
       .min(6, "Password must be at least 6 characters long")
       .regex(/[a-z]/, "Password must contain at least one lowercase letter"),
-    confirmPassword: z
-      .string()
-      .min(1, "Please confirm your password"),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
     phone: z
       .string()
       .min(1, "Phone number is required")
@@ -99,9 +96,7 @@ export default function CaseOfficerRegisterPage() {
       const fieldErrors: FormErrors = {};
       validation.error.issues.forEach((issue) => {
         const path = issue.path[0] as keyof FormErrors;
-        if (path) {
-          fieldErrors[path] = issue.message;
-        }
+        if (path) fieldErrors[path] = issue.message;
       });
       setErrors(fieldErrors);
       return;
@@ -111,7 +106,9 @@ export default function CaseOfficerRegisterPage() {
 
     try {
       const apiEndpoint =
-        process.env.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:3000";
+        typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1"
+          ? `${window.location.protocol}//${window.location.hostname}:3000`
+          : process.env.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:3000";
 
       if (selectedFile) {
         const data = new FormData();
@@ -119,9 +116,7 @@ export default function CaseOfficerRegisterPage() {
         data.append("email", formData.email.trim());
         data.append("password", formData.password);
         data.append("phone", formData.phone.trim());
-        if (formData.country) {
-          data.append("country", formData.country.trim());
-        }
+        if (formData.country) data.append("country", formData.country.trim());
         data.append("file", selectedFile);
 
         await axios.post(`${apiEndpoint}/case-officer/register`, data, {
@@ -138,144 +133,167 @@ export default function CaseOfficerRegisterPage() {
             phone: formData.phone.trim(),
             country: formData.country ? formData.country.trim() : "Unknown",
           },
-          {
-            headers: { "Content-Type": "application/json" },
-            withCredentials: true,
-          }
+          { headers: { "Content-Type": "application/json" }, withCredentials: true }
         );
       }
 
       setServerSuccess(
         "Registration successful! Your Case Officer account has been created. Redirecting to login..."
       );
-
-      setTimeout(() => {
-        router.push("/case-officer/login");
-      }, 1500);
+      setTimeout(() => router.push("/case-officer/login"), 1500);
     } catch (err: unknown) {
       const axiosErr = err as AxiosError<{ message?: string | string[] }>;
-      const message =
-        axiosErr.response?.data?.message ||
-        "Registration failed: Network Error or email already registered.";
-      setServerError(Array.isArray(message) ? message.join(", ") : message);
+      const serverMsg = axiosErr.response?.data?.message;
+      const message = Array.isArray(serverMsg)
+        ? serverMsg.join(", ")
+        : serverMsg ||
+          (axiosErr.code === "ERR_NETWORK"
+            ? "Cannot connect to backend server. Make sure the backend is running on port 3000."
+            : "Registration failed: Email already registered or invalid inputs.");
+      setServerError(message);
     } finally {
       setIsLoading(false);
     }
   };
 
+  const inputClass = (field: keyof FormErrors) =>
+    `w-full rounded-xl bg-white border px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 transition-colors focus:outline-none focus:ring-2 ${
+      errors[field]
+        ? "border-red-500 focus:ring-red-500/20"
+        : "border-slate-300 focus:border-slate-900 focus:ring-slate-900/10"
+    }`;
+
   return (
-    <div>
-      <OfficerNavbar />
+    <div className="w-full max-w-lg mx-auto">
+      <div className="mb-6">
+        <Link
+          href="/case-officer/login"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors"
+        >
+          ← Back to Sign In
+        </Link>
+      </div>
 
-      <main>
-        <h1>Case Officer Registration</h1>
-        <p>
-          Already have an account?{" "}
-          <Link href="/case-officer/login">
-            Sign In here
-          </Link>
-        </p>
-
-        {serverError && <p style={{ color: "red" }}>{serverError}</p>}
-        {serverSuccess && <p style={{ color: "green" }}>{serverSuccess}</p>}
-
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label>Full Name: </label>
-            <input
-              name="name"
-              type="text"
-              value={formData.name}
-              onChange={handleInputChange}
-              placeholder="robert"
-            />
-            {errors.name && <span style={{ color: "red" }}> {errors.name}</span>}
+      <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-900/5">
+        <div className="text-center mb-6">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white font-black text-xl shadow-xs mb-3">
+            +
           </div>
-          <br />
+          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+            Register Case Officer
+          </h2>
+          <p className="mt-1 text-xs text-slate-500">
+            Create a new Case Officer account for MPRS operations
+          </p>
+        </div>
 
-          <div>
-            <label>Email: </label>
-            <input
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="robert@gmail.xyz"
-            />
-            {errors.email && <span style={{ color: "red" }}> {errors.email}</span>}
+        {serverError && (
+          <div className="mb-5 rounded-xl bg-red-50 border border-red-200 p-3 text-xs text-red-700">
+            {serverError}
           </div>
-          <br />
-
-          <div>
-            <label>Phone Number (starts with 01): </label>
-            <input
-              name="phone"
-              type="text"
-              value={formData.phone}
-              onChange={handleInputChange}
-              placeholder="0123456789"
-            />
-            {errors.phone && <span style={{ color: "red" }}> {errors.phone}</span>}
+        )}
+        {serverSuccess && (
+          <div className="mb-5 rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-700">
+            {serverSuccess}
           </div>
-          <br />
+        )}
 
+        <form action="#" onSubmit={handleSubmit} className="space-y-4">
+          {/* Full Name */}
           <div>
-            <label>Password: </label>
-            <input
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleInputChange}
-              placeholder="••••••"
-            />
-            {errors.password && <span style={{ color: "red" }}> {errors.password}</span>}
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5" htmlFor="name">
+              Full Name
+            </label>
+            <input id="name" name="name" type="text" value={formData.name} onChange={handleInputChange} placeholder="e.g. Robert Ahmed" disabled={isLoading} className={inputClass("name")} />
+            {errors.name && <p className="mt-1 text-[11px] text-red-600">{errors.name}</p>}
           </div>
-          <br />
 
+          {/* Email */}
           <div>
-            <label>Confirm Password: </label>
-            <input
-              name="confirmPassword"
-              type="password"
-              value={formData.confirmPassword}
-              onChange={handleInputChange}
-              placeholder="••••••"
-            />
-            {errors.confirmPassword && (
-              <span style={{ color: "red" }}> {errors.confirmPassword}</span>
-            )}
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5" htmlFor="email">
+              Email Address
+            </label>
+            <input id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="officer@gmail.com" disabled={isLoading} className={inputClass("email")} />
+            {errors.email && <p className="mt-1 text-[11px] text-red-600">{errors.email}</p>}
           </div>
-          <br />
 
+          {/* Phone */}
           <div>
-            <label>Country / District: </label>
-            <input
-              name="country"
-              type="text"
-              value={formData.country}
-              onChange={handleInputChange}
-              placeholder="Bangladesh"
-            />
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5" htmlFor="phone">
+              Phone Number (starts with 01)
+            </label>
+            <input id="phone" name="phone" type="text" value={formData.phone} onChange={handleInputChange} placeholder="01XXXXXXXXX" disabled={isLoading} className={inputClass("phone")} />
+            {errors.phone && <p className="mt-1 text-[11px] text-red-600">{errors.phone}</p>}
           </div>
-          <br />
 
+          {/* Password row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5" htmlFor="password">
+                Password
+              </label>
+              <input id="password" name="password" type="password" value={formData.password} onChange={handleInputChange} placeholder="Min 6 chars" disabled={isLoading} className={inputClass("password")} />
+              {errors.password && <p className="mt-1 text-[11px] text-red-600">{errors.password}</p>}
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5" htmlFor="confirmPassword">
+                Confirm Password
+              </label>
+              <input id="confirmPassword" name="confirmPassword" type="password" value={formData.confirmPassword} onChange={handleInputChange} placeholder="Re-enter password" disabled={isLoading} className={inputClass("confirmPassword")} />
+              {errors.confirmPassword && <p className="mt-1 text-[11px] text-red-600">{errors.confirmPassword}</p>}
+            </div>
+          </div>
+
+          {/* Country */}
           <div>
-            <label>Verification Document / Badge (Optional PDF): </label>
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5" htmlFor="country">
+              Country / District
+            </label>
+            <input id="country" name="country" type="text" value={formData.country} onChange={handleInputChange} placeholder="Bangladesh" disabled={isLoading} className={inputClass("country")} />
+          </div>
+
+          {/* File */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5" htmlFor="file">
+              Verification Document / Badge (Optional PDF)
+            </label>
             <input
+              id="file"
               name="file"
               type="file"
               accept=".pdf,application/pdf"
               onChange={handleFileChange}
+              disabled={isLoading}
+              className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-700 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-900 file:px-3 file:py-1 file:text-xs file:font-semibold file:text-white hover:file:bg-slate-700 cursor-pointer"
             />
-            {errors.file && <span style={{ color: "red" }}> {errors.file}</span>}
+            {errors.file && <p className="mt-1 text-[11px] text-red-600">{errors.file}</p>}
           </div>
-          <br />
 
-          <button type="submit" disabled={isLoading}>
-            {isLoading ? "Registering..." : "Register"}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full mt-4 inline-flex items-center justify-center rounded-xl bg-slate-900 hover:bg-slate-800 px-4 py-2.5 text-sm font-semibold text-white shadow-xs transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          >
+            {isLoading ? (
+              <span className="flex items-center gap-2">
+                <span className="h-4 w-4 rounded-full border-2 border-white/20 border-t-white animate-spin"></span>
+                Creating Account...
+              </span>
+            ) : (
+              "Register Account"
+            )}
           </button>
         </form>
-      </main>
+
+        <div className="mt-6 pt-5 border-t border-slate-200 text-center">
+          <p className="text-xs text-slate-500">
+            Already registered?{" "}
+            <Link href="/case-officer/login" className="font-semibold text-slate-900 hover:text-slate-700 underline">
+              Sign In here
+            </Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

@@ -2,7 +2,10 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="relative min-h-screen bg-slate-100 flex items-center justify-center p-4 sm:p-6 overflow-hidden">
+    <div
+      style={{ fontFamily: '"Times New Roman", "Times", Georgia, serif' }}
+      className="relative min-h-screen bg-slate-100 flex items-center justify-center p-4 sm:p-6 overflow-hidden"
+    >
       <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-slate-300/40 blur-3xl pointer-events-none" />
       <div className="absolute -bottom-32 -right-32 w-96 h-96 rounded-full bg-blue-900/10 blur-3xl pointer-events-none" />
 
@@ -86,16 +89,16 @@ export default function Home() {
 
           <div className="flex flex-wrap items-center gap-3">
             <Link
-              href="/admin/login"
-              className="inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-white shadow-md shadow-slate-900/20 transition-all active:scale-[0.99]"
+              href="/case-officer/login"
+              className="inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold rounded-xl bg-blue-900 hover:bg-blue-800 text-white shadow-md shadow-blue-950/20 transition-all active:scale-[0.99]"
             >
-              Admin Sign In
+              Case Officer Sign In
             </Link>
             <Link
-              href="/admin/register"
-              className="inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 shadow-xs transition-all active:scale-[0.99]"
+              href="/case-officer/register"
+              className="inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold rounded-xl bg-white hover:bg-slate-50 text-blue-950 border border-blue-200 shadow-xs transition-all active:scale-[0.99]"
             >
-              Admin Registration
+              Officer Registration
             </Link>
           </div>
         </div>

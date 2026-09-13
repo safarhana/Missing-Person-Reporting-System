@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { z } from "zod";
 
-import OfficerNavbar from "../../components/OfficerNavbar";
 import CaseStatusBadge from "../../components/CaseStatusBadge";
 import CaseNotesList, { NoteItem } from "../../components/CaseNotesList";
 
@@ -34,9 +33,7 @@ type CaseDetail = {
 };
 
 type CasePageProps = {
-  params: Promise<{
-    id: string;
-  }>;
+  params: Promise<{ id: string }>;
 };
 
 export default function CaseDetailsPage({ params }: CasePageProps) {
@@ -46,22 +43,9 @@ export default function CaseDetailsPage({ params }: CasePageProps) {
 
   const [caseData, setCaseData] = useState<CaseDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [officerName] = useState<string>(() => {
-    if (typeof window !== "undefined") {
-      const stored = sessionStorage.getItem("officer") || localStorage.getItem("officer");
-      if (stored) {
-        try {
-          return JSON.parse(stored).name || "Case Officer";
-        } catch {
-          return "Case Officer";
-        }
-      }
-    }
-    return "Case Officer";
-  });
-
+  const [officerName, setOfficerName] = useState<string>("Case Officer");
   const [noteText, setNoteText] = useState("");
-  const [noteAuthor, setNoteAuthor] = useState(() => officerName);
+  const [noteAuthor, setNoteAuthor] = useState<string>("Case Officer");
   const [noteError, setNoteError] = useState("");
   const [isSubmittingNote, setIsSubmittingNote] = useState(false);
   const [notification, setNotification] = useState<{
@@ -74,13 +58,24 @@ export default function CaseDetailsPage({ params }: CasePageProps) {
 
   useEffect(() => {
     let isMounted = true;
-
     const token =
       sessionStorage.getItem("token") || localStorage.getItem("token");
     if (!token) {
       router.push("/case-officer/login");
       return;
     }
+
+    try {
+      const stored =
+        sessionStorage.getItem("officer") || localStorage.getItem("officer");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.name && isMounted) {
+          setOfficerName(parsed.name);
+          setNoteAuthor(parsed.name);
+        }
+      }
+    } catch {}
 
     const fetchCaseDetails = async () => {
       setIsLoading(true);
@@ -97,14 +92,14 @@ export default function CaseDetailsPage({ params }: CasePageProps) {
         );
 
         const found = Array.isArray(response.data)
-          ? response.data.find((c: CaseDetail) => String(c.id) === String(caseId))
+          ? response.data.find(
+              (c: CaseDetail) => String(c.id) === String(caseId)
+            )
           : null;
 
         if (isMounted) {
-          if (found) {
-            setCaseData(found);
-          } else {
-            setCaseData({
+          setCaseData(
+            found || {
               id: Number(caseId),
               name: "Rahim Uddin",
               age: 14,
@@ -121,8 +116,8 @@ export default function CaseDetailsPage({ params }: CasePageProps) {
                   date: new Date().toISOString(),
                 },
               ],
-            });
-          }
+            }
+          );
         }
       } catch {
         if (isMounted) {
@@ -146,22 +141,16 @@ export default function CaseDetailsPage({ params }: CasePageProps) {
           });
         }
       } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        if (isMounted) setIsLoading(false);
       }
     };
 
     fetchCaseDetails();
-
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [apiEndpoint, caseId, router]);
 
   const handleUpdateStatus = async (newStatus: string) => {
     if (!caseData) return;
-
     try {
       await axios.patch(
         `${apiEndpoint}/case-officer/cases/${caseData.id}/status`,
@@ -169,17 +158,11 @@ export default function CaseDetailsPage({ params }: CasePageProps) {
         { headers: { "Content-Type": "application/json" }, withCredentials: true }
       );
       setCaseData((prev) => (prev ? { ...prev, status: newStatus } : prev));
-      setNotification({
-        type: "success",
-        message: `Case status updated to ${newStatus}`,
-      });
+      setNotification({ type: "success", message: `Case status updated to ${newStatus}` });
       setTimeout(() => setNotification(null), 3000);
     } catch {
       setCaseData((prev) => (prev ? { ...prev, status: newStatus } : prev));
-      setNotification({
-        type: "success",
-        message: `Case status changed to ${newStatus}`,
-      });
+      setNotification({ type: "success", message: `Case status changed to ${newStatus}` });
       setTimeout(() => setNotification(null), 3000);
     }
   };
@@ -199,7 +182,6 @@ export default function CaseDetailsPage({ params }: CasePageProps) {
     }
 
     setIsSubmittingNote(true);
-
     const newNoteObj: NoteItem = {
       noteText: noteText.trim(),
       addedBy: noteAuthor.trim() || officerName,
@@ -209,42 +191,21 @@ export default function CaseDetailsPage({ params }: CasePageProps) {
     try {
       await axios.post(
         `${apiEndpoint}/case-officer/cases/${caseId}/notes`,
-        {
-          noteText: newNoteObj.noteText,
-          addedBy: newNoteObj.addedBy,
-        },
+        { noteText: newNoteObj.noteText, addedBy: newNoteObj.addedBy },
         { headers: { "Content-Type": "application/json" }, withCredentials: true }
       );
-
       setCaseData((prev) =>
-        prev
-          ? {
-              ...prev,
-              notes: [...(prev.notes || []), newNoteObj],
-            }
-          : prev
+        prev ? { ...prev, notes: [...(prev.notes || []), newNoteObj] } : prev
       );
-
       setNoteText("");
-      setNotification({
-        type: "success",
-        message: "New investigation note added successfully!",
-      });
+      setNotification({ type: "success", message: "Investigation note added successfully!" });
       setTimeout(() => setNotification(null), 3000);
     } catch {
       setCaseData((prev) =>
-        prev
-          ? {
-              ...prev,
-              notes: [...(prev.notes || []), newNoteObj],
-            }
-          : prev
+        prev ? { ...prev, notes: [...(prev.notes || []), newNoteObj] } : prev
       );
       setNoteText("");
-      setNotification({
-        type: "success",
-        message: "Investigation note recorded!",
-      });
+      setNotification({ type: "success", message: "Investigation note recorded!" });
       setTimeout(() => setNotification(null), 3000);
     } finally {
       setIsSubmittingNote(false);
@@ -253,7 +214,6 @@ export default function CaseDetailsPage({ params }: CasePageProps) {
 
   const handleDeleteCase = async () => {
     if (!confirm(`Are you sure you want to delete Case #${caseId}?`)) return;
-
     try {
       await axios.delete(`${apiEndpoint}/case-officer/cases/${caseId}`, {
         withCredentials: true,
@@ -264,105 +224,182 @@ export default function CaseDetailsPage({ params }: CasePageProps) {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[40vh] space-y-3">
+        <div className="relative flex h-10 w-10 items-center justify-center">
+          <div className="absolute h-full w-full rounded-full border-4 border-slate-200 border-t-slate-900 animate-spin"></div>
+        </div>
+        <p className="text-sm text-slate-500">Loading case file #{caseId}...</p>
+      </div>
+    );
+  }
+
+  if (!caseData) {
+    return (
+      <div className="text-center py-16">
+        <h2 className="text-xl font-bold text-slate-900 mb-2">Case Not Found</h2>
+        <Link href="/case-officer" className="text-sm text-slate-500 hover:text-slate-900 underline">
+          Return to Dashboard
+        </Link>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <OfficerNavbar officerName={officerName} />
-
-      <main>
-        <p>
-          <Link href="/case-officer">← Back to Dashboard</Link>
-          {" | "}
-          <button onClick={handleDeleteCase} type="button">
-            Delete Case
-          </button>
-        </p>
-
-        {notification && (
-          <p style={{ color: notification.type === "success" ? "green" : "red" }}>
-            <strong>{notification.message}</strong>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <p className="text-xs text-slate-500 mb-1">
+            <Link href="/case-officer" className="hover:text-slate-900">Dashboard</Link>
+            {" / "}
+            <span className="text-slate-700 font-medium">Case #{caseId}</span>
           </p>
-        )}
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+            Case Details: {caseData.name}
+          </h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Dynamic Route Parameter [id]: <span className="font-mono font-semibold">{caseId}</span>
+          </p>
+        </div>
+        <button
+          onClick={handleDeleteCase}
+          type="button"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-4 py-2 text-xs font-semibold transition-colors cursor-pointer"
+        >
+          Delete Case
+        </button>
+      </div>
 
-        {isLoading ? (
-          <p>Loading case file #{caseId}...</p>
-        ) : !caseData ? (
+      {notification && (
+        <div
+          className={`rounded-xl border p-3 text-xs ${
+            notification.type === "success"
+              ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+              : "bg-red-50 border-red-200 text-red-700"
+          }`}
+        >
+          {notification.message}
+        </div>
+      )}
+
+      <div className="rounded-2xl bg-white border border-slate-200 shadow-xs p-6">
+        <div className="flex items-start justify-between gap-4 mb-5">
           <div>
-            <h2>Case Not Found</h2>
-            <Link href="/case-officer">Return to Dashboard</Link>
+            <h2 className="text-lg font-bold text-slate-900">{caseData.name}</h2>
+            <div className="flex items-center gap-2 mt-1">
+              <CaseStatusBadge status={caseData.status} />
+              <span className="text-xs text-slate-400">Age: {caseData.age}</span>
+              {caseData.createdAt && (
+                <span className="text-xs text-slate-400">
+                  · Reported{" "}
+                  {new Date(caseData.createdAt).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </span>
+              )}
+            </div>
           </div>
-        ) : (
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-sm mb-5">
+          <div className="flex justify-between py-2 border-b border-slate-100">
+            <span className="text-slate-500 text-xs font-semibold uppercase tracking-wide">Last Seen</span>
+            <span className="font-medium text-slate-800">{caseData.lastSeenLocation}</span>
+          </div>
+          <div className="flex justify-between py-2 border-b border-slate-100">
+            <span className="text-slate-500 text-xs font-semibold uppercase tracking-wide">Contact</span>
+            <span className="font-medium text-slate-800">{caseData.contactNumber}</span>
+          </div>
+          <div className="flex justify-between py-2 border-b border-slate-100 sm:col-span-2">
+            <span className="text-slate-500 text-xs font-semibold uppercase tracking-wide">Description</span>
+            <span className="font-medium text-slate-800 text-right max-w-sm">{caseData.description}</span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 pt-3 border-t border-slate-100">
+          <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+            Change Status:
+          </label>
+          <select
+            value={caseData.status}
+            onChange={(e) => handleUpdateStatus(e.target.value)}
+            className="text-sm border border-slate-300 rounded-xl px-3 py-1.5 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900/10 cursor-pointer"
+          >
+            <option value="Active">Active</option>
+            <option value="Urgent">Urgent</option>
+            <option value="Investigating">Investigating</option>
+            <option value="Found">Found</option>
+            <option value="Closed">Closed</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="rounded-2xl bg-white border border-slate-200 shadow-xs p-6">
+        <h3 className="text-base font-bold text-slate-900 mb-4">
+          Investigation Notes History
+          <span className="ml-2 text-xs font-normal text-slate-400">
+            ({caseData.notes?.length || 0} notes)
+          </span>
+        </h3>
+        <CaseNotesList notes={caseData.notes} />
+      </div>
+
+      <div className="rounded-2xl bg-white border border-slate-200 shadow-xs p-6">
+        <h3 className="text-base font-bold text-slate-900 mb-5">
+          Add Investigation Note
+          <span className="ml-2 text-xs font-normal text-slate-400">(Zod Validated)</span>
+        </h3>
+        <form onSubmit={handleAddNote} className="space-y-4">
           <div>
-            <h1>Case Details: {caseData.name}</h1>
-            <p><strong>Dynamic Route Parameter [id]:</strong> {caseId}</p>
-
-            <fieldset>
-              <legend><strong>Case Information</strong></legend>
-              <p><strong>Name:</strong> {caseData.name}</p>
-              <p><strong>Age:</strong> {caseData.age}</p>
-              <p><strong>Status:</strong> <CaseStatusBadge status={caseData.status} /></p>
-              <p><strong>Last Seen Location:</strong> {caseData.lastSeenLocation}</p>
-              <p><strong>Contact Number:</strong> {caseData.contactNumber}</p>
-              <p><strong>Physical Description:</strong> {caseData.description}</p>
-
-              <div>
-                <label>Change Status: </label>
-                <select
-                  value={caseData.status}
-                  onChange={(e) => handleUpdateStatus(e.target.value)}
-                >
-                  <option value="Active">Active</option>
-                  <option value="Investigating">Investigating</option>
-                  <option value="Found">Found</option>
-                  <option value="Closed">Closed</option>
-                </select>
-              </div>
-            </fieldset>
-
-            <br />
-
-            <fieldset>
-              <legend><strong>Investigation Notes History ({caseData.notes?.length || 0})</strong></legend>
-              <CaseNotesList notes={caseData.notes} />
-            </fieldset>
-
-            <br />
-
-            <fieldset>
-              <legend><strong>Add Investigation Note (Zod Validated)</strong></legend>
-              <form onSubmit={handleAddNote}>
-                <div>
-                  <label>Author / Officer Name: </label>
-                  <input
-                    type="text"
-                    value={noteAuthor}
-                    onChange={(e) => setNoteAuthor(e.target.value)}
-                    placeholder="Officer Name"
-                  />
-                </div>
-                <br />
-
-                <div>
-                  <label>Note Content: </label>
-                  <br />
-                  <textarea
-                    rows={4}
-                    cols={50}
-                    value={noteText}
-                    onChange={(e) => setNoteText(e.target.value)}
-                    placeholder="Enter latest investigative findings..."
-                  ></textarea>
-                  {noteError && <p style={{ color: "red" }}>{noteError}</p>}
-                </div>
-                <br />
-
-                <button type="submit" disabled={isSubmittingNote}>
-                  {isSubmittingNote ? "Submitting..." : "Add Note to Case"}
-                </button>
-              </form>
-            </fieldset>
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              Author / Officer Name
+            </label>
+            <input
+              type="text"
+              value={noteAuthor}
+              onChange={(e) => setNoteAuthor(e.target.value)}
+              placeholder="Officer Name"
+              className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900"
+            />
           </div>
-        )}
-      </main>
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              Note Content
+            </label>
+            <textarea
+              rows={4}
+              value={noteText}
+              onChange={(e) => setNoteText(e.target.value)}
+              placeholder="Enter latest investigative findings..."
+              className={`w-full resize-none rounded-xl border px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 bg-white focus:outline-none focus:ring-2 transition-colors ${
+                noteError
+                  ? "border-red-500 focus:ring-red-500/20"
+                  : "border-slate-300 focus:border-slate-900 focus:ring-slate-900/10"
+              }`}
+            />
+            {noteError && (
+              <p className="mt-1 text-[11px] text-red-600">{noteError}</p>
+            )}
+          </div>
+          <button
+            type="submit"
+            disabled={isSubmittingNote}
+            className="inline-flex items-center justify-center rounded-xl bg-slate-900 hover:bg-slate-800 px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition-colors disabled:opacity-50 cursor-pointer"
+          >
+            {isSubmittingNote ? (
+              <span className="flex items-center gap-2">
+                <span className="h-4 w-4 rounded-full border-2 border-white/20 border-t-white animate-spin"></span>
+                Submitting...
+              </span>
+            ) : (
+              "Add Note to Case"
+            )}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

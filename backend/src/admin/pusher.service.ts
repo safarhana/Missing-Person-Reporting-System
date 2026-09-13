@@ -15,6 +15,9 @@ export class PusherService {
   public readonly channel = 'mprs-admin-channel';
   public readonly event = 'admin-alert';
 
+  public readonly officerChannel = 'mprs-officer-channel';
+  public readonly officerEvent = 'officer-alert';
+
   constructor(private readonly configService: ConfigService) {
     const appId = this.configService.get<string>('PUSHER_APP_ID');
     const key = this.configService.get<string>('PUSHER_KEY');
@@ -31,7 +34,7 @@ export class PusherService {
           useTLS: true,
         });
         this.logger.log(
-          `Pusher client connected on cluster '${cluster}' for channel '${this.channel}'`,
+          `Pusher client connected on cluster '${cluster}' for channels '${this.channel}' & '${this.officerChannel}'`,
         );
       } catch (err) {
         this.logger.warn(`Failed to initialize Pusher instance: ${(err as Error).message}`);
@@ -81,4 +84,44 @@ export class PusherService {
       };
     }
   }
+
+  async triggerOfficerAlert(payload: AdminAlertPayload): Promise<{ success: boolean; delivered: boolean; message: string }> {
+    const alertData = {
+      title: payload.title,
+      message: payload.message,
+      type: payload.type || 'info',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    if (!this.pusher) {
+      this.logger.log(
+        `[Pusher Standby] Channel: ${this.officerChannel} | Event: ${this.officerEvent} | Payload: ${JSON.stringify(alertData)}`,
+      );
+      return {
+        success: true,
+        delivered: false,
+        message: 'Pusher live credentials pending; event logged successfully.',
+      };
+    }
+
+    try {
+      await this.pusher.trigger(this.officerChannel, this.officerEvent, alertData);
+      this.logger.log(
+        `[Pusher Triggered] Channel: ${this.officerChannel} | Event: ${this.officerEvent} | "${alertData.title}"`,
+      );
+      return {
+        success: true,
+        delivered: true,
+        message: 'Pusher officer alert sent successfully.',
+      };
+    } catch (error) {
+      this.logger.error(`Error triggering Pusher officer event: ${(error as Error).message}`);
+      return {
+        success: false,
+        delivered: false,
+        message: (error as Error).message,
+      };
+    }
+  }
 }
+

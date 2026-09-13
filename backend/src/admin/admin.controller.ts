@@ -41,6 +41,27 @@ export class AdminController {
     return this.adminService.broadcastAlert(dto);
   }
 
+  @Get('pusher-test')
+  async testPusherGet() {
+    return this.adminService.broadcastAlert({
+      title: 'Pusher Live Test',
+      message: 'Live real-time notification sent via Pusher Channels!',
+      type: 'success',
+    });
+  }
+
+  @Post('pusher-test')
+  async testPusherPost(
+    @Body('title') title?: string,
+    @Body('message') message?: string,
+  ) {
+    return this.adminService.broadcastAlert({
+      title: title || 'Pusher Live Test',
+      message: message || 'Live real-time notification sent via Pusher Channels!',
+      type: 'success',
+    });
+  }
+
   @Get()
   @UseGuards(JwtAuthGuard)
   findAll() {

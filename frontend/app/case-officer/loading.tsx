@@ -1,4 +1,4 @@
-export default function AdminLoading() {
+export default function CaseOfficerLoading() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
       <div className="relative flex h-12 w-12 items-center justify-center">
@@ -8,7 +8,7 @@ export default function AdminLoading() {
 
       <div className="text-center space-y-2">
         <p className="text-sm font-semibold text-slate-800 animate-pulse">
-          Loading Operations Console...
+          Loading Case Officer Console...
         </p>
         <p className="text-xs text-slate-500">
           Communicating with MPRS backend services

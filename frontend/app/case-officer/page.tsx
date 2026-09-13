@@ -4,8 +4,8 @@ import React, { useEffect, useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { z } from "zod";
+import Link from "next/link";
 
-import OfficerNavbar from "./components/OfficerNavbar";
 import OfficerCard from "./components/OfficerCard";
 import CaseCard from "./components/CaseCard";
 import UrgentAlertsCarousel from "./components/UrgentAlertsCarousel";
@@ -43,34 +43,13 @@ type CaseData = {
 export default function CaseOfficerDashboardPage() {
   const router = useRouter();
 
-  const [officer] = useState<OfficerData | null>(() => {
-    if (typeof window !== "undefined") {
-      const storedOfficerStr =
-        sessionStorage.getItem("officer") || localStorage.getItem("officer");
-      if (storedOfficerStr) {
-        try {
-          return JSON.parse(storedOfficerStr);
-        } catch {
-          return null;
-        }
-      }
-    }
-    return {
-      id: 1,
-      name: "Case Officer",
-      email: "officer@police.gov",
-      phone: "01700000000",
-      country: "Bangladesh",
-      uniqueId: "CO-12345",
-    };
-  });
+  const [officer, setOfficer] = useState<OfficerData | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
   const [cases, setCases] = useState<CaseData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
-
-  const [showCreateForm, setShowCreateForm] = useState(false);
   const [newCaseData, setNewCaseData] = useState({
     name: "",
     age: "",
@@ -89,16 +68,39 @@ export default function CaseOfficerDashboardPage() {
 
   useEffect(() => {
     let isMounted = true;
+    setIsClient(true);
 
     const token =
       sessionStorage.getItem("token") || localStorage.getItem("token");
-
     if (!token) {
       router.push("/case-officer/login");
       return;
     }
 
-    const officerId = officer?.id || 1;
+    let currentOfficer: OfficerData = {
+      id: 1,
+      name: "Case Officer",
+      email: "officer@police.gov",
+      phone: "01700000000",
+      country: "Bangladesh",
+      uniqueId: "CO-12345",
+    };
+
+    const storedOfficerStr =
+      sessionStorage.getItem("officer") || localStorage.getItem("officer");
+    if (storedOfficerStr) {
+      try {
+        const parsed = JSON.parse(storedOfficerStr);
+        if (parsed) {
+          currentOfficer = { ...currentOfficer, ...parsed };
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+
+    setOfficer(currentOfficer);
+    const officerId = currentOfficer.id || 1;
 
     const fetchOfficerCases = async () => {
       setIsLoading(true);
@@ -122,13 +124,7 @@ export default function CaseOfficerDashboardPage() {
               description: "Wearing blue shirt and black pants. Last seen near bridge 2.",
               contactNumber: "01711223344",
               createdAt: new Date().toISOString(),
-              notes: [
-                {
-                  noteText: "Initial report received from local precinct.",
-                  addedBy: "Officer",
-                  date: new Date().toISOString(),
-                },
-              ],
+              notes: [{ noteText: "Initial report received.", addedBy: "Officer", date: new Date().toISOString() }],
             },
             {
               id: 102,
@@ -139,29 +135,18 @@ export default function CaseOfficerDashboardPage() {
               description: "Height 5'3\", red handbag, college student.",
               contactNumber: "01822334455",
               createdAt: new Date(Date.now() - 86400000).toISOString(),
-              notes: [
-                {
-                  noteText: "CCTV footage being reviewed near bus terminal.",
-                  addedBy: "Lead Detective",
-                  date: new Date().toISOString(),
-                },
-              ],
+              notes: [{ noteText: "CCTV footage being reviewed.", addedBy: "Lead Detective", date: new Date().toISOString() }],
             },
           ]);
         }
       } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        if (isMounted) setIsLoading(false);
       }
     };
 
     fetchOfficerCases();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [apiEndpoint, officer, router]);
+    return () => { isMounted = false; };
+  }, [apiEndpoint, router]);
 
   const handleStatusChange = async (caseId: number, newStatus: string) => {
     try {
@@ -170,48 +155,32 @@ export default function CaseOfficerDashboardPage() {
         { status: newStatus },
         { headers: { "Content-Type": "application/json" }, withCredentials: true }
       );
-
       setCases((prev) =>
         prev.map((c) => (c.id === caseId ? { ...c, status: newStatus } : c))
       );
-
-      setActionMessage({
-        type: "success",
-        text: `Case #${caseId} status updated to ${newStatus}`,
-      });
+      setActionMessage({ type: "success", text: `Case #${caseId} status updated to ${newStatus}` });
       setTimeout(() => setActionMessage(null), 3000);
     } catch {
       setCases((prev) =>
         prev.map((c) => (c.id === caseId ? { ...c, status: newStatus } : c))
       );
-      setActionMessage({
-        type: "success",
-        text: `Case #${caseId} status changed to ${newStatus}`,
-      });
+      setActionMessage({ type: "success", text: `Case #${caseId} status changed to ${newStatus}` });
       setTimeout(() => setActionMessage(null), 3000);
     }
   };
 
   const handleDeleteCase = async (caseId: number) => {
     if (!confirm(`Are you sure you want to delete Case #${caseId}?`)) return;
-
     try {
       await axios.delete(`${apiEndpoint}/case-officer/cases/${caseId}`, {
         withCredentials: true,
       });
-
       setCases((prev) => prev.filter((c) => c.id !== caseId));
-      setActionMessage({
-        type: "success",
-        text: `Case #${caseId} has been successfully deleted`,
-      });
+      setActionMessage({ type: "success", text: `Case #${caseId} has been deleted` });
       setTimeout(() => setActionMessage(null), 3000);
     } catch {
       setCases((prev) => prev.filter((c) => c.id !== caseId));
-      setActionMessage({
-        type: "success",
-        text: `Case #${caseId} deleted`,
-      });
+      setActionMessage({ type: "success", text: `Case #${caseId} deleted` });
       setTimeout(() => setActionMessage(null), 3000);
     }
   };
@@ -242,15 +211,11 @@ export default function CaseOfficerDashboardPage() {
       };
 
       let newCreatedCase: CaseData;
-
       try {
         const response = await axios.post(
           `${apiEndpoint}/case-officer/${officerId}/cases`,
           payload,
-          {
-            headers: { "Content-Type": "application/json" },
-            withCredentials: true,
-          }
+          { headers: { "Content-Type": "application/json" }, withCredentials: true }
         );
         newCreatedCase = response.data;
       } catch {
@@ -264,26 +229,12 @@ export default function CaseOfficerDashboardPage() {
       }
 
       setCases((prev) => [newCreatedCase, ...prev]);
-      setShowCreateForm(false);
-      setNewCaseData({
-        name: "",
-        age: "",
-        lastSeenLocation: "",
-        description: "",
-        contactNumber: "",
-      });
-
-      setActionMessage({
-        type: "success",
-        text: `New case for "${newCreatedCase.name}" created successfully!`,
-      });
+      setNewCaseData({ name: "", age: "", lastSeenLocation: "", description: "", contactNumber: "" });
+      setActionMessage({ type: "success", text: `New case for "${newCreatedCase.name}" created successfully!` });
       setTimeout(() => setActionMessage(null), 3500);
     } catch (err: unknown) {
       console.error(err);
-      setActionMessage({
-        type: "error",
-        text: "Failed to create case. Please try again.",
-      });
+      setActionMessage({ type: "error", text: "Failed to create case. Please try again." });
     }
   };
 
@@ -299,240 +250,280 @@ export default function CaseOfficerDashboardPage() {
   });
 
   const totalCases = cases.length;
-  const activeCases = cases.filter(
-    (c) => c.status.toLowerCase() === "active"
-  ).length;
-  const investigatingCases = cases.filter(
-    (c) => c.status.toLowerCase() === "investigating"
-  ).length;
+  const urgentCases = cases.filter(
+    (c) => c.status.toLowerCase() === "urgent" || c.status.toLowerCase().includes("urgent") || c.status.toLowerCase().includes("critical")
+  );
+  const activeCases = cases.filter((c) => c.status.toLowerCase() === "active").length;
+  const investigatingCases = cases.filter((c) => c.status.toLowerCase() === "investigating").length;
   const foundCases = cases.filter(
-    (c) =>
-      c.status.toLowerCase() === "found" || c.status.toLowerCase() === "closed"
+    (c) => c.status.toLowerCase() === "found" || c.status.toLowerCase() === "closed"
   ).length;
+
+  const statCards = [
+    { label: "Total Cases", value: totalCases, badge: "All", badgeCls: "bg-slate-100 text-slate-700 border-slate-200" },
+    { label: "Urgent Cases", value: urgentCases.length, badge: "Urgent", badgeCls: "bg-red-50 text-red-700 border-red-200 font-bold" },
+    { label: "Active", value: activeCases, badge: "Active", badgeCls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+    { label: "Investigating", value: investigatingCases, badge: "Ongoing", badgeCls: "bg-amber-50 text-amber-700 border-amber-200" },
+    { label: "Resolved / Found", value: foundCases, badge: "Closed", badgeCls: "bg-blue-50 text-blue-700 border-blue-200" },
+  ];
+
+  const inputCls = (field: string) =>
+    `w-full rounded-xl border px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 bg-white focus:outline-none focus:ring-2 transition-colors ${
+      formErrors[field]
+        ? "border-red-500 focus:ring-red-500/20"
+        : "border-slate-300 focus:border-slate-900 focus:ring-slate-900/10"
+    }`;
 
   return (
-    <div>
-      <OfficerNavbar officerName={officer?.name} />
-
-      <main>
-        {actionMessage && (
-          <p style={{ color: actionMessage.type === "success" ? "green" : "red" }}>
-            <strong>{actionMessage.text}</strong>
+    <div className="space-y-6">
+      <div className="rounded-2xl bg-gradient-to-r from-slate-900 via-slate-850 to-blue-950 p-6 sm:p-8 text-white shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border border-slate-800">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-0.5 text-xs font-medium text-slate-200 border border-white/20">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+              Officer Session Active
+            </span>
+            {isClient && officer?.uniqueId && (
+              <span className="text-xs text-slate-300">· {officer.uniqueId}</span>
+            )}
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+            Welcome back, {isClient && officer?.name ? officer.name : "Case Officer"}
+          </h1>
+          <p className="mt-1 text-sm text-slate-300 max-w-2xl">
+            Centralized operations dashboard for managing missing person cases and investigative activities.
           </p>
-        )}
+        </div>
+      </div>
 
-        <h1>Case Officer Dashboard</h1>
+      {actionMessage && (
+        <div
+          className={`rounded-xl border p-3 text-xs ${
+            actionMessage.type === "success"
+              ? "bg-emerald-50 border-emerald-200 text-emerald-700"
+              : "bg-red-50 border-red-200 text-red-700"
+          }`}
+        >
+          {actionMessage.text}
+        </div>
+      )}
 
-        {officer && (
-          <OfficerCard
-            id={officer.id}
-            name={officer.name}
-            uniqueId={officer.uniqueId}
-            email={officer.email}
-            phone={officer.phone}
-            country={officer.country}
-            joiningDate={officer.joiningDate}
-          />
-        )}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        {statCards.map((card) => (
+          <div key={card.label} className="rounded-2xl bg-white border border-slate-200 shadow-xs p-5">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                {card.label}
+              </p>
+              <span className={`text-[10px] font-semibold border rounded-full px-2 py-0.5 ${card.badgeCls}`}>
+                {card.badge}
+              </span>
+            </div>
+            <p className="text-3xl font-bold text-slate-900">{card.value}</p>
+          </div>
+        ))}
+      </div>
 
-        <br />
+      <UrgentAlertsCarousel
+        alerts={
+          urgentCases.length > 0
+            ? urgentCases.map((c) => ({
+                id: c.id,
+                name: c.name,
+                age: c.age,
+                lastSeen: c.lastSeenLocation,
+                status: "CRITICAL ALERT",
+                description: c.description,
+              }))
+            : undefined
+        }
+      />
 
-        <UrgentAlertsCarousel />
+      {isClient && officer && (
+        <OfficerCard
+          id={officer.id}
+          name={officer.name}
+          uniqueId={officer.uniqueId}
+          email={officer.email}
+          phone={officer.phone}
+          country={officer.country}
+          joiningDate={officer.joiningDate}
+        />
+      )}
 
-        <br />
-
-        <fieldset>
-          <legend><strong>Case Statistics</strong></legend>
-          <table border={1} cellPadding={6} style={{ borderCollapse: "collapse", width: "100%" }}>
-            <thead>
-              <tr>
-                <th>Total Cases</th>
-                <th>Active</th>
-                <th>Investigating</th>
-                <th>Resolved / Found</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>{totalCases}</td>
-                <td>{activeCases}</td>
-                <td>{investigatingCases}</td>
-                <td>{foundCases}</td>
-              </tr>
-            </tbody>
-          </table>
-        </fieldset>
-
-        <br />
-
-        <section>
-          <h2>Assigned Missing Person Cases</h2>
-
+      <div className="rounded-2xl bg-white border border-slate-200 shadow-xs p-6">
+        <div className="flex items-center justify-between mb-5">
           <div>
+            <h3 className="text-base font-bold text-slate-900">
+              Register New Missing Person Case
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Fill in the details below to immediately dispatch a new missing person investigation.
+            </p>
+          </div>
+        </div>
+        <form onSubmit={handleCreateCase} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                Person&apos;s Full Name
+              </label>
+              <input
+                type="text"
+                value={newCaseData.name}
+                onChange={(e) => setNewCaseData({ ...newCaseData, name: e.target.value })}
+                placeholder="e.g. John Doe"
+                className={inputCls("name")}
+              />
+              {formErrors.name && <p className="mt-1 text-[11px] text-red-600">{formErrors.name}</p>}
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                Age
+              </label>
+              <input
+                type="number"
+                value={newCaseData.age}
+                onChange={(e) => setNewCaseData({ ...newCaseData, age: e.target.value })}
+                placeholder="e.g. 24"
+                className={inputCls("age")}
+              />
+              {formErrors.age && <p className="mt-1 text-[11px] text-red-600">{formErrors.age}</p>}
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                Contact Phone Number
+              </label>
+              <input
+                type="text"
+                value={newCaseData.contactNumber}
+                onChange={(e) => setNewCaseData({ ...newCaseData, contactNumber: e.target.value })}
+                placeholder="01711223344"
+                className={inputCls("contactNumber")}
+              />
+              {formErrors.contactNumber && <p className="mt-1 text-[11px] text-red-600">{formErrors.contactNumber}</p>}
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                Last Seen Location
+              </label>
+              <input
+                type="text"
+                value={newCaseData.lastSeenLocation}
+                onChange={(e) => setNewCaseData({ ...newCaseData, lastSeenLocation: e.target.value })}
+                placeholder="e.g. Dhanmondi Lake, Dhaka"
+                className={inputCls("lastSeenLocation")}
+              />
+              {formErrors.lastSeenLocation && <p className="mt-1 text-[11px] text-red-600">{formErrors.lastSeenLocation}</p>}
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              Physical Description
+            </label>
+            <textarea
+              rows={3}
+              value={newCaseData.description}
+              onChange={(e) => setNewCaseData({ ...newCaseData, description: e.target.value })}
+              placeholder="Distinct physical traits, clothing last seen wearing..."
+              className={`resize-none ${inputCls("description")}`}
+            />
+            {formErrors.description && <p className="mt-1 text-[11px] text-red-600">{formErrors.description}</p>}
+          </div>
+          <div className="flex items-center gap-3 pt-2">
+            <button type="submit" className="inline-flex items-center justify-center rounded-xl bg-slate-900 hover:bg-slate-800 px-5 py-2.5 text-sm font-semibold text-white shadow-xs transition-colors cursor-pointer">
+              Create Case File
+            </button>
             <button
-              onClick={() => setShowCreateForm((prev) => !prev)}
               type="button"
+              onClick={() => {
+                setNewCaseData({ name: "", age: "", lastSeenLocation: "", description: "", contactNumber: "" });
+                setFormErrors({});
+              }}
+              className="inline-flex items-center justify-center rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-5 py-2.5 text-sm font-medium transition-colors cursor-pointer"
             >
-              {showCreateForm ? "[-] Hide Register Case Form" : "[+] Register New Missing Person Case"}
+              Clear Form
             </button>
           </div>
+        </form>
+      </div>
 
-          {showCreateForm && (
-            <fieldset style={{ margin: "15px 0" }}>
-              <legend><strong>New Missing Person Case Form</strong></legend>
-              <form onSubmit={handleCreateCase}>
-                <div>
-                  <label>Person&apos;s Name: </label>
-                  <input
-                    type="text"
-                    value={newCaseData.name}
-                    onChange={(e) =>
-                      setNewCaseData({ ...newCaseData, name: e.target.value })
-                    }
-                    placeholder="e.g. John Doe"
-                  />
-                  {formErrors.name && <span style={{ color: "red" }}> {formErrors.name}</span>}
-                </div>
-                <br />
-
-                <div>
-                  <label>Age: </label>
-                  <input
-                    type="number"
-                    value={newCaseData.age}
-                    onChange={(e) =>
-                      setNewCaseData({ ...newCaseData, age: e.target.value })
-                    }
-                    placeholder="e.g. 24"
-                  />
-                  {formErrors.age && <span style={{ color: "red" }}> {formErrors.age}</span>}
-                </div>
-                <br />
-
-                <div>
-                  <label>Contact Phone Number: </label>
-                  <input
-                    type="text"
-                    value={newCaseData.contactNumber}
-                    onChange={(e) =>
-                      setNewCaseData({
-                        ...newCaseData,
-                        contactNumber: e.target.value,
-                      })
-                    }
-                    placeholder="e.g. 01711223344"
-                  />
-                  {formErrors.contactNumber && (
-                    <span style={{ color: "red" }}> {formErrors.contactNumber}</span>
-                  )}
-                </div>
-                <br />
-
-                <div>
-                  <label>Last Seen Location: </label>
-                  <input
-                    type="text"
-                    value={newCaseData.lastSeenLocation}
-                    onChange={(e) =>
-                      setNewCaseData({
-                        ...newCaseData,
-                        lastSeenLocation: e.target.value,
-                      })
-                    }
-                    placeholder="e.g. Dhanmondi Lake, Dhaka"
-                  />
-                  {formErrors.lastSeenLocation && (
-                    <span style={{ color: "red" }}> {formErrors.lastSeenLocation}</span>
-                  )}
-                </div>
-                <br />
-
-                <div>
-                  <label>Physical Description: </label>
-                  <textarea
-                    rows={3}
-                    cols={40}
-                    value={newCaseData.description}
-                    onChange={(e) =>
-                      setNewCaseData({
-                        ...newCaseData,
-                        description: e.target.value,
-                      })
-                    }
-                    placeholder="Distinct physical traits, clothing last seen wearing..."
-                  ></textarea>
-                  {formErrors.description && (
-                    <span style={{ color: "red" }}> {formErrors.description}</span>
-                  )}
-                </div>
-                <br />
-
-                <button type="submit">Create Case File</button>
-                {" "}
-                <button type="button" onClick={() => setShowCreateForm(false)}>Cancel</button>
-              </form>
-            </fieldset>
-          )}
-
-          <br />
-
+      <div className="rounded-2xl bg-white border border-slate-200 shadow-xs p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
           <div>
-            <label>Search: </label>
+            <h3 className="text-base font-bold text-slate-900">Assigned Missing Person Cases</h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              {filteredCases.length} case{filteredCases.length !== 1 ? "s" : ""} shown
+            </p>
+          </div>
+          <Link
+            href="/case-officer/register"
+            className="inline-flex items-center gap-1 rounded-xl bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 text-xs font-semibold transition-colors"
+          >
+            + Register Officer
+          </Link>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3 mb-5">
+          <div className="flex-1 relative">
             <input
               type="text"
               placeholder="Search by name or location..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900"
             />
-
-            {" | "}
-            <label>Filter Status: </label>
-            {(["All", "Active", "Investigating", "Found", "Closed"] as const).map(
-              (status) => (
-                <span key={status}>
-                  <button
-                    onClick={() => setFilterStatus(status)}
-                    type="button"
-                    style={{ fontWeight: filterStatus === status ? "bold" : "normal" }}
-                  >
-                    {status}
-                  </button>
-                  {" "}
-                </span>
-              )
-            )}
           </div>
-        </section>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {(["All", "Active", "Investigating", "Found", "Closed"] as const).map((status) => (
+              <button
+                key={status}
+                onClick={() => setFilterStatus(status)}
+                type="button"
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
+                  filterStatus === status
+                    ? "bg-slate-900 text-white border-slate-900"
+                    : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
+                }`}
+              >
+                {status}
+              </button>
+            ))}
+          </div>
+        </div>
 
-        <hr />
-
-        <section>
-          {isLoading ? (
-            <p>Loading cases...</p>
-          ) : filteredCases.length === 0 ? (
-            <p>No cases found.</p>
-          ) : (
-            <div>
-              {filteredCases.map((caseItem) => (
-                <CaseCard
-                  key={caseItem.id}
-                  id={caseItem.id}
-                  name={caseItem.name}
-                  age={caseItem.age}
-                  lastSeenLocation={caseItem.lastSeenLocation}
-                  status={caseItem.status}
-                  description={caseItem.description}
-                  contactNumber={caseItem.contactNumber}
-                  createdAt={caseItem.createdAt}
-                  notesCount={caseItem.notes?.length || 0}
-                  onStatusChange={handleStatusChange}
-                  onDelete={handleDeleteCase}
-                />
-              ))}
-            </div>
-          )}
-        </section>
-      </main>
+        {isLoading ? (
+          <div className="space-y-3 animate-pulse">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-32 rounded-2xl bg-slate-100 border border-slate-200"></div>
+            ))}
+          </div>
+        ) : filteredCases.length === 0 ? (
+          <div className="text-center py-12 text-slate-400">
+            <p className="text-sm font-medium">No cases found.</p>
+            <p className="text-xs mt-1">Try adjusting your search or filter.</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {filteredCases.map((caseItem) => (
+              <CaseCard
+                key={caseItem.id}
+                id={caseItem.id}
+                name={caseItem.name}
+                age={caseItem.age}
+                lastSeenLocation={caseItem.lastSeenLocation}
+                status={caseItem.status}
+                description={caseItem.description}
+                contactNumber={caseItem.contactNumber}
+                createdAt={caseItem.createdAt}
+                notesCount={caseItem.notes?.length || 0}
+                onStatusChange={handleStatusChange}
+                onDelete={handleDeleteCase}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

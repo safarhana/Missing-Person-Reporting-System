@@ -3,33 +3,37 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export default function AdminSidebar() {
+export default function OfficerSidebar() {
   const pathname = usePathname();
 
   const navigation = [
     {
       name: "Dashboard",
-      href: "/admin",
+      href: "/case-officer",
       tag: "D",
-      description: "Overview & system metrics",
+      description: "Overview & case metrics",
+      exact: true,
     },
     {
-      name: "Admins & Users",
-      href: "/admin/users",
-      tag: "U",
-      description: "Directory, Search & Status",
+      name: "My Cases",
+      href: "/case-officer/cases",
+      tag: "C",
+      description: "Manage & track cases",
+      exact: false,
     },
     {
-      name: "Volunteers",
-      href: "/admin/volunteers",
-      tag: "V",
-      description: "Assignment & management",
+      name: "My Profile",
+      href: "/case-officer/profile",
+      tag: "P",
+      description: "View & edit my account",
+      exact: false,
     },
     {
-      name: "Case Officers",
-      href: "/admin/case-officers",
-      tag: "O",
-      description: "Supervision & assignment",
+      name: "Register Officer",
+      href: "/case-officer/register",
+      tag: "R",
+      description: "New officer enrollment",
+      exact: true,
     },
   ];
 
@@ -37,14 +41,13 @@ export default function AdminSidebar() {
     <aside className="w-full md:w-64 bg-white border-r border-slate-200 flex flex-col shrink-0">
       <div className="p-4 flex-1">
         <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider px-3 mb-2">
-          Operations Management
+          Case Officer Management
         </p>
         <nav className="space-y-1">
           {navigation.map((item) => {
-            const isActive =
-              item.href === "/admin"
-                ? pathname === "/admin"
-                : pathname.startsWith(item.href);
+            const isActive = item.exact
+              ? pathname === item.href
+              : pathname.startsWith(item.href);
 
             return (
               <Link

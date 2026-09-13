@@ -37,40 +37,49 @@ export class AdminService {
   ) {}
 
   async create(createAdminDto: CreateAdminDto) {
-    const hashedPassword = await bcrypt.hash(
-      createAdminDto.password,
-      10,
-    );
-
-    createAdminDto.password = hashedPassword;
-
-    const admin = this.adminRepository.create(createAdminDto);
-
-    const savedAdmin = await this.adminRepository.save(admin);
-
-    const recipientEmail =
-      this.configService.get<string>('ADMIN_REGISTRATION_EMAIL') ||
-      this.configService.get<string>('MAIL_USER');
-
-    if (!recipientEmail) {
-      this.logger.warn(
-        'No recipient email configured (ADMIN_REGISTRATION_EMAIL / MAIL_USER); skipping registration notification email.',
+    try {
+      const hashedPassword = await bcrypt.hash(
+        createAdminDto.password,
+        10,
       );
-    } else {
-      await this.mailerService.sendMail({
-        to: recipientEmail,
-        subject: 'Admin Registration',
-        text: `Welcome ${savedAdmin.fullName}! Your account has been created successfully.`,
+
+      createAdminDto.password = hashedPassword;
+
+      const admin = this.adminRepository.create(createAdminDto);
+
+      const savedAdmin = await this.adminRepository.save(admin);
+
+      const recipientEmail =
+        this.configService.get<string>('ADMIN_REGISTRATION_EMAIL') ||
+        this.configService.get<string>('MAIL_USER');
+
+      if (!recipientEmail) {
+        this.logger.warn(
+          'No recipient email configured (ADMIN_REGISTRATION_EMAIL / MAIL_USER); skipping registration notification email.',
+        );
+      } else {
+        this.mailerService
+          .sendMail({
+            to: recipientEmail,
+            subject: 'Admin Registration',
+            text: `Welcome ${savedAdmin.fullName}! Your account has been created successfully.`,
+          })
+          .catch((mailErr) => {
+            this.logger.warn(`Mailer skipped or unavailable: ${(mailErr as Error).message}`);
+          });
+      }
+
+      await this.pusherService.triggerAdminAlert({
+        title: 'New Admin Registered',
+        message: `Admin ${savedAdmin.fullName} has joined the system.`,
+        type: 'success',
       });
+
+      return savedAdmin;
+    } catch (err) {
+      this.logger.error(`Admin create error: ${(err as Error).message}`, (err as Error).stack);
+      throw err;
     }
-
-    await this.pusherService.triggerAdminAlert({
-      title: 'New Admin Registered',
-      message: `Admin ${savedAdmin.fullName} has joined the system.`,
-      type: 'success',
-    });
-
-    return savedAdmin;
   }
 
   findAll() {
@@ -322,6 +331,8 @@ export class AdminService {
     message: string;
     type?: 'info' | 'warning' | 'success' | 'alert';
   }) {
-    return await this.pusherService.triggerAdminAlert(data);
+    const adminRes = await this.pusherService.triggerAdminAlert(data);
+    await this.pusherService.triggerOfficerAlert(data);
+    return adminRes;
   }
-}
+}
