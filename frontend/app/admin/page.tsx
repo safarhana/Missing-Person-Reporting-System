@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AdminCard from "./components/AdminCard";
 import { getAuthToken, getStoredUsername } from "./utils/validation";
-import { getAdminByUsername, getAllAdmins, AdminUser } from "./services/api";
+import { getAdminByUsername, getAllAdmins, getAdminVolunteers, getAdminCaseOfficers, AdminUser } from "./services/api";
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -34,7 +34,23 @@ export default function AdminDashboardPage() {
         if (savedUser) {
           try {
             const adminData = await getAdminByUsername(savedUser);
-            setProfile(adminData);
+            let vols = adminData.volunteers;
+            let officers = adminData.caseOfficers;
+            if ((!vols || !officers) && adminData.id) {
+              try {
+                const [volsData, officersData] = await Promise.all([
+                  getAdminVolunteers(adminData.id),
+                  getAdminCaseOfficers(adminData.id),
+                ]);
+                vols = vols || volsData;
+                officers = officers || officersData;
+              } catch (e) {}
+            }
+            setProfile({
+              ...adminData,
+              volunteers: vols || [],
+              caseOfficers: officers || [],
+            });
           } catch (e) {
             console.warn("Could not fetch individual admin profile, displaying session defaults", e);
           }
