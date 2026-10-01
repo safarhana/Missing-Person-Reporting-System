@@ -14,7 +14,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Missing Person Reporting System",
-  description: "A centralized platform to report, track, and manage missing person cases effectively.",
+  description:
+    "A centralized platform to report, track, and manage missing person cases effectively.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

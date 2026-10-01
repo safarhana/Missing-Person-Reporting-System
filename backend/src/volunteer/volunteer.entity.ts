@@ -37,6 +37,18 @@ export class VolunteerEntity {
   password: string;
 
   @Column({
+  type: 'varchar',
+  nullable: true,
+  })
+  passwordResetCode: string | null;
+
+  @Column({
+  type: 'timestamp',
+  nullable: true,
+  })
+  passwordResetExpires: Date | null;
+
+  @Column({
     default: true,
   })
   isActive: boolean;
@@ -50,6 +62,7 @@ export class VolunteerEntity {
   @Column({
     type: 'bigint',
     unsigned: true,
+    nullable: true,
   })
   phone: string;
 

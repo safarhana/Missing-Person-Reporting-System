@@ -16,7 +16,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: ['.env', '.env.example'],
     }),
 
     TypeOrmModule.forRootAsync({
@@ -37,8 +37,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
       }),
     }),
 
-
-
+ 
     MailerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
