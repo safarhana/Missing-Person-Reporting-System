@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import StatusButton from "../components/statusButton";
 
+
 type VolunteerDetailsProps = {
   params: Promise<{
     id: string;
@@ -18,7 +19,7 @@ type Volunteer = {
   isActive: boolean;
 };
 
-export const dynamic = "force-dynamic";
+//export const dynamic = "force-dynamic";
 
 export default async function VolunteerDetails({
   params,

@@ -13,21 +13,17 @@ type Volunteer = {
   isActive : boolean;
 };
 
-export default function VolunteerHome() {
+export default function managementHome() {
 
-  // Store volunteers received from backend
-  const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
+   const [volunteers, setVolunteers] = useState<Volunteer[]>([]);
 
-  // Store loading state
-  const [loading, setLoading] = useState(true);
+   const [loading, setLoading] = useState(true);
 
-  // Store error message
-  const [error, setError] = useState("");
+   const [error, setError] = useState("");
 
   useEffect(() => {
 
-    // Function to get volunteers from backend
-    const getVolunteers = async () => {
+     const getVolunteers = async () => {
       try {
 
         const response = await axios.get(

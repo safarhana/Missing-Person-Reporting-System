@@ -1,7 +1,8 @@
 "use client";
-
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import Pusher from "pusher-js";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -14,6 +15,45 @@ type NewPasswordForm = {
 
 export default function NewPasswordPage() {
   const router = useRouter();
+  const [notification, setNotification] = useState("");
+
+
+  useEffect(() => {
+  const username = sessionStorage.getItem("resetUsername");
+
+  if (!username) {
+    return;
+  }
+
+  const pusher = new Pusher(
+    process.env.NEXT_PUBLIC_PUSHER_KEY!,
+    {
+      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER!,
+    }
+  );
+
+  const channel = pusher.subscribe(`volunteer-${username}`);
+
+  channel.bind("password-reset", (data: {
+    message: string;
+    username: string;
+  }) => {
+    setNotification(data.message);
+
+    sessionStorage.removeItem("resetUsername");
+    sessionStorage.removeItem("resetCode");
+
+  setTimeout(() => {
+    router.push("/volunteer/login");
+  }, 1500);
+  });
+
+  return () => {
+    channel.unbind_all();
+    pusher.unsubscribe(`volunteer-${username}`);
+    pusher.disconnect();
+  };
+}, []);
 
   const {
     register,
@@ -48,13 +88,6 @@ export default function NewPasswordPage() {
 
       console.log("Reset password response:", response.data);
 
-      alert(response.data.message);
-
-      sessionStorage.removeItem("resetUsername");
-      sessionStorage.removeItem("resetCode");
-
-      // Go back to login
-      router.push("/volunteer/login");
     } catch (error: any) {
       console.log(error);
 
@@ -71,6 +104,13 @@ export default function NewPasswordPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-base-200 px-4 py-12">
+        {notification && (
+            <div className="toast toast-top toast-end">
+                <div className="alert alert-success">
+                     <span>✓ {notification}</span>
+                </div>
+            </div>
+        )}
       <div className="card w-full max-w-md border border-base-300 bg-base-100 shadow-xl">
         <div className="card-body">
         <p className="font-semibold text-primary">Volunteer Portal</p>
