@@ -38,7 +38,7 @@ export class VolunteerController {
   }
 
   @Delete(':id')
-@UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
 deleteUser(
   @Param('id', ParseIntPipe) id: number,
   @Body('username') username: string,

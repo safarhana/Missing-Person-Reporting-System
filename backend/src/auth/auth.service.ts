@@ -10,9 +10,21 @@ import { VolunteerEntity } from '../volunteer/volunteer.entity';
 import { VolunteerLoginDto } from './VolunteerLogin.dto';
 import { randomInt } from 'crypto';
 import { MailerService } from '@nestjs-modules/mailer';
+import Pusher = require('pusher');
+
+
 
 @Injectable()
 export class AuthService {
+
+  private pusher = new Pusher({
+  appId: process.env.PUSHER_APP_ID!,
+  key: process.env.PUSHER_KEY!,
+  secret: process.env.PUSHER_SECRET!,
+  cluster: process.env.PUSHER_CLUSTER!,
+  useTLS: true,
+});
+
   constructor(
     @InjectRepository(Admin)
     private adminRepository: Repository<Admin>,
@@ -289,8 +301,6 @@ export class AuthService {
     const hashedPassword =
       await bcrypt.hash( newPassword, 10,);
 
- 
-
     volunteer.password = hashedPassword;
 
     volunteer.passwordResetCode = null;
@@ -300,6 +310,15 @@ export class AuthService {
 
 
     await this.volunteerRepository.save(volunteer,);
+
+    await this.pusher.trigger(
+    `volunteer-${volunteer.username}`,
+    'password-reset',
+    {
+    message: 'Password reset successfully.',
+    username: volunteer.username,
+    },
+  );
 
     return {
 
